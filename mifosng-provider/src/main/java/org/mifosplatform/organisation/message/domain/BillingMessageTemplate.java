@@ -61,7 +61,7 @@ public class BillingMessageTemplate extends AbstractAuditableCustom<AppUser, Lon
 	
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "billingMessageTemplate", orphanRemoval = true)
-	private List<BillingMessageParam> details = new ArrayList<BillingMessageParam>();
+	private List<BillingMessageParam> messageParamDetails = new ArrayList<BillingMessageParam>();
 	
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "billingMessageTemplate", orphanRemoval = true)
@@ -79,7 +79,6 @@ public class BillingMessageTemplate extends AbstractAuditableCustom<AppUser, Lon
 		this.header=header;
 		this.body=body;
 		this.footer=footer;
-		this.details=details;
 		this.messageType=messageType;
 	}
  
@@ -133,19 +132,35 @@ public class BillingMessageTemplate extends AbstractAuditableCustom<AppUser, Lon
 		this.footer = footer;
 	}
 
-
-	public List<BillingMessageParam> getDetails() {
-		return details;
+     public List<BillingMessageParam> getMessageParamDetails() {
+		return messageParamDetails;
 	}
 
-	public void setDetails(List<BillingMessageParam> details) {
-		this.details = details;
+	public void setMessageParamDetails(List<BillingMessageParam> messageParamDetails) {
+		this.messageParamDetails = messageParamDetails;
 	}
 
-	
+	public void setMessageType(char messageType) {
+		this.messageType = messageType;
+	}
 
+	public void setIsDeleted(char isDeleted) {
+		this.isDeleted = isDeleted;
+	}
 
-     public static BillingMessageTemplate fromJson(JsonCommand command){
+	public void setMessageData(List<BillingMessage> messageData) {
+		this.messageData = messageData;
+	}
+
+	public char getIsDeleted() {
+		return isDeleted;
+	}
+
+	public List<BillingMessage> getMessageData() {
+		return messageData;
+	}
+
+	public static BillingMessageTemplate fromJson(JsonCommand command){
 		
 		//final JsonElement element = fromJsonHelper.parse(command.toString());
 		String  templateDescription=command.stringValueOfParameterNamed("templateDescription");
@@ -166,7 +181,7 @@ public class BillingMessageTemplate extends AbstractAuditableCustom<AppUser, Lon
 
     public void setBillingMessageParam(BillingMessageParam billingMessageParam) {
 	billingMessageParam.update(this);
-	this.details.add(billingMessageParam);
+	this.messageParamDetails.add(billingMessageParam);
 	
 }
 
