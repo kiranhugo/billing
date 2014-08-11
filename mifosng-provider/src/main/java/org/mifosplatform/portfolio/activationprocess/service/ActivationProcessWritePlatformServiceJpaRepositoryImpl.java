@@ -169,23 +169,16 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 		try {
 			context.authenticatedUser();
 			commandFromApiJsonDeserializer.validateForCreate(command.json());
+			GlobalConfigurationProperty deviceStatusConfiguration = configurationRepository.
+					findOneByName(ConfigurationConstants.CONFIR_REGISTRATION_REQUIRE_DEVICE);
+			
 			Long id = new Long(1);
+			String device = null;
 			String fullname = command.stringValueOfParameterNamed("fullname");
 			String city = command.stringValueOfParameterNamed("city");
-			Long phone = command.longValueOfParameterNamed("phone");
-			String device = command.stringValueOfParameterNamed("device");
+			Long phone = command.longValueOfParameterNamed("phone");	
 			String email = command.stringValueOfParameterNamed("email");
-
-			ItemDetails detail = itemDetailsRepository.findOneBySerialNo(device);
-
-			if (detail == null) {
-				throw new SerialNumberNotFoundException(device);
-			}
-
-			if (detail != null && detail.getStatus().equalsIgnoreCase("Used")) {
-				throw new SerialNumberAlreadyExistException(device);
-			}
-
+			
 			CommandProcessingResult resultClient = null;
 			CommandProcessingResult resultSale = null;
 			CommandProcessingResult resultOrder = null;
@@ -225,62 +218,71 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				throw new PlatformDataIntegrityException("error.msg.client.creation", "Client Creation Failed","Client Creation Failed");
 			}
 
-			// book device
+			//book device
+			
+			if(deviceStatusConfiguration != null){
+				
+				if(deviceStatusConfiguration.isEnabled()){
+					
+					device = command.stringValueOfParameterNamed("device");
+					
+					ItemDetails detail = itemDetailsRepository.findOneBySerialNo(device);
 
-			// GlobalConfigurationProperty
-			// configuration=configurationRepository.findOneByName(ConfigurationConstants.CPE_TYPE);
-			// if(configuration.getValue().equalsIgnoreCase(ConfigurationConstants.CONFIR_PROPERTY_SALE)){
+					if (detail == null) {
+						throw new SerialNumberNotFoundException(device);
+					}
 
-			JSONObject serialNumberObject = new JSONObject();
-			serialNumberObject.put("serialNumber", device);
-			serialNumberObject.put("clientId", resultClient.getClientId());
-			serialNumberObject.put("status", "allocated");
-			serialNumberObject.put("itemMasterId", detail.getItemMasterId());
-			serialNumberObject.put("isNewHw", "Y");
+					if (detail != null && detail.getStatus().equalsIgnoreCase("Used")) {
+						throw new SerialNumberAlreadyExistException(device);
+					}
 
-			JSONArray serialNumber = new JSONArray();
-			serialNumber.put(0, serialNumberObject);
+					JSONObject serialNumberObject = new JSONObject();
+					serialNumberObject.put("serialNumber", device);
+					serialNumberObject.put("clientId", resultClient.getClientId());
+					serialNumberObject.put("status", "allocated");
+					serialNumberObject.put("itemMasterId", detail.getItemMasterId());
+					serialNumberObject.put("isNewHw", "Y");
 
-			JSONObject bookDevice = new JSONObject();
-			bookDevice.put("chargeCode", "NONE");
-			bookDevice.put("unitPrice", new Long(100));
-			bookDevice.put("itemId", id);
-			bookDevice.put("discountId", id);
-			bookDevice.put("officeId", id);
-			bookDevice.put("totalPrice", new Long(100));
-			bookDevice.put("quantity", id);
-			bookDevice.put("locale", "en");
-			bookDevice.put("dateFormat", dateFormat);
-			bookDevice.put("saleType", "SecondSale");
-			bookDevice.put("saleDate", activationDate);
-			bookDevice.put("serialNumber", serialNumber);
+					JSONArray serialNumber = new JSONArray();
+					serialNumber.put(0, serialNumberObject);
 
-			final JsonElement deviceElement = fromJsonHelper.parse(bookDevice.toString());
-			JsonCommand comm = new JsonCommand(null, bookDevice.toString(),
-					deviceElement, fromJsonHelper, null, null, null, null,
-					null, null, null, null, null, null, null, null);
-			resultSale = this.oneTimeSaleWritePlatformService.createOneTimeSale(comm, resultClient.getClientId());
+					JSONObject bookDevice = new JSONObject();
+					bookDevice.put("chargeCode", "NONE");
+					bookDevice.put("unitPrice", new Long(100));
+					bookDevice.put("itemId", id);
+					bookDevice.put("discountId", id);
+					bookDevice.put("officeId", id);
+					bookDevice.put("totalPrice", new Long(100));
+					bookDevice.put("quantity", id);
+					bookDevice.put("locale", "en");
+					bookDevice.put("dateFormat", dateFormat);
+					bookDevice.put("saleType", "SecondSale");
+					bookDevice.put("saleDate", activationDate);
+					bookDevice.put("serialNumber", serialNumber);
 
-			/*
-			 * }else
-			 * if(configuration.getValue().equalsIgnoreCase(ConfigurationConstants
-			 * .CONFIR_PROPERTY_OWN)){ for(JsonElement ownDevice:owndevices){
-			 * 
-			 * JsonCommand comm=new JsonCommand(null,
-			 * ownDevice.toString(),ownDevice, fromJsonHelper, null, null, null,
-			 * null, null, null, null, null, null, null, null,null);
-			 * resultSale=this
-			 * .ownedHardwareWritePlatformService.createOwnedHardware
-			 * (comm,resultClient.getClientId()); }
-			 * 
-			 * }
-			 */
+					final JsonElement deviceElement = fromJsonHelper.parse(bookDevice.toString());
+					JsonCommand comm = new JsonCommand(null, bookDevice.toString(),
+							deviceElement, fromJsonHelper, null, null, null, null,
+							null, null, null, null, null, null, null, null);
+					resultSale = this.oneTimeSaleWritePlatformService.createOneTimeSale(comm, resultClient.getClientId());
+					
+					if (resultSale == null) {
+						throw new PlatformDataIntegrityException("error.msg.client.device.assign.failed","Device Assign Failed for ClientId :"
+										+ resultClient.getClientId(),"Device Assign Failed");
+					}
+					
+				}
+				
+			}
 
 			// book order
 			GlobalConfigurationProperty selfregistrationconfiguration = configurationRepository
 					.findOneByName(ConfigurationConstants.CONFIR_PROPERTY_SELF_REGISTRATION);
+			
 			if (selfregistrationconfiguration != null) {
+				
 				if (selfregistrationconfiguration.isEnabled()) {
+					
 					JSONObject orderJson = new JSONObject(selfregistrationconfiguration.getValue());
 					if (orderJson.getString("paytermCode") != null && Long.valueOf(orderJson.getLong("planCode")) != null
 							&& Long.valueOf(orderJson.getLong("contractPeriod")) != null) {
@@ -294,13 +296,41 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 								fromJsonHelper, null, null, null, null, null,
 								null, null, null, null, null, null, null);
 						resultOrder = this.orderWritePlatformService.createOrder(resultClient.getClientId(),orderCommand);
+						
+						if (resultOrder == null) {
+							throw new PlatformDataIntegrityException("error.msg.client.order.creation","Book Order Failed for ClientId:"
+											+ resultClient.getClientId(),"Book Order Failed");
+						}
 					}
+				} else{
+					JSONObject beeniusOrderJson = new JSONObject();
+					String paytermCode = command.stringValueOfParameterNamed("paytermCode");
+					Long contractPeriod = command.longValueOfParameterNamed("contractPeriod");
+					Long planCode = command.longValueOfParameterNamed("planCode");
+					
+					beeniusOrderJson.put("planCode", planCode);
+					beeniusOrderJson.put("contractPeriod", contractPeriod);
+					beeniusOrderJson.put("paytermCode", paytermCode);
+					beeniusOrderJson.put("billAlign", false);
+					beeniusOrderJson.put("locale", "en");
+					beeniusOrderJson.put("isNewplan", true);
+					beeniusOrderJson.put("dateFormat", dateFormat);
+					beeniusOrderJson.put("start_date", activationDate);
+					
+					final JsonElement orderElement = fromJsonHelper.parse(beeniusOrderJson.toString());
+					JsonCommand orderCommand = new JsonCommand(null,
+							beeniusOrderJson.toString(), orderElement,
+							fromJsonHelper, null, null, null, null, null,
+							null, null, null, null, null, null, null);
+					resultOrder = this.orderWritePlatformService.createOrder(resultClient.getClientId(),orderCommand);
+					
+					if (resultOrder == null) {
+						throw new PlatformDataIntegrityException("error.msg.client.order.creation","Book Order Failed for ClientId:"
+										+ resultClient.getClientId(),"Book Order Failed");
+					}
+					
 				}
-				if (resultOrder == null) {
-					throw new PlatformDataIntegrityException("error.msg.client.order.creation","Book Order Failed for ClientId:"
-									+ resultClient.getClientId(),"Book Order Failed");
-				}
-
+				
 			}
 
 			// create selfcare record

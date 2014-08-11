@@ -26,7 +26,8 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
 	/**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("fullname", "phone", "city", "device", "email"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("fullname", "phone", "city", 
+    		"device", "email", "planCode", "paytermCode", "contractPeriod"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -54,9 +55,6 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
 
         final String city = fromApiJsonHelper.extractStringNamed("city", element);
         baseDataValidator.reset().parameter("city").value(city).notBlank().notExceedingLengthOf(50);
-        
-        final String device = fromApiJsonHelper.extractStringNamed("device", element);
-        baseDataValidator.reset().parameter("device").value(device).notBlank().notExceedingLengthOf(18);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

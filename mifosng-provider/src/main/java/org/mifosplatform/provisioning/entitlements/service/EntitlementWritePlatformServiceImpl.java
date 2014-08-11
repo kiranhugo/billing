@@ -2,13 +2,9 @@ package org.mifosplatform.provisioning.entitlements.service;
 
 import java.util.List;
 
-import org.hamcrest.collection.IsEmptyCollection;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
-import org.mifosplatform.organisation.message.domain.MessageDataRepository;
-import org.mifosplatform.organisation.message.service.BillingMessageDataWritePlatformService;
 import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
