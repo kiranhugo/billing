@@ -116,8 +116,8 @@ public class BillMasterWritePlatformServiceImplementation implements
 		for (FinancialTransactionsData financialTransactionsData : financialTransactionsDatas) {
 			
 			BillDetail billDetail = new BillDetail(null,financialTransactionsData.getTransactionId(),
-					financialTransactionsData.getTransactionDate(),	financialTransactionsData.getTransactionType(),
-					financialTransactionsData.getDebitAmount());
+					financialTransactionsData.getTransDate().toDate(),	financialTransactionsData.getTransactionType(),
+					financialTransactionsData.getDebitAmount(),financialTransactionsData.getPlanCode(),financialTransactionsData.getDescription());
 			//this.billDetailRepository.save(billDetail);
 			listOfBillingDetail.add(billDetail);
 		    billMaster.addBillDetails(billDetail);
@@ -156,6 +156,10 @@ public class BillMasterWritePlatformServiceImplementation implements
 		context.authenticatedUser();
 		Client client=this.clientRepository.findOne(billMaster.getClientId());
 		String clientEmail=client.getEmail();
+		if(clientEmail == null){
+			String msg="Please provide email first";
+			throw new BillingOrderNoRecordsFoundException(msg,client);
+		}
 		String filePath=billMaster.getFileName();
 		BillingMessage billingMessage=null;
 		List<BillingMessageTemplate> billingMessageTemplate=this.messageTemplateRepository.findAll();

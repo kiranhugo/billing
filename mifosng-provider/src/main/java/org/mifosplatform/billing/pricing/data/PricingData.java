@@ -98,11 +98,10 @@ public class PricingData {
 		this.price=price;
 		this.chargeCode=billingFrequencyCode;
 	}
+
 	public List<ServiceData> getServiceData() {
 		return serviceData;
 	}
-	
-	
 
 	public String getServiceCode() {
 		return serviceCode;

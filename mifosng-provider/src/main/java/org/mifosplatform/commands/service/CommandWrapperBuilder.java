@@ -2100,6 +2100,15 @@ public CommandWrapperBuilder updateprovisiongDetails(Long processrequestId) {
     return this;
 }
 
+public CommandWrapperBuilder confirnProvisiongDetails(Long processrequestId) {
+
+	this.actionName = "CONFIRM";
+    this.entityName = "PROVISIONINGDETAILS";
+    this.entityId=processrequestId;
+    this.href = "/provisioning/confirm"+processrequestId;
+    return this;
+}
+
 public CommandWrapperBuilder createGlobalConfiguration() {
 	this.actionName = "CREATE";
 	this.entityName = "SMTPCONFIGURATION";
@@ -2381,6 +2390,13 @@ public CommandWrapperBuilder editGrn(Long id) {
 	return this;
 }
 
+public CommandWrapperBuilder createClientParent(Long clientId) {
+	this.actionName = "CREATE";
+	this.entityName = "PARENTCLIENT";
+	this.entityId = clientId;
+	this.href = "/parentclient/" +clientId;
+	return this;
+  }
 public CommandWrapperBuilder updateIpStatus() {
 	this.actionName = "UPDATEIPSTATUS";
 	this.entityName = "IPPOOLMANAGEMENT";
@@ -2414,6 +2430,14 @@ public CommandWrapperBuilder selfRegistrationProcess() {
 	this.actionName = "SELFREGISTRATION";
 	this.entityName = "ACTIVATE";
 	this.href = "/activationprocess/selfregistration";
+	return this;
+}
+
+public CommandWrapperBuilder reactiveOrder(Long orderId) {
+	this.actionName = "REACTIVE";
+	this.entityName = "ORDER";
+	this.entityId=orderId;
+	this.href = "reactive/"+orderId;
 	return this;
 }
 

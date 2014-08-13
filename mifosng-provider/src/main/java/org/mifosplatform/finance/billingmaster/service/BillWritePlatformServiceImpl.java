@@ -103,8 +103,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		List<BillDetail> listOfBillingDetail = new ArrayList<BillDetail>();
 		for (FinancialTransactionsData financialTransactionsData : financialTransactionsDatas) {
 			BillDetail billDetail = new BillDetail(master,financialTransactionsData.getTransactionId(),
-					financialTransactionsData.getTransactionDate(),	financialTransactionsData.getTransactionType(),
-					financialTransactionsData.getAmount());
+					financialTransactionsData.getTransDate().toDate(),	financialTransactionsData.getTransactionType(),
+					financialTransactionsData.getAmount(),financialTransactionsData.getPlanCode(),financialTransactionsData.getDescription());
 			this.billDetailRepository.save(billDetail);
 			listOfBillingDetail.add(billDetail);
 		}
@@ -571,7 +571,9 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				}
 				
 			Map<String, Object> parameters = new HashMap();
-			String id = String.valueOf(billMaster.getId());
+
+			//String id1 = String.valueOf(billMaster.getId());
+			Integer id=Integer.valueOf(billMaster.getId().toString());
 			parameters.put("param1", id);
 			//parameters.put("param1",new LocalDate(billMaster.getBillDate())+"/"+billNo);
 			parameters.put("SUBREPORT_DIR",jpath+""+File.separator);
