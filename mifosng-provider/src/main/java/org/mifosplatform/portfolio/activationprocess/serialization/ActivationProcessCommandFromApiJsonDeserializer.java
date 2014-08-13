@@ -27,7 +27,7 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("fullname", "phone", "city", 
-    		"device", "email", "planCode", "paytermCode", "contractPeriod"));
+    		"device", "email", "planCode", "paytermCode", "contractPeriod", "amount", "transactionId" ));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -51,10 +51,20 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("fullname").value(fullname).notBlank().notExceedingLengthOf(50);
         
         final Long phone = fromApiJsonHelper.extractLongNamed("phone", element);
-        baseDataValidator.reset().parameter("phone").value(phone).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter("phone").value(phone).notNull().longGreaterThanZero();
 
         final String city = fromApiJsonHelper.extractStringNamed("city", element);
         baseDataValidator.reset().parameter("city").value(city).notBlank().notExceedingLengthOf(50);
+        
+        if (fromApiJsonHelper.parameterExists("transactionId", element)) {
+            final String transactionId = fromApiJsonHelper.extractStringNamed("transactionId", element);
+            baseDataValidator.reset().parameter("transactionId").value(transactionId).notNull();
+        }
+        
+        if (fromApiJsonHelper.parameterExists("amount", element)) {
+            final String amount = fromApiJsonHelper.extractStringNamed("amount", element);
+            baseDataValidator.reset().parameter("amount").value(amount).notNull();
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

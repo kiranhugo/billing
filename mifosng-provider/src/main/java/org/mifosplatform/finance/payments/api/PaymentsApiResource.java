@@ -25,10 +25,15 @@ import javax.ws.rs.core.UriInfo;
 import org.json.JSONObject;
 import org.mifosplatform.billing.paymode.data.McodeData;
 import org.mifosplatform.billing.paymode.service.PaymodeReadPlatformService;
+import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
+import org.mifosplatform.billing.selfcare.domain.SelfCareTemporaryRepository;
+import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryAlreadyExistException;
+import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryEmailIdNotFoundException;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.finance.payments.data.PaymentData;
+import org.mifosplatform.finance.payments.exception.DalpayRequestFailureException;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -59,16 +64,18 @@ public class PaymentsApiResource {
 	private final DefaultToApiJsonSerializer<PaymentData> toApiJsonSerializer;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final PortfolioCommandSourceWritePlatformService writePlatformService;
+	private final SelfCareTemporaryRepository selfCareTemporaryRepository;
 
 	@Autowired
 	public PaymentsApiResource(final PlatformSecurityContext context,final PaymodeReadPlatformService readPlatformService,
 			final DefaultToApiJsonSerializer<PaymentData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService writePlatformService) {
+			final PortfolioCommandSourceWritePlatformService writePlatformService, final SelfCareTemporaryRepository selfCareTemporaryRepository) {
 		this.context = context;
 		this.readPlatformService = readPlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.writePlatformService = writePlatformService;
+		this.selfCareTemporaryRepository = selfCareTemporaryRepository;
 	}
 
 	@POST
@@ -162,27 +169,57 @@ public class PaymentsApiResource {
 		   	  JSONObject json= new JSONObject(apiRequestBodyAsJson);
 		   	  String orderNumber = json.getString("order_num");
 		   	  Long clientId = json.getLong("user1");
+		   	  String returnUrl = json.getString("user2");
+		   	  String EmailId = json.getString("cust_email");
 		   	  String amount = json.getString("total_amount");
 		   	  BigDecimal totalAmount = new BigDecimal(amount);
 		   	  
-			  String date=new SimpleDateFormat("dd MMMM yyyy").format(new Date());
-			  JsonObject object=new JsonObject();
-			  
-			  object.addProperty("txn_id", orderNumber);
-			  object.addProperty("dateFormat","dd MMMM yyyy");
-			  object.addProperty("locale","en");
-			  object.addProperty("paymentDate",date);
-			  object.addProperty("amountPaid",totalAmount);
-			  object.addProperty("isChequeSelected","no");
-			  object.addProperty("receiptNo",orderNumber);
-			  object.addProperty("remarks","Updated with Dalpay");
-			  object.addProperty("paymentCode",27);
-		   	 
-		    final CommandWrapper commandRequest = new CommandWrapperBuilder().createPayment(clientId).withJson(object.toString()).build();
-			final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
-			return "<!-- success--> <span>Order Accepted Successfully</span>"+"OBS Payment Id:"+result.resourceId()+"<br>"
-					+ "<a href='https://49.205.106.79:5560/Clientapp/app/index.html#/viewclient/"+clientId+"'>"
+			if (clientId !=null && clientId > 0) {
+				String date = new SimpleDateFormat("dd MMMM yyyy").format(new Date());
+				JsonObject object = new JsonObject();
+
+				object.addProperty("txn_id", orderNumber);
+				object.addProperty("dateFormat", "dd MMMM yyyy");
+				object.addProperty("locale", "en");
+				object.addProperty("paymentDate", date);
+				object.addProperty("amountPaid", totalAmount);
+				object.addProperty("isChequeSelected", "no");
+				object.addProperty("receiptNo", orderNumber);
+				object.addProperty("remarks", "Updated with Dalpay");
+				object.addProperty("paymentCode", 27);
+
+				final CommandWrapper commandRequest = new CommandWrapperBuilder().createPayment(clientId).withJson(object.toString()).build();
+				final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+				return "<!-- success--> <span>Order Accepted Successfully</span>"
+						+ "OBS Payment Id:"
+						+ result.resourceId()
+						+ "<br>"
+						+ "<a href='"+ returnUrl +"'>"
+						+ "<strong>CLICK HERE</strong> to return to your account</a>";
+			}else if(clientId !=null && clientId == 0){
+				
+				SelfCareTemporary selfCareTemporary = this.selfCareTemporaryRepository.findOneByEmailId(EmailId);
+				if(selfCareTemporary != null && selfCareTemporary.getPaymentStatus().equalsIgnoreCase("INACTIVE")){
+					
+					selfCareTemporary.setPaymentData(json.toString());
+					selfCareTemporary.setPaymentStatus("INTERMEDIATE");
+					this.selfCareTemporaryRepository.save(selfCareTemporary);
+					
+					return "<!-- success--> <span>Order Accepted Successfully</span>"
+					+ "<br>"
+					+ "<a href='"+ returnUrl +"'>"
 					+ "<strong>CLICK HERE</strong> to return to your account</a>";
+					
+				}else if(selfCareTemporary != null){				
+					throw new SelfCareTemporaryAlreadyExistException(EmailId);					
+				}else{					
+					throw new SelfCareTemporaryEmailIdNotFoundException(EmailId);					
+				}		
+			}else{		
+				throw new DalpayRequestFailureException(clientId);				
+			}
+		   	  
+			  
 	  } 
 	   catch(Exception e){
 	    return e.getMessage();

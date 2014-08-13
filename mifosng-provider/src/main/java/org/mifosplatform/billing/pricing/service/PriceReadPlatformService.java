@@ -20,4 +20,5 @@ public interface PriceReadPlatformService {
 	List<ServiceData> retrievePrcingDetails(Long planId);
 	List<ServiceData> retrieveServiceCodeDetails(Long planCode);
 	PricingData retrieveSinglePriceDetails(String priceId);
+	List<PricingData> retrievePlanAndPriceDetails();
 }

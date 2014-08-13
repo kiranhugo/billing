@@ -9,5 +9,8 @@ public interface SelfCareTemporaryRepository  extends JpaRepository<SelfCareTemp
 
 	@Query("from SelfCareTemporary selfCareTemporary where selfCareTemporary.generatedKey =:generatedKey")
 	SelfCareTemporary findOneByGeneratedKey(@Param("generatedKey")String generatedKey);
+	
+	@Query("from SelfCareTemporary selfCareTemporary where selfCareTemporary.userName =:userName")
+	SelfCareTemporary findOneByEmailId(@Param("userName")String userName);
 
 }

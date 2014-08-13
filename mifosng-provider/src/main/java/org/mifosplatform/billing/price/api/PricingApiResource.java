@@ -126,6 +126,16 @@ public class PricingApiResource {
 		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 		}
+		@GET
+		@Consumes({ MediaType.APPLICATION_JSON })
+		@Produces({ MediaType.APPLICATION_JSON })
+		public String retrievePlanAndPriceDetails(@Context final UriInfo uriInfo) {
+			
+		 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		List<PricingData> pricingDatas = this.priceReadPlatformService.retrievePlanAndPriceDetails();
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+	    return this.toApiJsonSerializer.serialize(settings, pricingDatas, RESPONSE_DATA_PARAMETERS);
+		}
 	 @DELETE
 		@Path("{priceId}")
 		@Consumes({MediaType.APPLICATION_JSON})
