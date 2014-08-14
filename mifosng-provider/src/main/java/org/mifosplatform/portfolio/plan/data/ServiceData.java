@@ -25,6 +25,7 @@ public class ServiceData {
 	private String code;
     private String serviceType;
 	private String priceregion;
+	private String isPrepaid;
 
 	public ServiceData(Long id, String planCode, String serviceCode,
 			String planDescription, String chargeCode, String charging_variant,
@@ -67,6 +68,11 @@ public class ServiceData {
 		return id;
 	}
 
+	
+	public String isPrepaid() {
+		return isPrepaid;
+	}
+
 	public String getServiceCode() {
 		return serviceCode;
 	}
@@ -84,6 +90,22 @@ public class ServiceData {
 	}
 	
 	
+
+	public void setIsPrepaid(String isPrepaid) {
+		this.isPrepaid = isPrepaid;
+	}
+
+	public void setServiceDescription(String serviceDescription) {
+		this.serviceDescription = serviceDescription;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public void setPriceregion(String priceregion) {
+		this.priceregion = priceregion;
+	}
 
 	public String getPriceregion() {
 		return priceregion;

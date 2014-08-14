@@ -6,6 +6,7 @@ import org.mifosplatform.billing.chargecode.data.ChargesData;
 import org.mifosplatform.finance.data.DiscountMasterData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.priceregion.data.PriceRegionData;
+import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 
 
@@ -30,9 +31,12 @@ public class PricingData {
 	private String chargeCode;
 	private Long contractId;
 	private String contractPeriod;
+	private List<SubscriptionData> contractPeriods;
+	private String isPrepaid;
 
 	public PricingData(final List<ServiceData> serviceData,	final List<ChargesData> chargeData,
-	final List<EnumOptionData> chargevariant,List<DiscountMasterData> data,final String planCode,Long planId,PricingData pricingData, List<PriceRegionData> priceRegionData)
+	final List<EnumOptionData> chargevariant,List<DiscountMasterData> data,final String planCode,Long planId,PricingData pricingData, 
+	List<PriceRegionData> priceRegionData, List<SubscriptionData> contractPeriods, String isPrepaid)
 	{
 
 		if(pricingData!= null)
@@ -47,6 +51,7 @@ public class PricingData {
 		this.priceId=pricingData.getPriceId();
 		this.serviceCode=pricingData.getServiceCode();
 		this.chargeCode=pricingData.getChargeCode();
+		this.contractPeriod=pricingData.getContractPeriod();
 		
 		}
 		this.chargeData=chargeData;
@@ -57,7 +62,9 @@ public class PricingData {
 		this.planCode=planCode;
 		}
 		this.planId=planId;
+		this.isPrepaid=isPrepaid;
 		this.priceRegionData=priceRegionData;
+		this.contractPeriods=contractPeriods;
 
 	}
 
@@ -69,8 +76,8 @@ public class PricingData {
 		this.planCode=null;
 	}
 
-	public PricingData(Long id, String serviceCode, String chargeCode,
-			BigDecimal price, Long discountId, int chargeVariantId, Long priceregion,String planCode, Long priceId) {
+	public PricingData(Long id, String serviceCode, String chargeCode,BigDecimal price, Long discountId, int chargeVariantId, 
+			Long priceregion,String planCode, Long priceId,String contractperiod) {
 	    this.serviceData=null;
 		this.chargeData=null;
 		this.chargevariant=null;
@@ -79,6 +86,7 @@ public class PricingData {
 		this.serviceCode=serviceCode;
 		this.chargeCode=chargeCode;
 		this.price=price;
+		this.contractPeriod=contractperiod;
 		this.chargeVariantId=chargeVariantId;
 		this.discountId=discountId;
 		this.priceregion=priceregion;
@@ -104,6 +112,23 @@ public class PricingData {
 	}
 	
 	
+	
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+	public String getContractPeriod() {
+		return contractPeriod;
+	}
+
+	public List<SubscriptionData> getContractPeriods() {
+		return contractPeriods;
+	}
+
+	public String getIsPrepaid() {
+		return isPrepaid;
+	}
 
 	public String getServiceCode() {
 		return serviceCode;
