@@ -456,39 +456,46 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			//this.fromApiJsonDeserializer.validateForUpDateIpDetails(command.json());
 			final Long clientId=command.longValueOfParameterNamed("clientId");
 			final JsonElement element = fromJsonHelper.parse(command.json());
-			//final JsonArray exitIpsArray=fromApiJsonHelper.extractJsonArrayNamed("existIps",element);
-			String[] exitIpsArray = fromJsonHelper.extractArrayNamed("existIps",element);
-			//final JsonArray newIpsArray=fromApiJsonHelper.extractJsonArrayNamed("newIps",element);
-			String[] newIpsArray = fromJsonHelper.extractArrayNamed("newIps",element);
-			
+
+			final String[] exitIpsArray=fromApiJsonHelper.extractArrayNamed("existIps",element);
+			final String[] newIpsArray=fromApiJsonHelper.extractArrayNamed("newIps",element);
 			IpPoolManagementDetail ipPoolManagement=null;
+			JSONArray array=new JSONArray();
 			List<ServiceParameters> parameters=this.serviceParametersRepository.findDataByOrderId(orderId);
 			
 			for(ServiceParameters serviceData:parameters){
 				if(serviceData.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_IPADDRESS)){
-					serviceData.setParameterValue(newIpsArray.toString());
-			
-						if(exitIpsArray.length>=1){
-							for (int i=0;i<exitIpsArray.length; i++){
-					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findAllocatedIpAddressData(exitIpsArray[i]);
+
+					for(String newIp:newIpsArray){
+						array.put(newIp);
+					}
+					serviceData.setParameterValue(array.toString());
+					 if(exitIpsArray.length >= 1){
+					      for (int i=0;i<exitIpsArray.length; i++){
+					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findByIpAddress(exitIpsArray[i]);
+
 					    	  ipPoolManagement.setStatus('F');
 					    	  ipPoolManagement.setClientId(null);
 					    	  ipPoolManagement.setSubnet(null);
+					    	  this.ipPoolManagementJpaRepository.save(ipPoolManagement);
 					      }
-					      this.ipPoolManagementJpaRepository.save(ipPoolManagement);
+					     
 					   }
-					if(newIpsArray.length>=1){
+
+					if(newIpsArray.length >= 1){
+
 					      for (int i=0;i<newIpsArray.length; i++){
 					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findByIpAddress(newIpsArray[i]);
 					    	  ipPoolManagement.setStatus('A');
 					    	  ipPoolManagement.setClientId(clientId);
 					    	 // ipPoolManagement.setSubnet(null);
+					    	  this.ipPoolManagementJpaRepository.save(ipPoolManagement);
 					      }
-					      this.ipPoolManagementJpaRepository.save(ipPoolManagement);
+					     
 					   }	
-					 
+
 					this.serviceParametersRepository.save(serviceData);
-					
+
 				}
 		}
 	
