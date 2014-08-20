@@ -10,10 +10,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
-import org.mifosplatform.portfolio.order.domain.OrderHistoryRepository;
-import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
-import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
@@ -36,32 +33,25 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 
 	
 	
+	private final InvoiceClient invoiceClient;
+	private final FromJsonHelper fromApiJsonHelper;
 	private final EventActionRepository eventActionRepository;
-    private final FromJsonHelper fromApiJsonHelper;
+	private final ProcessRequestRepository processRequestRepository;
     private final OrderWritePlatformService orderWritePlatformService;
-    private final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
-    private final OrderHistoryRepository orderHistory;
-    private final OrderRepository orderRepository;
-    private final InvoiceClient invoiceClient;
-    private final ProcessRequestRepository processRequestRepository;
     private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
     
  
 
 	@Autowired
 	public ProcessEventActionServiceImpl(final EventActionRepository eventActionRepository,final FromJsonHelper fromJsonHelper,
-			final OrderWritePlatformService orderWritePlatformService,final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,
-			final OrderHistoryRepository orderHistory,final OrderRepository orderRepository,final InvoiceClient invoiceClient,
+			final OrderWritePlatformService orderWritePlatformService,final InvoiceClient invoiceClient,
 			final ProcessRequestRepository processRequestRepository,final HardwareAssociationReadplatformService hardwareAssociationReadplatformService)
 	{
-		this.eventActionRepository=eventActionRepository;
+		this.invoiceClient=invoiceClient;
         this.fromApiJsonHelper=fromJsonHelper;
-        this.orderWritePlatformService=orderWritePlatformService;
-        this.orderHistory=orderHistory;
-        this.orderRepository=orderRepository;
-        this.invoiceClient=invoiceClient;
-        this.transactionHistoryWritePlatformService=transactionHistoryWritePlatformService;
+        this.eventActionRepository=eventActionRepository;
         this.processRequestRepository=processRequestRepository;
+        this.orderWritePlatformService=orderWritePlatformService;
         this.hardwareAssociationReadplatformService=hardwareAssociationReadplatformService;
 	}
 	

@@ -66,20 +66,20 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
     private final String CreditCardToken="creditCardToken";
 	
 	private final PlatformSecurityContext context;
-	private final PaymentRepository paymentRepository;
-	private final PaymentCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-	private final ClientBalanceReadPlatformService clientBalanceReadPlatformService;
-	private final ClientBalanceRepository clientBalanceRepository;
-	private final UpdateClientBalance updateClientBalance;
-	private final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
-	private final ChequePaymentRepository chequePaymentRepository;
-	private final ActiondetailsWritePlatformService actiondetailsWritePlatformService;
-	private final ActionDetailsReadPlatformService actionDetailsReadPlatformService; 
-	private final PaymodeReadPlatformService paymodeReadPlatformService ;
-	private final InvoiceRepository invoiceRepository;
-	private final GlobalConfigurationRepository globalConfigurationRepository;
-	private final PaypalEnquireyRepository paypalEnquireyRepository;
 	private final FromJsonHelper fromApiJsonHelper;
+	private final PaymentRepository paymentRepository;
+	private final InvoiceRepository invoiceRepository;
+	private final UpdateClientBalance updateClientBalance;
+	private final ClientBalanceRepository clientBalanceRepository;
+	private final ChequePaymentRepository chequePaymentRepository;
+	private final PaypalEnquireyRepository paypalEnquireyRepository;
+	private final PaymodeReadPlatformService paymodeReadPlatformService ;
+	private final GlobalConfigurationRepository globalConfigurationRepository;
+	private final PaymentCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+	private final ActionDetailsReadPlatformService actionDetailsReadPlatformService; 
+	private final ClientBalanceReadPlatformService clientBalanceReadPlatformService;
+	private final ActiondetailsWritePlatformService actiondetailsWritePlatformService;
+	private final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
 
 	@Autowired
 	public PaymentWritePlatformServiceImpl(final PlatformSecurityContext context,final PaymentRepository paymentRepository,
@@ -89,56 +89,56 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			final UpdateClientBalance updateClientBalance,final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final PaymodeReadPlatformService paymodeReadPlatformService,
 			final InvoiceRepository invoiceRepository,final GlobalConfigurationRepository globalConfigurationRepository,
 			final PaypalEnquireyRepository paypalEnquireyRepository,final FromJsonHelper fromApiJsonHelper) {
+		
 		this.context = context;
-		this.paymentRepository = paymentRepository;
-		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-		this.clientBalanceReadPlatformService=clientBalanceReadPlatformService;
-		this.clientBalanceRepository=clientBalanceRepository;
-		this.transactionHistoryWritePlatformService = transactionHistoryWritePlatformService;
-		this.updateClientBalance= updateClientBalance;
-		this.chequePaymentRepository=chequePaymentRepository;
-		this.actiondetailsWritePlatformService=actiondetailsWritePlatformService; 
-		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
-		this.paymodeReadPlatformService=paymodeReadPlatformService;
-		this.invoiceRepository=invoiceRepository;
-		this.globalConfigurationRepository=globalConfigurationRepository;
-		this.paypalEnquireyRepository=paypalEnquireyRepository;
 		this.fromApiJsonHelper=fromApiJsonHelper;
+		this.invoiceRepository=invoiceRepository;
+		this.paymentRepository = paymentRepository;
+		this.updateClientBalance= updateClientBalance;
+		this.clientBalanceRepository=clientBalanceRepository;
+		this.chequePaymentRepository=chequePaymentRepository;
+		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+		this.paypalEnquireyRepository=paypalEnquireyRepository;
+		this.paymodeReadPlatformService=paymodeReadPlatformService;
+		this.globalConfigurationRepository=globalConfigurationRepository;
+		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
+		this.clientBalanceReadPlatformService=clientBalanceReadPlatformService;
+		this.actiondetailsWritePlatformService=actiondetailsWritePlatformService; 
+		this.transactionHistoryWritePlatformService = transactionHistoryWritePlatformService;
 		
 	}
 
 	@Transactional
 	@Override
 	public CommandProcessingResult createPayment(JsonCommand command) {
+		
 		try {
 			context.authenticatedUser();
-
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
 			List<ClientBalanceData> clientBalancedatas = clientBalanceReadPlatformService.retrieveAllClientBalances(command.entityId());
-			
 			Long id=Long.valueOf(-1);
-			if(clientBalancedatas.size() == 1)
-				id= createPayments(clientBalancedatas.get(0).getId(),command.entityId(),command);											
-			else
-			id=	createPayments(command.entityId(),command.entityId(),command);
 			
-			if(command.stringValueOfParameterNamed("isChequeSelected").equalsIgnoreCase("yes")){
-				ChequePayment chequePayment = ChequePayment.fromJson(command);
-				chequePayment.setPaymentId(id);
-				chequePaymentRepository.save(chequePayment);
-			}
+				if(clientBalancedatas.size() == 1)
+					id= createPayments(clientBalancedatas.get(0).getId(),command.entityId(),command);											
+				else
+					id=	createPayments(command.entityId(),command.entityId(),command);
+					if(command.stringValueOfParameterNamed("isChequeSelected").equalsIgnoreCase("yes")){
+						ChequePayment chequePayment = ChequePayment.fromJson(command);
+						chequePayment.setPaymentId(id);
+						chequePaymentRepository.save(chequePayment);
+					}
 			
-			//Add New Action 
-			List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_PAYMENT);
-			if(actionDetaislDatas.size() != 0){
-			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.entityId(), id.toString());
-			}
-			
-			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(id).build();
+					//Add New Action 
+					List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_PAYMENT);
+						if(actionDetaislDatas.size() != 0){
+							this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.entityId(), id.toString());
+						}
+						return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(id).build();
+		
 		} catch (DataIntegrityViolationException dve) {
 			return CommandProcessingResult.empty();
+			}
 		}
-	}
 	
 	@Transactional
 	@Override

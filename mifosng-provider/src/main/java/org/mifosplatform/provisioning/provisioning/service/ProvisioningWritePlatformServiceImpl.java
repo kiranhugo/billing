@@ -491,14 +491,10 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 					    	 // ipPoolManagement.setSubnet(null);
 					    	  this.ipPoolManagementJpaRepository.save(ipPoolManagement);
 					      }
-					     
 					   }	
-
 					this.serviceParametersRepository.save(serviceData);
-
 				}
 		}
-	
 		}catch(DataIntegrityViolationException dve){
 			handleCodeDataIntegrityIssues(null, dve);
 		}
