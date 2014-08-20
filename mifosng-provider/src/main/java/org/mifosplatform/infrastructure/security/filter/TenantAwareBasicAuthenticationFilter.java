@@ -6,6 +6,8 @@
 package org.mifosplatform.infrastructure.security.filter;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -15,6 +17,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.time.StopWatch;
+import org.mifosplatform.billing.loginhistory.data.LoginHistoryData;
+import org.mifosplatform.billing.loginhistory.domain.LoginHistory;
+import org.mifosplatform.billing.loginhistory.domain.LoginHistoryRepository;
+import org.mifosplatform.billing.loginhistory.service.LoginHistoryReadPlatformService;
 import org.mifosplatform.infrastructure.cache.domain.CacheType;
 import org.mifosplatform.infrastructure.cache.service.CacheWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
@@ -63,6 +69,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     //ashok changed
     private AuthenticationDetailsSource<HttpServletRequest,?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
     private RememberMeServices rememberMeServices = new NullRememberMeServices();
+    private final LoginHistoryReadPlatformService loginHistoryReadPlatformService;
+    private final LoginHistoryRepository loginHistoryRepository;
    
     @Autowired
     private AuthenticationEntryPoint authenticationEntryPoint;
@@ -79,13 +87,16 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     @Autowired
     public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,final AuthenticationEntryPoint authenticationEntryPoint,
     		final ConfigurationDomainService configurationDomainService,final CacheWritePlatformService cacheWritePlatformService,
-    		final TenantDetailsService tenantDetailsService,final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer) {
+    		final TenantDetailsService tenantDetailsService,final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
+    		final LoginHistoryReadPlatformService loginHistoryReadPlatformService,final LoginHistoryRepository loginHistoryRepository) {
     	
         super(authenticationManager, authenticationEntryPoint);
         this.configurationDomainService=configurationDomainService;
         this.cacheWritePlatformService=cacheWritePlatformService;
         this.tenantDetailsService=tenantDetailsService;
         this.toApiJsonSerializer=toApiJsonSerializer;
+        this.loginHistoryReadPlatformService=loginHistoryReadPlatformService;
+        this.loginHistoryRepository=loginHistoryRepository;
     }
 
     @Override
@@ -160,6 +171,37 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                }
 
                ThreadLocalContextUtil.setTenant(tenant);
+               
+               /**
+                * login history start
+                * Enters here when session is not new
+                * */
+               if (!request.getSession().isNew()) {  // skip new sessions
+                   Date dayAgo = new Date(System.currentTimeMillis() - 24*60*60*1000);
+                   Date hourAgo = new Date(System.currentTimeMillis() - 20*60*1000);
+                   Date created = new Date(request.getSession().getCreationTime());
+                   Date accessed = new Date(request.getSession().getLastAccessedTime());
+                   
+                   if (created.before(dayAgo) || accessed.before(hourAgo)) {
+                  	 
+                	   LoginHistoryData dataLogin= this.loginHistoryReadPlatformService.retrieveSessionId(request.getSession().getId());
+                	   if(dataLogin!=null){
+                		   LoginHistory loginHistory=this.loginHistoryRepository.findOne((Long) request.getSession().getAttribute("lId"));
+                		   final Map<String, Object> changes = loginHistory.update();
+                		   if(!changes.isEmpty()){
+                			   	this.loginHistoryRepository.save(loginHistory);
+                		   }
+                		   request.getSession().invalidate();
+                		   request.getSession(true);  // get a new session
+                	   }else{
+                		   request.getSession().invalidate();
+                		   request.getSession(true);  // get a new session
+                	   }
+                   }
+               }
+               /**
+                * login history end
+                * */
                //ashokchanged
                super.doFilter(req, res, chain);
                //ashok changed
