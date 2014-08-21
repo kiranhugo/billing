@@ -171,37 +171,6 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                }
 
                ThreadLocalContextUtil.setTenant(tenant);
-               
-               /**
-                * login history start
-                * Enters here when session is not new
-                * */
-               if (!request.getSession().isNew()) {  // skip new sessions
-                   Date dayAgo = new Date(System.currentTimeMillis() - 24*60*60*1000);
-                   Date hourAgo = new Date(System.currentTimeMillis() - 20*60*1000);
-                   Date created = new Date(request.getSession().getCreationTime());
-                   Date accessed = new Date(request.getSession().getLastAccessedTime());
-                   
-                   if (created.before(dayAgo) || accessed.before(hourAgo)) {
-                  	 
-                	   LoginHistoryData dataLogin= this.loginHistoryReadPlatformService.retrieveSessionId(request.getSession().getId());
-                	   if(dataLogin!=null){
-                		   LoginHistory loginHistory=this.loginHistoryRepository.findOne((Long) request.getSession().getAttribute("lId"));
-                		   final Map<String, Object> changes = loginHistory.update();
-                		   if(!changes.isEmpty()){
-                			   	this.loginHistoryRepository.save(loginHistory);
-                		   }
-                		   request.getSession().invalidate();
-                		   request.getSession(true);  // get a new session
-                	   }else{
-                		   request.getSession().invalidate();
-                		   request.getSession(true);  // get a new session
-                	   }
-                   }
-               }
-               /**
-                * login history end
-                * */
                //ashokchanged
                super.doFilter(req, res, chain);
                //ashok changed
