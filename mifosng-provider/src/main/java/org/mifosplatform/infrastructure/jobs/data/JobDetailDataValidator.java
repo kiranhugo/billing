@@ -214,6 +214,14 @@ public class JobDetailDataValidator {
                 baseDataValidator.reset().parameter(SchedulerJobApiConstants.JOB_Password).value(password).notBlank();
             }
         	
+          }else if(jobName.equalsIgnoreCase(SchedulerJobApiConstants.JOB_SIMULATOR)){
+        	
+        	if (this.fromApiJsonHelper.parameterExists(SchedulerJobApiConstants.jobisCreateTicket, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final Boolean  createTicket= this.fromApiJsonHelper.extractBooleanNamed(SchedulerJobApiConstants.jobisCreateTicket, element);
+                baseDataValidator.reset().parameter(SchedulerJobApiConstants.jobisCreateTicket).value(createTicket).notBlank();
+            }
+        	
         }
        
         if (!atLeastOneParameterPassedForUpdate) {

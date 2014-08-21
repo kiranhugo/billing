@@ -50,8 +50,9 @@ public class SchedulerJobApiConstants {
     public static final String JOB_Username="Username";
     public static final String JOB_Password="Password";
     public static final String JOB_REPORT_STATMENT="Report Statement";
-    
-    
+    public static final String JOB_SIMULATOR="Simulator";
+    public static final String jobisCreateTicket="isCreateTicket";
+    public static final String jobTicket="Ticket";
     
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
             displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
@@ -71,7 +72,7 @@ public class SchedulerJobApiConstants {
 
 
     public static final Set<String> CREATE_REQUEST_JOB_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobProcessdate,jobDueDate,jobPromotionalMessage,
-    		jobMessageTemplate,jobExipiryDate,"locale","dateFormat","isDynamic","jobName","reportName","isAutoRenewal",schedulerJobParamName,jobReportName,
+    		jobMessageTemplate,jobExipiryDate,"locale","dateFormat","isDynamic","jobName","reportName","isAutoRenewal","isCreateTicket","isUpdateStatus",schedulerJobParamName,jobReportName,
     		JOB_REPORTEMAIL,JOB_EmailId,JOB_ProvSystem,JOB_URL,JOB_Username,JOB_Password,JOB_MiddleWare));
 
 

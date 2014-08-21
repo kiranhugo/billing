@@ -188,7 +188,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 							this.clientRepository.saveAndFlush(client);
 							detailsData.setNotify();
 					}
-						this.processRequestRepository.save(detailsData);
+						this.processRequestRepository.saveAndFlush(detailsData);
 				}catch(Exception exception){
 					exception.printStackTrace();
 				}
