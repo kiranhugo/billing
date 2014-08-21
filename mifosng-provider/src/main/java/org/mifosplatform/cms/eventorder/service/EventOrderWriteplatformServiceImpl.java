@@ -38,55 +38,45 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class EventOrderWriteplatformServiceImpl implements
-		EventOrderWriteplatformService {
+public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatformService {
 
 	private final PlatformSecurityContext context;
-	private final EventOrderRepository eventOrderRepository;
-	private final EventOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final InvoiceOneTimeSale invoiceOneTimeSale;
-	private final EventMasterRepository eventMasterRepository;
 	private final MediaAssetRepository mediaAssetRepository;
-	private final EventOrderReadplatformServie eventOrderReadplatformServie;
-	private final MediaDeviceReadPlatformService deviceReadPlatformService;
-	private final ClientBalanceReadPlatformService balanceReadPlatformService;
+	private final EventOrderRepository eventOrderRepository;
+	private final EventMasterRepository eventMasterRepository;
 	private final EventDetailsRepository eventDetailsRepository;
-	private final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
 	private final EventPricingRepository eventPricingRepository;
+	private final MediaDeviceReadPlatformService deviceReadPlatformService;
+	private final EventOrderReadplatformServie eventOrderReadplatformServie;
+	private final ClientBalanceReadPlatformService balanceReadPlatformService;
+	private final EventOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
+	private final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
 
 	@Autowired
-	public EventOrderWriteplatformServiceImpl(
-			final PlatformSecurityContext context,
-			final EventOrderRepository eventOrderRepository,
-			final EventOrderCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final EventOrderReadplatformServie eventOrderReadplatformServie,
-			final InvoiceOneTimeSale invoiceOneTimeSale,
-			final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
-			final EventMasterRepository eventMasterRepository,
-			final MediaAssetRepository mediaAssetRepository,
-			final MediaDeviceReadPlatformService deviceReadPlatformService,
-			final ClientBalanceReadPlatformService balanceReadPlatformService,
-			final EventDetailsRepository eventDetailsRepository,
-			final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,
-			final EventPricingRepository eventPricingRepository) {
+	public EventOrderWriteplatformServiceImpl(final PlatformSecurityContext context,final EventOrderRepository eventOrderRepository,
+			final EventOrderCommandFromApiJsonDeserializer apiJsonDeserializer,final EventOrderReadplatformServie eventOrderReadplatformServie,
+			final InvoiceOneTimeSale invoiceOneTimeSale,final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
+			final EventMasterRepository eventMasterRepository,final MediaAssetRepository mediaAssetRepository,final EventPricingRepository eventPricingRepository,
+			final MediaDeviceReadPlatformService deviceReadPlatformService,final ClientBalanceReadPlatformService balanceReadPlatformService,
+			final EventDetailsRepository eventDetailsRepository,final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService) {
 		
 		this.context = context;
-		this.eventOrderRepository = eventOrderRepository;
-		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.invoiceOneTimeSale = invoiceOneTimeSale;
-		this.eventMasterRepository = eventMasterRepository;
+		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.mediaAssetRepository = mediaAssetRepository;
-		this.eventOrderReadplatformServie = eventOrderReadplatformServie;
+		this.eventOrderRepository = eventOrderRepository;
+		this.eventDetailsRepository=eventDetailsRepository;
+		this.eventMasterRepository = eventMasterRepository;
+		this.eventPricingRepository = eventPricingRepository;
 		this.deviceReadPlatformService = deviceReadPlatformService;
 		this.balanceReadPlatformService = balanceReadPlatformService;
-		this.eventDetailsRepository=eventDetailsRepository;
+		this.eventOrderReadplatformServie = eventOrderReadplatformServie;
 		this.transactionHistoryWritePlatformService = transactionHistoryWritePlatformService;
-		this.eventPricingRepository = eventPricingRepository;
 
 	}
 
-	private void handleCodeDataIntegrityIssues(JsonCommand command,
-			DataIntegrityViolationException dve) {
+	private void handleCodeDataIntegrityIssues(JsonCommand command,DataIntegrityViolationException dve) {
 		// TODO Auto-generated method stub
 
 	}
@@ -94,15 +84,17 @@ public class EventOrderWriteplatformServiceImpl implements
 	@Transactional
 	@Override
 	public CommandProcessingResult createEventOrder(JsonCommand command) {
+		
 		try {
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			final Long eventId = command.longValueOfParameterNamed("eventId");
 			final String deviceId = command.stringValueOfParameterNamed("deviceId");
 			MediaDeviceData deviceData = this.deviceReadPlatformService.retrieveDeviceDetails(deviceId);
-			if (deviceData == null) {
-				throw new NoMediaDeviceFoundException();
-			}
+			
+				if (deviceData == null) {
+					throw new NoMediaDeviceFoundException();
+				}
 			
 			/*
 			//Check Client Custome Validation
@@ -115,48 +107,40 @@ public class EventOrderWriteplatformServiceImpl implements
 			final String formatType = command.stringValueOfParameterNamed("formatType");
 			final String optType=command.stringValueOfParameterNamed("optType");
 			EventMaster eventMaster = this.eventMasterRepository.findOne(eventId);
-			if(eventMaster == null){
-				throw new NoEventMasterFoundException();
-			}
-			
-			List<EventDetails> eventDetails=eventMaster.getEventDetails();
-			
-			EventOrder eventOrder = EventOrder.fromJson(command,eventMaster, deviceData);
-			
-			for(EventDetails detail:eventDetails){
-				
-				EventDetails eventDetail=this.eventDetailsRepository.findOne(detail.getId());
-				MediaAsset mediaAsset = this.mediaAssetRepository.findOne(eventDetail.getMediaId());
-				List<MediaassetLocation> mediaassetLocations = mediaAsset.getMediaassetLocations();
-				String movieLink = "";
-				
-				for (MediaassetLocation location : mediaassetLocations) {
-					if (location.getFormatType().equalsIgnoreCase(formatType)) {
-						movieLink = location.getLocation();
-					}
+				if(eventMaster == null){
+					throw new NoEventMasterFoundException();
 				}
+			List<EventDetails> eventDetails=eventMaster.getEventDetails();
+			EventOrder eventOrder = EventOrder.fromJson(command,eventMaster, deviceData);
+				
+				for(EventDetails detail:eventDetails){
+					EventDetails eventDetail=this.eventDetailsRepository.findOne(detail.getId());
+					MediaAsset mediaAsset = this.mediaAssetRepository.findOne(eventDetail.getMediaId());
+					List<MediaassetLocation> mediaassetLocations = mediaAsset.getMediaassetLocations();
+					String movieLink = "";
+				
+					for (MediaassetLocation location : mediaassetLocations) {
+						if (location.getFormatType().equalsIgnoreCase(formatType)) {
+							movieLink = location.getLocation();
+						}
+					}
 				      EventOrderdetials eventOrderdetials=new EventOrderdetials(eventDetail,movieLink,formatType,optType);
 				      eventOrder.addEventOrderDetails(eventOrderdetials);
 				
-				    if (movieLink.isEmpty()) {
-				    	
-					  throw new NoMoviesFoundException();
+				      if (movieLink.isEmpty()) {
+				    	  throw new NoMoviesFoundException();
 				    }
-			}
-
-			boolean hasSufficientMoney = this.checkClientBalance(eventOrder.getBookedPrice(), deviceData.getClientId());
-			if (!hasSufficientMoney) {
-				throw new InsufficientAmountException();
-			}
-
-			this.eventOrderRepository.save(eventOrder);
-
-			List<OneTimeSaleData> oneTimeSaleDatas = eventOrderReadplatformServie.retrieveEventOrderData(eventOrder.getClientId());
-			for (OneTimeSaleData oneTimeSaleData : oneTimeSaleDatas) {
-				this.invoiceOneTimeSale.invoiceOneTimeSale(eventOrder.getClientId(), oneTimeSaleData);
-
-				this.updateOneTimeSale(oneTimeSaleData);
-			}
+				}
+				boolean hasSufficientMoney = this.checkClientBalance(eventOrder.getBookedPrice(), deviceData.getClientId());
+					if (!hasSufficientMoney) {
+						throw new InsufficientAmountException();
+					}
+					this.eventOrderRepository.save(eventOrder);
+					List<OneTimeSaleData> oneTimeSaleDatas = eventOrderReadplatformServie.retrieveEventOrderData(eventOrder.getClientId());
+						for (OneTimeSaleData oneTimeSaleData : oneTimeSaleDatas) {
+							this.invoiceOneTimeSale.invoiceOneTimeSale(eventOrder.getClientId(), oneTimeSaleData);
+							this.updateOneTimeSale(oneTimeSaleData);
+						}
             
 			transactionHistoryWritePlatformService.saveTransactionHistory(eventOrder.getClientId(), "Event Order", eventOrder.getEventBookedDate(),"CancelFlag:"+eventOrder.getCancelFlag(),
 					"bookedPrice:"+eventOrder.getBookedPrice(),"EventValidTillDate:"+eventOrder.getEventValidtill(),"EventId:"+eventOrder.getEventId(),"EventOrderID:"+eventOrder.getId());
@@ -172,12 +156,14 @@ public class EventOrderWriteplatformServiceImpl implements
 	@Override
 	public CommandProcessingResult updateEventOrderPrice(JsonCommand command) {
 		
-		Long id = eventOrderReadplatformServie.getCurrentRow(command.stringValueOfParameterNamed("formatType"), command.stringValueOfParameterNamed("optType"), command.longValueOfParameterNamed("clientId"));
-		EventPricing eventPricing = eventPricingRepository.findOne(id);
-		eventPricing.setPrice(Double.valueOf(command.stringValueOfParameterNamed("price")));
-		eventPricingRepository.save(eventPricing);
-		return new CommandProcessingResultBuilder().withResourceIdAsString(eventPricing.getPrice().toString()).build();
+			Long id = eventOrderReadplatformServie.getCurrentRow(command.stringValueOfParameterNamed("formatType"), 
+						command.stringValueOfParameterNamed("optType"), command.longValueOfParameterNamed("clientId"));
+			EventPricing eventPricing = eventPricingRepository.findOne(id);
+			eventPricing.setPrice(Double.valueOf(command.stringValueOfParameterNamed("price")));
+			eventPricingRepository.save(eventPricing);
+			return new CommandProcessingResultBuilder().withResourceIdAsString(eventPricing.getPrice().toString()).build();
 	}
+	
 	
 	public boolean checkClientBalance(Double bookedPrice, Long clientId) {
 		  boolean isBalanceAvailable = false;
@@ -185,12 +171,12 @@ public class EventOrderWriteplatformServiceImpl implements
 		  BigDecimal eventPrice=new BigDecimal(bookedPrice);
 		  if(clientBalance!=null){
 			  BigDecimal resultantBalance = clientBalance.getBalanceAmount().add(eventPrice);
-			  if(resultantBalance.compareTo(BigDecimal.ZERO) == -1 || resultantBalance.compareTo(BigDecimal.ZERO) == 0){
-			  isBalanceAvailable = true;   
-			  }else {
-				  isBalanceAvailable = false;
-			  }
-		  }
+			  		if(resultantBalance.compareTo(BigDecimal.ZERO) == -1 || resultantBalance.compareTo(BigDecimal.ZERO) == 0){
+			  			isBalanceAvailable = true;   
+			  		}else {
+			  			isBalanceAvailable = false;
+			  		}
+		  	}
 		  return isBalanceAvailable;
 	}
 
@@ -198,8 +184,6 @@ public class EventOrderWriteplatformServiceImpl implements
 		EventOrder oneTimeSale = eventOrderRepository.findOne(oneTimeSaleData.getId());
 		oneTimeSale.setInvoiced();
 		eventOrderRepository.save(oneTimeSale);
-
-	
 
 	}
 }

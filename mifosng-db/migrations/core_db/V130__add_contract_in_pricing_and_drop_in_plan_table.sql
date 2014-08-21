@@ -68,3 +68,4 @@ call addPlanImage();
 Drop procedure IF EXISTS addPlanImage;
 
 insert ignore into `m_permission`(`id`,`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`) values (null,'billing','UPDATE_IPDETAILPARAMS','IPDETAILPARAMS','UPDATE',0);
+insert ignore into b_eventaction_mapping VALUES (null,'Event Order','Provision IT','Workflow_events','N','N');
