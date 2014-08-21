@@ -361,8 +361,11 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_CLIENTID,client.getAccountNo());
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_CLIENTNAME,client.getFirstname());
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_ORDERID,order.getId());
-			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_PLANNAME,planName);
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_MACID,inventoryItemDetails.getSerialNumber());
+			    	
+			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_PLANNAME,planName);
+			    	
+			    	
 			    		if(groupname != null){
 			    			jsonObject.put(ProvisioningApiConstants.PROV_DATA_OLD_GROUPNAME,groupname);
 			    		}
