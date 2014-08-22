@@ -36,19 +36,19 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
 
     @OneToOne
     @JoinColumn(name="createdby_id")
-    private U                 createdBy;
+    private U  createdBy;
 
     @Column(name="created_date")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date              createdDate;
+    private Date  createdDate;
 
     @OneToOne
     @JoinColumn(name="lastmodifiedby_id")
-    private U                 lastModifiedBy;
+    private U   lastModifiedBy;
 
     @Column(name="lastmodified_date")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date              lastModifiedDate;
+    private Date  lastModifiedDate;
 
 	/*
 	 * (non-Javadoc)
@@ -81,7 +81,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
     @Override
     public DateTime getCreatedDate() {
 
-        return null == this.createdDate ? null : new DateTime(this.createdDate);
+    	 return null == this.createdDate ? null : new DateTime(this.createdDate);
     }
 
     /*
@@ -129,7 +129,7 @@ public abstract class AbstractAuditableCustom<U, PK extends Serializable> extend
     @Override
     public DateTime getLastModifiedDate() {
 
-        return null == this.lastModifiedDate ? null : new DateTime(this.lastModifiedDate);
+    	return null == this.lastModifiedDate ? null : new DateTime(this.lastModifiedDate);
     }
 
     /*
