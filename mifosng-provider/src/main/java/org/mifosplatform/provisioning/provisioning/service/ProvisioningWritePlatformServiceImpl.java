@@ -378,6 +378,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			    		}
 		        
 		        for(ServiceParameters serviceParameters:parameters){
+		        	
 		        	if(serviceParameters.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_IPADDRESS)){
 		        			if(serviceParameters.getParameterValue().contains("/")){
 		        				jsonObject.put(ProvisioningApiConstants.PROV_DATA_IPTYPE,"Subnet");

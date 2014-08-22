@@ -32,6 +32,10 @@ import org.mifosplatform.logistics.onetimesale.serialization.EventOrderCommandFr
 import org.mifosplatform.logistics.onetimesale.service.InvoiceOneTimeSale;
 import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformService;
 import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
+import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
+import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
+import org.mifosplatform.workflow.eventaction.service.ActiondetailsWritePlatformService;
+import org.mifosplatform.workflow.eventaction.service.EventActionConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -51,6 +55,8 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 	private final EventOrderReadplatformServie eventOrderReadplatformServie;
 	private final ClientBalanceReadPlatformService balanceReadPlatformService;
 	private final EventOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
+	private final ActionDetailsReadPlatformService actionDetailsReadPlatformService; 
+	private final ActiondetailsWritePlatformService actiondetailsWritePlatformService;
 	private final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
 
 	@Autowired
@@ -59,7 +65,8 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 			final InvoiceOneTimeSale invoiceOneTimeSale,final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
 			final EventMasterRepository eventMasterRepository,final MediaAssetRepository mediaAssetRepository,final EventPricingRepository eventPricingRepository,
 			final MediaDeviceReadPlatformService deviceReadPlatformService,final ClientBalanceReadPlatformService balanceReadPlatformService,
-			final EventDetailsRepository eventDetailsRepository,final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService) {
+			final EventDetailsRepository eventDetailsRepository,final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,
+			final ActionDetailsReadPlatformService actionDetailsReadPlatformService,final ActiondetailsWritePlatformService actiondetailsWritePlatformService) {
 		
 		this.context = context;
 		this.invoiceOneTimeSale = invoiceOneTimeSale;
@@ -72,6 +79,8 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 		this.deviceReadPlatformService = deviceReadPlatformService;
 		this.balanceReadPlatformService = balanceReadPlatformService;
 		this.eventOrderReadplatformServie = eventOrderReadplatformServie;
+		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
+		this.actiondetailsWritePlatformService=actiondetailsWritePlatformService;
 		this.transactionHistoryWritePlatformService = transactionHistoryWritePlatformService;
 
 	}
@@ -141,6 +150,13 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 							this.invoiceOneTimeSale.invoiceOneTimeSale(eventOrder.getClientId(), oneTimeSaleData);
 							this.updateOneTimeSale(oneTimeSaleData);
 						}
+						
+
+						//Add New Action 
+						List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_EVENT_ORDER);
+							if(!actionDetaislDatas.isEmpty()){
+								this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.entityId(),eventOrder.getId().toString());
+							}		
             
 			transactionHistoryWritePlatformService.saveTransactionHistory(eventOrder.getClientId(), "Event Order", eventOrder.getEventBookedDate(),"CancelFlag:"+eventOrder.getCancelFlag(),
 					"bookedPrice:"+eventOrder.getBookedPrice(),"EventValidTillDate:"+eventOrder.getEventValidtill(),"EventId:"+eventOrder.getEventId(),"EventOrderID:"+eventOrder.getId());
