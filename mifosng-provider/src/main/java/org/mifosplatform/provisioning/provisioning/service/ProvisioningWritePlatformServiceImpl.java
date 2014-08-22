@@ -1,5 +1,6 @@
 package org.mifosplatform.provisioning.provisioning.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -24,11 +25,15 @@ import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.mifosplatform.portfolio.association.exception.PairingNotExistException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
+import org.mifosplatform.portfolio.client.service.GroupData;
+import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderLine;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
+import org.mifosplatform.portfolio.plan.domain.Plan;
+import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.portfolio.plan.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
@@ -78,7 +83,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	private final ProcessRequestReadplatformService processRequestReadplatformService;
 	private final ProcessRequestWriteplatformService processRequestWriteplatformService;
 	private final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService;
-	
+	private final PlanRepository planRepository;
+	private final GroupReadPlatformService groupReadPlatformService;
 	
     @Autowired
 	public ProvisioningWritePlatformServiceImpl(final PlatformSecurityContext context,final InventoryItemDetailsRepository inventoryItemDetailsRepository,
@@ -88,7 +94,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final HardwareAssociationRepository associationRepository,final ServiceMasterRepository serviceMasterRepository,final ClientRepository clientRepository,
 			final ProcessRequestReadplatformService processRequestReadplatformService,final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,
 			final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService,final ProvisioningReadPlatformService provisioningReadPlatformService,
-			final ProcessRequestWriteplatformService processRequestWriteplatformService) {
+			final ProcessRequestWriteplatformService processRequestWriteplatformService,final PlanRepository planRepository,
+			final GroupReadPlatformService groupReadPlatformService) {
 
     	this.context = context;
     	this.fromJsonHelper=fromJsonHelper;
@@ -108,7 +115,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		this.processRequestReadplatformService=processRequestReadplatformService;
 		this.processRequestWriteplatformService=processRequestWriteplatformService;
 		this.ipPoolManagementReadPlatformService=ipPoolManagementReadPlatformService;
-
+		this.planRepository=planRepository;
+		this.groupReadPlatformService=groupReadPlatformService;
 	}
 
 	@Override
@@ -362,10 +370,16 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_CLIENTNAME,client.getFirstname());
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_ORDERID,order.getId());
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_MACID,inventoryItemDetails.getSerialNumber());
-			    	
-			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_PLANNAME,planName);
-			    	
-			    	
+
+			    	if(requestType.equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
+			    		jsonObject.put("New_"+ProvisioningApiConstants.PROV_DATA_PLANNAME,planName);
+			    		Order Oldorder=this.orderRepository.findOne(orderId);
+				    	Plan plan=this.planRepository.findOne(Oldorder.getPlanId());
+				    	jsonObject.put("Old_"+ProvisioningApiConstants.PROV_DATA_PLANNAME,plan.getCode());
+			    	}else{
+			    		jsonObject.put(ProvisioningApiConstants.PROV_DATA_PLANNAME,planName);
+			    	}
+
 			    		if(groupname != null){
 			    			jsonObject.put(ProvisioningApiConstants.PROV_DATA_OLD_GROUPNAME,groupname);
 			    		}
@@ -390,16 +404,26 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		        				jsonObject.put(ProvisioningApiConstants.PROV_DATA_IPTYPE,"Single");
 		        			}
 		        		}
-		        		if(serviceParameters.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_SERVICE) && 
-		        				requestType.equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
-		        			List<ServiceParameterData> serviceDatas=this.provisioningReadPlatformService.getSerivceParameters(order.getId());
-		        			jsonObject.put(serviceParameters.getParameterName(),serviceDatas.get(0).getParamValue());
-		        			jsonObject.put(ProvisioningApiConstants.PROV_DATA_OLD_ORDERID,orderId);
-		        		}
 		        		if(serviceParameters.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_GROUPNAME) && groupname != null){
 		        			jsonObject.put("NEW_"+serviceParameters.getParameterName(),serviceParameters.getParameterValue());
 		        		}else{
-		        			jsonObject.put(serviceParameters.getParameterName(),serviceParameters.getParameterValue());
+		        			if(serviceParameters.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_SERVICE) && 
+			        				requestType.equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
+			        			List<ServiceParameterData> serviceDatas=this.provisioningReadPlatformService.getSerivceParameters(order.getId());
+			        			List<ServiceParameterData> oldServiceDatas=this.provisioningReadPlatformService.getSerivceParameters(orderId);
+			        			jsonObject.put("NEW_"+serviceParameters.getParameterName(),serviceDatas.get(0).getParamValue());
+			        			jsonObject.put("OLD_"+serviceParameters.getParameterName(),oldServiceDatas.get(0).getParamValue());
+			        			jsonObject.put(ProvisioningApiConstants.PROV_DATA_OLD_ORDERID,orderId);
+			        		}else if(serviceParameters.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_GROUPNAME) &&
+			        				requestType.equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
+			        			Collection<GroupData> groupDatas = this.groupReadPlatformService.retrieveGroupServiceDetails(orderId);
+			        			for(GroupData groupData:groupDatas){
+			        				jsonObject.put("NEW_"+serviceParameters.getParameterName(),groupData.getGroupName());
+			        			}
+			        			jsonObject.put("OLD_"+serviceParameters.getParameterName(),serviceParameters.getParameterValue());
+			        		}else{
+			        			jsonObject.put(serviceParameters.getParameterName(),serviceParameters.getParameterValue());
+			        		}
 		        		}
 		        	}
 			    	for(OrderLine orderLine:orderLines){
