@@ -4,7 +4,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import net.java.dev.obs.beesmart.AddExternalBeesmartMethod;
+
 import org.codehaus.jettison.json.JSONObject;
+import org.mifosplatform.cms.eventmaster.domain.EventMaster;
+import org.mifosplatform.cms.eventmaster.domain.EventMasterRepository;
+import org.mifosplatform.cms.eventorder.domain.EventOrder;
+import org.mifosplatform.cms.eventorder.domain.EventOrderRepository;
+import org.mifosplatform.cms.eventorder.domain.EventOrderdetials;
 import org.mifosplatform.crm.ticketmaster.data.TicketMasterData;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMaster;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMasterRepository;
@@ -18,11 +25,18 @@ import org.mifosplatform.organisation.message.exception.EmailNotFoundException;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.exception.HardwareDetailsNotFoundException;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
+import org.mifosplatform.provisioning.processrequest.service.ProcessRequestWriteplatformService;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
@@ -31,6 +45,7 @@ import org.mifosplatform.workflow.eventaction.domain.EventAction;
 import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -38,40 +53,50 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 	
 	
 	
+	private final OrderRepository orderRepository;
+	private final TicketMasterRepository repository;
+	private final ClientRepository clientRepository;
+	private final EventOrderRepository eventOrderRepository;
+	private final EventMasterRepository eventMasterRepository;
 	private final EventActionRepository eventActionRepository;
+	private final MessageDataRepository messageDataRepository;
+	private final AppUserReadPlatformService readPlatformService;
+	private final BillingOrderApiResourse billingOrderApiResourse;
+	private final BillingMessageTemplateRepository messageTemplateRepository;
+	private final TicketMasterReadPlatformService ticketMasterReadPlatformService ;
     private final ActionDetailsReadPlatformService actionDetailsReadPlatformService;	
-    private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
     private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
-    private final OrderRepository orderRepository;
-    private final BillingOrderApiResourse billingOrderApiResourse;
-    private final MessageDataRepository messageDataRepository;
-    private final BillingMessageTemplateRepository messageTemplateRepository;
-    private final TicketMasterReadPlatformService ticketMasterReadPlatformService ;
-    private final AppUserReadPlatformService readPlatformService;
-    private final TicketMasterRepository repository;
+    private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
+	private final ProcessRequestRepository processRequestRepository;
 
 	@Autowired
 	public EventActionWritePlatformServiceImpl(final ActionDetailsReadPlatformService actionDetailsReadPlatformService,final EventActionRepository eventActionRepository,
 			final HardwareAssociationReadplatformService hardwareAssociationReadplatformService,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
-			final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,final OrderRepository orderRepository,final BillingOrderApiResourse billingOrderApiResourse,
-			final MessageDataRepository messageDataRepository,final BillingMessageTemplateRepository messageTemplateRepository,
+			final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,final OrderRepository orderRepository,final TicketMasterRepository repository,
+			final BillingOrderApiResourse billingOrderApiResourse,final MessageDataRepository messageDataRepository,final ClientRepository clientRepository,
+			final BillingMessageTemplateRepository messageTemplateRepository,final EventMasterRepository eventMasterRepository,final EventOrderRepository eventOrderRepository,
 			final TicketMasterReadPlatformService ticketMasterReadPlatformService,final AppUserReadPlatformService readPlatformService,
-			final TicketMasterRepository repository)
+			final ProcessRequestRepository processRequestRepository)
 	{
+		this.repository=repository;
+		this.orderRepository=orderRepository;
+		this.clientRepository=clientRepository;
+		this.readPlatformService=readPlatformService;
+		this.eventOrderRepository=eventOrderRepository;
 		this.eventActionRepository=eventActionRepository;
+		this.eventMasterRepository=eventMasterRepository;
+		this.messageDataRepository=messageDataRepository;
+		this.billingOrderApiResourse=billingOrderApiResourse;
+		this.processRequestRepository=processRequestRepository;
+		this.messageTemplateRepository=messageTemplateRepository;
+		this.ticketMasterReadPlatformService=ticketMasterReadPlatformService;
         this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
-        this.hardwareAssociationReadplatformService=hardwareAssociationReadplatformService;
         this.contractPeriodReadPlatformService=contractPeriodReadPlatformService;
-        this.orderRepository=orderRepository;
-        this.billingOrderApiResourse=billingOrderApiResourse;
-        this.messageDataRepository=messageDataRepository;
-        this.messageTemplateRepository=messageTemplateRepository;
-        this.ticketMasterReadPlatformService=ticketMasterReadPlatformService;
-        this.readPlatformService=readPlatformService;
-        this.repository=repository;
+        this.hardwareAssociationReadplatformService=hardwareAssociationReadplatformService;
 	}
 	
 	
+	@Transactional
 	@Override
 	public void AddNewActions(List<ActionDetaislData> actionDetaislDatas,final Long clientId,final String resourceId) {
     
@@ -195,8 +220,34 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 					        	  jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
 					        	  this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),jsonObject.toString());
 				        	  	}
-				        	}
-			  	} if(detailsData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_SEND_PROVISION)){
+				      }else if(detailsData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_PROVISION_IT)){
+			  	    	
+			  	    	Client client=this.clientRepository.findOne(clientId);
+			  	    	EventOrder eventOrder=this.eventOrderRepository.findOne(Long.valueOf(resourceId));
+			  	    	EventMaster eventMaster=this.eventMasterRepository.findOne(eventOrder.getEventId());
+			  	    	String response= AddExternalBeesmartMethod.addVodPackage(client.getOffice().getExternalId().toString(),client.getAccountNo(),
+			  	    			eventMaster.getEventName());
+			  	   
+						ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0), eventOrder.getClientId(),eventOrder.getId(),ProvisioningApiConstants.PROV_BEENIUS,
+								ProvisioningApiConstants.REQUEST_ACTIVATION_VOD);
+						List<EventOrderdetials> eventDetails=eventOrder.getEventOrderdetials();
+						//EventMaster eventMaster=this.eventMasterRepository.findOne(eventOrder.getEventId());
+						//JSONObject jsonObject=new JSONObject();
+						jsonObject.put("officeUid",client.getOffice().getExternalId());
+						jsonObject.put("subscriberUid",client.getAccountNo());
+						jsonObject.put("vodUid",eventMaster.getEventName());
+								
+							for(EventOrderdetials details:eventDetails){
+								ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(details.getId(),details.getEventDetails().getId(),jsonObject.toString(),
+										response,null,eventMaster.getEventStartDate(), eventMaster.getEventEndDate(),new Date(),new Date(),'N',
+										ProvisioningApiConstants.REQUEST_ACTIVATION_VOD,null);
+								processRequest.add(processRequestDetails);
+							}
+						this.processRequestRepository.save(processRequest);
+					
+			  	    	
+				      }
+			  	    }if(detailsData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_SEND_PROVISION)){
 		        	   
 		        	   eventAction=new EventAction(new Date(), "CREATE", "Client",EventActionConstants.ACTION_SEND_PROVISION.toString(),"/processrequest/"+clientId, 
 		        	   Long.parseLong(resourceId),jsonObject.toString(),clientId,clientId);

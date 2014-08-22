@@ -12,11 +12,13 @@ import javax.persistence.Table;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "b_process_request")
-public class ProcessRequest extends AbstractPersistable<Long>{
+public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long> {
 
 	
 	@Column(name = "client_id")
@@ -56,7 +58,7 @@ public class ProcessRequest extends AbstractPersistable<Long>{
 
 
 
-	public ProcessRequest(Long clientId, Long orderId, 
+	/*public ProcessRequest(Long clientId, Long orderId, 
 			 String provisioningSystem, char isDeleted,String userName, String requestType, Long requestId) {
             this.clientId=clientId;
             this.orderId=orderId;
@@ -65,7 +67,7 @@ public class ProcessRequest extends AbstractPersistable<Long>{
             this.prepareRequestId=requestId;
 	
 	
-	}
+	}*/
 	 public ProcessRequest(Long prepareRequestId, Long clientId,Long orderId, String provisioningSytem, String requestType) {
 		 	this.prepareRequestId = prepareRequestId;
 		 	this.clientId = clientId;

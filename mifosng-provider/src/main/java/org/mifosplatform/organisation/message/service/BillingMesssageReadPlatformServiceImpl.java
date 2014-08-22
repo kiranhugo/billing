@@ -31,6 +31,7 @@ import org.mifosplatform.portfolio.plan.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -275,7 +276,8 @@ public class BillingMesssageReadPlatformServiceImpl implements
 						String requstStatus = UserActionStatusTypeEnum.MESSAGE.toString();
 						Long clientId = billingMesssageReadPlatformService.retrieveClientId(columndata.get(0).toString());
 						if(clientId!=null){
-							ProcessRequest processRequest = new ProcessRequest(clientId, new Long(0), "Comvenient", 'N', null,requstStatus, new Long(0));
+							//ProcessRequest processRequest = new ProcessRequest(clientId, new Long(0), "Comvenient", requstStatus, new Long(0));
+							ProcessRequest processRequest=new  ProcessRequest(Long.valueOf(0), clientId, Long.valueOf(0), ProvisioningApiConstants.PROV_COMVENIENT, requstStatus);
 							processRequest.setNotify();
 							Long id = new Long(0);
 							ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(id, id, body, "Recieved", 

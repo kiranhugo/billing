@@ -705,8 +705,9 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				if (requstStatus != null && plan!=null) {
 					GlobalConfigurationProperty configurationProperty=this.configurationRepository.findOneByName(CPE_TYPE);
 					AllocationDetailsData detailsData = this.allocationReadPlatformService.getTheHardwareItemDetails(command.entityId(),configurationProperty.getValue());
-					ProcessRequest processRequest = new ProcessRequest(order.getClientId(),
-						order.getId(),plan.getProvisionSystem(), 'N', null, requstStatus,new Long(0));
+					/*ProcessRequest processRequest = new ProcessRequest(order.getClientId(),
+						order.getId(),plan.getProvisionSystem(), 'N', null, requstStatus,new Long(0));*/
+					ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0),order.getClientId(),order.getId(),plan.getProvisionSystem(),requstStatus);
 				  processRequest.setNotify();
 				  List<OrderLine> orderLineData = order.getServices();
 				  	for (OrderLine orderLine : orderLineData) {

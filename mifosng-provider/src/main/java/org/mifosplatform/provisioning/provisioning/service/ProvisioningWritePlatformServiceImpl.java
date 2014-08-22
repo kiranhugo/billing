@@ -277,8 +277,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 				jsonObject.put(ProvisioningApiConstants.PROV_DATA_MACID,macId);
 				jsonObject.put(ProvisioningApiConstants.PROV_DATA_IPTYPE,ipType);
 				
-				ProcessRequest processRequest=new ProcessRequest(clientId,orderId,ProvisioningApiConstants.PROV_PACKETSPAN, 'N',
-					null,UserActionStatusTypeEnum.ACTIVATION.toString(), Long.valueOf(0));
+				ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0),clientId,orderId,ProvisioningApiConstants.PROV_PACKETSPAN,
+						                       UserActionStatusTypeEnum.ACTIVATION.toString());
 				Order order=this.orderRepository.findOne(orderId);
 				List<OrderLine> orderLines=order.getServices();
 				

@@ -82,11 +82,11 @@ public class EventOrder extends AbstractAuditableCustom<AppUser, Long> {
 	       this.chargeCode=chargeCode;
 	}
 
-	public static EventOrder fromJson(JsonCommand command, EventMaster eventMaster, MediaDeviceData details) {
+	public static EventOrder fromJson(JsonCommand command, EventMaster eventMaster,Long clientTypeId) {
 		 final Long eventId = command.longValueOfParameterNamed("eventId");
-		 final Long clientId = details.getClientId();//command.longValueOfParameterNamed("clientId");
+		 final Long clientId =command.longValueOfParameterNamed("clientId");
 		 final LocalDate eventBookedDate=command.localDateValueOfParameterNamed("eventBookedDate");
-		 final Long clientType=details.getClientTypeId();//command.integerValueOfParameterNamed("clientType");
+		 final Long clientType=clientTypeId;
 		 final String optType=command.stringValueOfParameterNamed("optType");
 		 final String formatType=command.stringValueOfParameterNamed("formatType");
 		 final Date eventValidtill=eventMaster.getEventValidity();

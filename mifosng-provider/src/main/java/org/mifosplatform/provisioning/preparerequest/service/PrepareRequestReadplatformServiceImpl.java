@@ -161,8 +161,8 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 							this.orderRepository.saveAndFlush(order);
 						
 						}else {
-							ProcessRequest processRequest=new ProcessRequest(order.getClientId(), order.getId(), requestData.getProvisioningSystem(),
-									'N',requestData.getUserName(),requestType,requestData.getRequestId());
+							ProcessRequest processRequest=new ProcessRequest(requestData.getRequestId(),order.getClientId(),order.getId(),
+									                       requestData.getProvisioningSystem(),requestType);
 								List<OrderLine> orderLineData=order.getServices();
 								for(OrderLine orderLine:orderLineData){
 									String HardWareId=null;
