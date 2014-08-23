@@ -21,6 +21,14 @@ public class SelfCareTemporary extends AbstractAuditableCustom<AppUser, Long>{
 	@Column(name="status")
 	private String status;
 	
+	@Column(name="payment_status")
+	private String paymentStatus;
+	
+	@Column(name="payment_data")
+	private String paymentData;
+	
+	
+	
 	public SelfCareTemporary(){
 		
 	}
@@ -37,6 +45,8 @@ public class SelfCareTemporary extends AbstractAuditableCustom<AppUser, Long>{
 		SelfCareTemporary selfCareTemporary = new SelfCareTemporary();
 		selfCareTemporary.setUserName(userName);
 		selfCareTemporary.setStatus("INACTIVE");
+		selfCareTemporary.paymentStatus = "INACTIVE";
+		selfCareTemporary.paymentData = "NULL";
 		return selfCareTemporary;
 		
 	}
@@ -64,6 +74,23 @@ public class SelfCareTemporary extends AbstractAuditableCustom<AppUser, Long>{
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	public String getPaymentStatus() {
+		return paymentStatus;
+	}
+
+	public void setPaymentStatus(String paymentStatus) {
+		this.paymentStatus = paymentStatus;
+	}
+
+	public String getPaymentData() {
+		return paymentData;
+	}
+
+	public void setPaymentData(String paymentData) {
+		this.paymentData = paymentData;
+	}
+	
 	
 	
 

@@ -827,6 +827,10 @@ public class SynchronousCommandProcessingService implements
 			        		handler = applicationContext.getBean("registerSelfCareCommandHandler",NewCommandSourceHandler.class);	
 					   } else if(wrapper.isSelfCareEmailVerification()) {
 			        		handler = applicationContext.getBean("emailVerificationSelfCareCommandHandler",NewCommandSourceHandler.class);	
+					   } else if(wrapper.isSelfCareGeneratePassword()) {
+			        		handler = applicationContext.getBean("generateNewSelfCarePasswordCommandHandler",NewCommandSourceHandler.class);	
+					   } else if(wrapper.isChangePassword()) {
+			        		handler = applicationContext.getBean("selfcareChangePasswordCommandHandler",NewCommandSourceHandler.class);	
 					   } else{
 				           throw new UnsupportedCommandException(wrapper.commandName());
 				       }

@@ -1,7 +1,6 @@
 package org.mifosplatform.provisioning.processrequest.domain;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,12 +13,12 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "b_process_request")
-public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long> {
 
+public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long> {
 	
 	@Column(name = "client_id")
 	private Long clientId;

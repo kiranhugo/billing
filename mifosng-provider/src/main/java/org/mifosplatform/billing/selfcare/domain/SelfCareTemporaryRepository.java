@@ -7,7 +7,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface SelfCareTemporaryRepository  extends JpaRepository<SelfCareTemporary, Long>, JpaSpecificationExecutor<SelfCareTemporary> {
 
-	@Query("from SelfCareTemporary selfCareTemporary where selfCareTemporary.generatedKey =:generatedKey")
-	SelfCareTemporary findOneByGeneratedKey(@Param("generatedKey")String generatedKey);
+	@Query("from SelfCareTemporary selfCareTemporary where selfCareTemporary.userName =:userName and selfCareTemporary.generatedKey =:generatedKey")
+	SelfCareTemporary findOneByGeneratedKey(@Param("generatedKey")String generatedKey, @Param("userName")String userName);
+	
+	@Query("from SelfCareTemporary selfCareTemporary where selfCareTemporary.userName =:userName")
+	SelfCareTemporary findOneByEmailId(@Param("userName")String userName);
 
 }

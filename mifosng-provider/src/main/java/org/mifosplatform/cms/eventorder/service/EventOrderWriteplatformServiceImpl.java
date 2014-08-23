@@ -3,8 +3,6 @@ package org.mifosplatform.cms.eventorder.service;
 import java.math.BigDecimal;
 import java.util.List;
 
-import javax.security.auth.login.Configuration;
-
 import org.mifosplatform.cms.eventmaster.domain.EventDetails;
 import org.mifosplatform.cms.eventmaster.domain.EventDetailsRepository;
 import org.mifosplatform.cms.eventmaster.domain.EventMaster;
@@ -12,8 +10,6 @@ import org.mifosplatform.cms.eventmaster.domain.EventMasterRepository;
 import org.mifosplatform.cms.eventorder.domain.EventOrder;
 import org.mifosplatform.cms.eventorder.domain.EventOrderRepository;
 import org.mifosplatform.cms.eventorder.domain.EventOrderdetials;
-import org.mifosplatform.cms.eventorder.exception.CustomValidationException;
-import org.mifosplatform.cms.eventorder.exception.InsufficientAmountException;
 import org.mifosplatform.cms.eventpricing.domain.EventPricing;
 import org.mifosplatform.cms.eventpricing.domain.EventPricingRepository;
 import org.mifosplatform.cms.media.domain.MediaAsset;
@@ -196,6 +192,7 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 				handleCodeDataIntegrityIssues(command, dve);
 				return new CommandProcessingResult(Long.valueOf(-1));
 			}
+
 		}
 
 	

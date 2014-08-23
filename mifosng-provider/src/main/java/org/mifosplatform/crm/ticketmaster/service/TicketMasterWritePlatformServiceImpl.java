@@ -22,12 +22,15 @@ import org.mifosplatform.infrastructure.documentmanagement.command.DocumentComma
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
 import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
 import org.mifosplatform.workflow.eventaction.service.ActiondetailsWritePlatformService;
 import org.mifosplatform.workflow.eventaction.service.EventActionConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -177,16 +180,23 @@ catch (DataIntegrityViolationException dve) {
 	@Override
 	public CommandProcessingResult createTicketMaster(JsonCommand command) {
 		 try {
-		this.context.authenticatedUser();
+			 Long created=null;
+			 SecurityContext context = SecurityContextHolder.getContext();
+	        	if (context.getAuthentication() != null) {
+	        		AppUser appUser=this.context.authenticatedUser();
+	        		 created=appUser.getId();
+	        	}else{
+	        		created=new Long(0);
+	        	}	 
 		this.fromApiJsonDeserializer.validateForCreate(command.json());
 		final TicketMaster ticketMaster = TicketMaster.fromJson(command);
-		Long created = context.authenticatedUser().getId();
+		//Long created = context.authenticatedUser().getId();
 		ticketMaster.setCreatedbyId(created);
-		this.repository.save(ticketMaster);
+		this.repository.saveAndFlush(ticketMaster);
 		final TicketDetail details = TicketDetail.fromJson(command);
 		details.setTicketId(ticketMaster.getId());
 		details.setCreatedbyId(created);
-		this.detailsRepository.save(details);
+		this.detailsRepository.saveAndFlush(details);
 		transactionHistoryWritePlatformService.saveTransactionHistory(ticketMaster.getClientId(), "Ticket", ticketMaster.getTicketDate(),"Description:"+ticketMaster.getDescription(),
 			"Priority:"+ticketMaster.getPriority(),"AssignedTo:"+ticketMaster.getAssignedTo(),"Source:"+ticketMaster.getSource(),"TicketMasterID:"+ticketMaster.getId());
 		

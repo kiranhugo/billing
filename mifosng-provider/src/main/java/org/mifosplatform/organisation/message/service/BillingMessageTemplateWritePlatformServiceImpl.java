@@ -85,7 +85,7 @@ public class BillingMessageTemplateWritePlatformServiceImpl implements BillingMe
 				this.billingMessageTemplateCommandFromApiJsonDeserializer.validateForCreate(command.json());
 				final BillingMessageTemplate messageTemplate=retriveMessageBy(command.entityId());
 				final Map<String, Object> changes = messageTemplate.updateMessageTemplate(command);
-				messageTemplate.getDetails().clear();
+				messageTemplate.getMessageParamDetails().clear();
 				
 				final JsonArray billingMessageparamArray=command.arrayOfParameterNamed("messageParams").getAsJsonArray();
 				 Long number=0L;

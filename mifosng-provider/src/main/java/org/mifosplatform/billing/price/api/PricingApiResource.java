@@ -172,5 +172,6 @@ public class PricingApiResource {
 	    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 	    	return this.toApiJsonSerializer.serialize(result);
 		}
+
 }
 	

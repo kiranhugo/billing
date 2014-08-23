@@ -90,7 +90,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     @Override
     public AppUserData retrieveUser(final Long userId) {
 
-        context.authenticatedUser();
+       // context.authenticatedUser();
 
         final AppUser user = this.appUserRepository.findOne(userId);
         if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }

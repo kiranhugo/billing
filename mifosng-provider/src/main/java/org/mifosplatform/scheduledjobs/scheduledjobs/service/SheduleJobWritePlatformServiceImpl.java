@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,9 @@ import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.crm.ticketmaster.api.TicketMasterApiResource;
+import org.mifosplatform.crm.ticketmaster.data.ProblemsData;
+import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
 import org.mifosplatform.finance.billingmaster.api.BillingMasterApiResourse;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
@@ -33,6 +37,7 @@ import org.mifosplatform.infrastructure.configuration.domain.GlobalConfiguration
 import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
@@ -41,15 +46,14 @@ import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.MiddlewareJobConstants;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.message.data.BillingMessageDataForProcessing;
 import org.mifosplatform.organisation.message.service.BillingMessageDataWritePlatformService;
 import org.mifosplatform.organisation.message.service.BillingMesssageReadPlatformService;
 import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
-import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderData;
-import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
-import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
 import org.mifosplatform.provisioning.entitlements.data.ClientEntitlementData;
 import org.mifosplatform.provisioning.entitlements.data.EntitlementsData;
@@ -67,6 +71,7 @@ import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobWri
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
 import org.mifosplatform.workflow.eventaction.service.ProcessEventActionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +84,7 @@ import com.google.gson.JsonObject;
 
 @Service
 public class SheduleJobWritePlatformServiceImpl implements SheduleJobWritePlatformService {
+
 
 
 private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
@@ -102,6 +108,9 @@ private String ReceiveMessage;
 private final ScheduleJob scheduleJob;
 private final ReadReportingService readExtraDataAndReportingService;
 private final GlobalConfigurationRepository globalConfigurationRepository;
+private final TicketMasterApiResource ticketMasterApiResource;
+private final TicketMasterReadPlatformService ticketMasterReadPlatformService;
+
 
 
 @Autowired
@@ -116,7 +125,9 @@ final BillingMesssageReadPlatformService billingMesssageReadPlatformService,fina
 final ScheduleJob scheduleJob,final EntitlementReadPlatformService entitlementReadPlatformService,
 final EntitlementWritePlatformService entitlementWritePlatformService,final ReadReportingService readExtraDataAndReportingService,
 final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,
-final GlobalConfigurationRepository globalConfigurationRepository) {
+final GlobalConfigurationRepository globalConfigurationRepository,
+final TicketMasterApiResource ticketMasterApiResource, 
+final TicketMasterReadPlatformService ticketMasterReadPlatformService) {
 
 this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 this.invoiceClient = invoiceClient;
@@ -137,6 +148,9 @@ this.actiondetailsWritePlatformService=actiondetailsWritePlatformService;
 this.scheduleJob=scheduleJob;
 this.readExtraDataAndReportingService=readExtraDataAndReportingService;
 this.globalConfigurationRepository=globalConfigurationRepository;
+this.ticketMasterApiResource=ticketMasterApiResource;
+this.ticketMasterReadPlatformService = ticketMasterReadPlatformService;
+
 
 }
 
@@ -360,38 +374,71 @@ exception.printStackTrace();
 @CronTarget(jobName = JobName.SIMULATOR)
 public void processSimulator() {
 
-	try {
-		System.out.println("Processing Simulator Details.......");
-		List<ProcessingDetailsData> processingDetails = this.processRequestReadplatformService.retrieveUnProcessingDetails();
-		
-		if(!processingDetails.isEmpty()){
-			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
-			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
-			LocalTime date=new LocalTime(zone);
-			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-			String path=FileUtils.generateLogFileDirectory()+JobName.SIMULATOR.toString()+ File.separator +"Simulator_"+new LocalDate().toString().
+
+try {
+  System.out.println("Processing Simulator Details.......");
+  JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.SIMULATOR.toString());
+  if(data!=null){	
+	  List<ProcessingDetailsData> processingDetails = this.processRequestReadplatformService.retrieveUnProcessingDetails();
+     if(data.getUpdateStatus().equalsIgnoreCase("Y")){ 
+       if(!processingDetails.isEmpty()){
+       MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+       final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+       LocalTime date=new LocalTime(zone);
+       String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
+       String path=FileUtils.generateLogFileDirectory()+JobName.SIMULATOR.toString()+ File.separator +"Simulator_"+new LocalDate().toString().
     		    replace("-","")+"_"+dateTime+".log";
-			File fileHandler = new File(path.trim());
-			fileHandler.createNewFile();
-			FileWriter fw = new FileWriter(fileHandler);
-			FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
-			fw.append("Processing Simulator Details....... \r\n");
-			
-				for (ProcessingDetailsData detailsData : processingDetails) {
-					fw.append("simulator Process Request id="+detailsData.getId()+" ,orderId="+detailsData.getOrderId()+" ,Provisiong System="
-							+detailsData.getProvisionigSystem()+" ,RequestType="+detailsData.getRequestType()+"\r\n");
-					ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
-					processRequest.setProcessStatus('Y');
-					this.processRequestRepository.save(processRequest);
-					this.processRequestWriteplatformService.notifyProcessingDetails(processRequest,'Y');
-				}
-				
-				fw.append("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" \r\n");
-				fw.flush();
-				fw.close();
-		}
-		System.out.println("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
-	} catch (DataIntegrityViolationException exception) {
+       File fileHandler = new File(path.trim());
+       fileHandler.createNewFile();
+       FileWriter fw = new FileWriter(fileHandler);
+       FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
+       fw.append("Processing Simulator Details....... \r\n");
+        for (ProcessingDetailsData detailsData : processingDetails) {
+        	
+          fw.append("simulator Process Request id="+detailsData.getId()+" ,orderId="+detailsData.getOrderId()+" ,Provisiong System="
+          +detailsData.getProvisionigSystem()+" ,RequestType="+detailsData.getRequestType()+"\r\n");
+          ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
+          processRequest.setProcessStatus('Y');
+          this.processRequestRepository.saveAndFlush(processRequest);
+          this.processRequestWriteplatformService.notifyProcessingDetails(processRequest,'Y');
+        }
+        fw.append("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" \r\n");
+        fw.flush();
+        fw.close();
+        } 
+     
+     }
+      if(data.getcreateTicket().equalsIgnoreCase("Y")){
+       for (ProcessingDetailsData detailsData : processingDetails) {
+    	   ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
+    	   List<ProblemsData> problemsData=this.ticketMasterReadPlatformService.retrieveProblemData();
+    	   List<EnumOptionData> priorityData = this.ticketMasterReadPlatformService.retrievePriorityData();
+    	  // Collection<MCodeData> sourceData =this.codeReadPlatformService.getCodeValue("Ticket Source");
+    	   Long userId=0L;
+     	   JSONObject jsonobject = new JSONObject();
+ 		   DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
+ 		   DateTimeFormatter formatter2	=DateTimeFormat.fullTime();
+ 		   jsonobject.put("locale", "en");
+ 		   jsonobject.put("dateFormat", "dd MMMM yyyy");
+ 		   jsonobject.put("ticketTime"," "+new LocalTime().toString(formatter2));
+ 		   jsonobject.put("description","orderUpdate");
+ 		   jsonobject.put("ticketDate",formatter1.print(new LocalDate()));
+ 		   jsonobject.put("sourceOfTicket","Phone");
+ 		   jsonobject.put("assignedTo", userId);
+ 		   jsonobject.put("priority",priorityData.get(0).getValue());
+ 		   jsonobject.put("problemCode", problemsData.get(0).getProblemCode());
+ 		   String resourceId = this.ticketMasterApiResource.createTicketMaster(processRequest.getClientId(), jsonobject.toString());
+ 		  // if(resourceId !=null){
+ 			//processRequest.setNotify();
+ 			//this.processRequestRepository.save(processRequest);
+ 		 
+       }
+      }
+    
+  }
+  
+     System.out.println("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+} catch (DataIntegrityViolationException exception) {
 
 	} catch (Exception exception) {
 		System.out.println(exception.getMessage());

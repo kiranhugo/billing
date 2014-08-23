@@ -110,10 +110,6 @@ public class PricingData {
 	public List<ServiceData> getServiceData() {
 		return serviceData;
 	}
-	
-	
-	
-
 	public Long getContractId() {
 		return contractId;
 	}

@@ -109,6 +109,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 		      EventActionProcedureData actionProcedureData=this.actionDetailsReadPlatformService.checkCustomeValidationForEvents(clientId, detailsData.getEventName(),detailsData.getActionName(),resourceId);
 			  JSONObject jsonObject=new JSONObject();
 				
+
 			  	if(actionProcedureData.isCheck()){
 				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
 				    List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
