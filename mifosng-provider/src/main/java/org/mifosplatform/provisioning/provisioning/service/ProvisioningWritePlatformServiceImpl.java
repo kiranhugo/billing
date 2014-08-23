@@ -1,8 +1,12 @@
 package org.mifosplatform.provisioning.provisioning.service;
 
+
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.json.JSONObject;
 
@@ -478,20 +482,28 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			//this.fromApiJsonDeserializer.validateForUpDateIpDetails(command.json());
 			final Long clientId=command.longValueOfParameterNamed("clientId");
 			final JsonElement element = fromJsonHelper.parse(command.json());
-			final String[] exitIpsArray=fromApiJsonHelper.extractArrayNamed("existIps",element);
+			final String[] removeIpsArray=fromApiJsonHelper.extractArrayNamed("removeIps",element);
 			final String[] newIpsArray=fromApiJsonHelper.extractArrayNamed("newIps",element);
+			List<String> tmpList = Arrays.asList(newIpsArray);
+			Set<String> uniqueList = new HashSet<String>(tmpList);
+			if(uniqueList.size()<tmpList.size()){
+				 throw new IpNotAvailableException(orderId);
+			}
 			IpPoolManagementDetail ipPoolManagement=null;
 			JSONArray array=new JSONArray();
 			List<ServiceParameters> parameters=this.serviceParametersRepository.findDataByOrderId(orderId);
+			
 			for(ServiceParameters serviceData:parameters){
 				if(serviceData.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_IPADDRESS)){
 					for(String newIp:newIpsArray){
 						array.put(newIp);
 					}
 					serviceData.setParameterValue(array.toString());
-					 if(exitIpsArray.length >= 1){
-					      for (int i=0;i<exitIpsArray.length; i++){
-					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findByIpAddress(exitIpsArray[i]);
+					 if(removeIpsArray.length >= 1){
+					      for (int i=0;i<removeIpsArray.length; i++){
+					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findByIpAddress(removeIpsArray[i]);
+					    	  if(ipPoolManagement == null){
+									throw new IpNotAvailableException(removeIpsArray[i]); }
 					    	  ipPoolManagement.setStatus('F');
 					    	  ipPoolManagement.setClientId(null);
 					    	  ipPoolManagement.setSubnet(null);
@@ -502,6 +514,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 					if(newIpsArray.length >= 1){
 					      for (int i=0;i<newIpsArray.length; i++){
 					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findByIpAddress(newIpsArray[i]);
+					    	  if(ipPoolManagement == null){
+									throw new IpNotAvailableException(newIpsArray[i]); }
 					    	  ipPoolManagement.setStatus('A');
 					    	  ipPoolManagement.setClientId(clientId);
 					    	 // ipPoolManagement.setSubnet(null);

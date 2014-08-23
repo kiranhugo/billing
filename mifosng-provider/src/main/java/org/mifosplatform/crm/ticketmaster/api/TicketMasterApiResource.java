@@ -35,17 +35,24 @@ import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformServic
 import org.mifosplatform.crm.ticketmaster.service.TicketMasterWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import com.google.gson.JsonElement;
 
 
 @Path("/tickets")
@@ -63,12 +70,14 @@ public class TicketMasterApiResource {
 		private PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 		private PlatformSecurityContext context;
 		final private MCodeReadPlatformService codeReadPlatformService;
+		private final FromJsonHelper fromApiJsonHelper;
 		@Autowired
 		public TicketMasterApiResource(final TicketMasterWritePlatformService ticketMasterWritePlatformService,final TicketMasterReadPlatformService ticketMasterReadPlatformService,
 										final DefaultToApiJsonSerializer<TicketMasterData> toApiJsonSerializer, final DefaultToApiJsonSerializer<ClientTicketData> clientToApiJsonSerializer,
 										final ApiRequestParameterHelper apiRequestParameterHelper, final TicketDetailsRepository detailsRepository,
 										final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final PlatformSecurityContext context,
-										final MCodeReadPlatformService codeReadPlatformService)	{
+										final MCodeReadPlatformService codeReadPlatformService,
+										final FromJsonHelper fromApiJsonHelper)	{
 			this.ticketMasterWritePlatformService = ticketMasterWritePlatformService;
 			this.ticketMasterReadPlatformService = ticketMasterReadPlatformService;
 		    this.toApiJsonSerializer = toApiJsonSerializer;
@@ -78,6 +87,7 @@ public class TicketMasterApiResource {
 			this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 			this.context = context;
 			this.codeReadPlatformService=codeReadPlatformService;
+			this.fromApiJsonHelper=fromApiJsonHelper;
 		}
 		private final Set<String> RESPONSE_PARAMETERS = new HashSet<String>(Arrays.asList("id","priorityType","problemsDatas","usersData","status","assignedTo","userName","ticketDate","lastComment","masterData"));   
 
@@ -94,11 +104,24 @@ public class TicketMasterApiResource {
 		@Consumes({ MediaType.APPLICATION_JSON })
 		@Produces({ MediaType.APPLICATION_JSON })
 		public String createTicketMaster(@PathParam("clientId") final Long clientId,final String jsonRequestBody) {
-			
+			CommandProcessingResult result=null;
+			Long userId=null;
+			SecurityContext context = SecurityContextHolder.getContext();
+        	if (context.getAuthentication() != null) {
+        		AppUser appUser=this.context.authenticatedUser();
+        		userId=appUser.getId();
+        	}
+        	if(userId !=null){	 
 			final CommandWrapper commandRequest = new CommandWrapperBuilder().createTicketMaster(clientId).withJson(jsonRequestBody).build();
-			final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-			
-			return this.toApiJsonSerializer.serialize(result);
+		     result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		     return this.toApiJsonSerializer.serialize(result);
+        	}else{
+			 final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonRequestBody.toString());
+			 final JsonCommand command = JsonCommand.from(jsonRequestBody.toString(),parsedCommand,this.fromApiJsonHelper,"TICKET",clientId,
+					 null,null,clientId,null,null,null,null,null,null,null);
+		     result =this.ticketMasterWritePlatformService.createTicketMaster(command);
+		     return this.toApiJsonSerializer.serialize(result);
+        	}
 		}	
 			
 			

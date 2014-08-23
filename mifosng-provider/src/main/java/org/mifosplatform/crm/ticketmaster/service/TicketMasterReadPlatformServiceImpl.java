@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -82,7 +84,11 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 	@Override
 	public List<ProblemsData> retrieveProblemData() {
 
-		context.authenticatedUser();
+		//context.authenticatedUser();
+		SecurityContext context = SecurityContextHolder.getContext();
+    	if (context.getAuthentication() != null) {
+    		this.context.authenticatedUser();
+    	}
 
 		DataMapper mapper = new DataMapper();
 

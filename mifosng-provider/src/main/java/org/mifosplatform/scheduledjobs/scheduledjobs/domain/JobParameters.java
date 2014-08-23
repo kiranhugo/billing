@@ -203,6 +203,25 @@ public class JobParameters extends AbstractPersistable<Long>{
 	    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.JOB_Password) && Password!=null){
 	    	this.paramValue=Password;
 	      }
+	    
+	    final String createticket = "isCreateTicket";
+	    final boolean ticket= command.booleanPrimitiveValueOfParameterNamed(createticket);
+	    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobTicket)){
+	    	if(ticket){
+	    	this.isDynamic="Y";
+	    	}else
+	    		this.isDynamic="N";
+	        }
+	    
+	    final String  updateStatus = "isUpdateStatus";
+	    final boolean status= command.booleanPrimitiveValueOfParameterNamed(updateStatus);
+	    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.statusParamName)){
+	    	if(status){
+	    	this.isDynamic="Y";
+	    	}else
+	    		this.isDynamic="N";
+	        }
+	    
 	}
 
 
