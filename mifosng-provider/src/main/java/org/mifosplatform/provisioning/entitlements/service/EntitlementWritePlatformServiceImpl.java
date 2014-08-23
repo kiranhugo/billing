@@ -2,6 +2,8 @@ package org.mifosplatform.provisioning.entitlements.service;
 
 import java.util.List;
 
+import org.mifosplatform.billing.selfcare.domain.SelfCare;
+import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -24,18 +26,20 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 	private final ProcessRequestWriteplatformService processRequestWriteplatformService;
 	private final ClientRepository clientRepository;
 	private final MessagePlatformEmailService messagePlatformEmailService;
+	private final SelfCareRepository selfCareRepository;
 	
 
 	@Autowired
 	public EntitlementWritePlatformServiceImpl(
 			final ProcessRequestWriteplatformService processRequestWriteplatformService,
 			final ProcessRequestRepository entitlementRepository, final ClientRepository clientRepository,
-			final MessagePlatformEmailService messagePlatformEmailService) {
+			final MessagePlatformEmailService messagePlatformEmailService,final SelfCareRepository selfCareRepository) {
 
 		this.processRequestWriteplatformService = processRequestWriteplatformService;
 		this.entitlementRepository = entitlementRepository;
 		this.clientRepository = clientRepository;
 		this.messagePlatformEmailService = messagePlatformEmailService;
+		this.selfCareRepository = selfCareRepository;
 	}
 
 	/* In This create(JsonCommand command) method, 
@@ -53,25 +57,36 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			Long clientId = command.longValueOfParameterNamed("clientId");	
 			if(clientId !=null && authPin !=null && authPin.length()>0){
 				Client client = this.clientRepository.findOne(clientId);
+				SelfCare selfcare = this.selfCareRepository.findOneByClientId(clientId);
+				
 				if(client == null){
 					throw new ClientNotFoundException(clientId);
 				}
 				
+				if(selfcare == null){
+					throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
+				}
 				StringBuilder builder = new StringBuilder();
 				builder.append("Dear " + client.getFirstname() + " " + client.getLastname()+ "\n");
 				builder.append("\n");
 				builder.append("Your Beenius Subscriber Account has been successfully created.");
-				builder.append("The following is your Beenius Account Details. ");
+				builder.append("Following are the Beenius Account Details. ");
 				builder.append("\n");
-				builder.append("SubscriberUId :" + client.getAccountNo() + ",");
+				builder.append("subscriberUid : " + client.getAccountNumber());
 				builder.append("\n");
-				builder.append("Authpin :" + authPin + ".");
+				builder.append("Authpin : " + authPin + ".");
+				builder.append("\n");
+				builder.append("PIN : 1234");
+				builder.append("\n");
 				builder.append("\n");
 				builder.append("Thankyou");
 				
-				message = this.messagePlatformEmailService.sendGeneralMessage(client.getEmail(), builder.toString(), 
-						"Beenius StreamingMedia");		
+				selfcare.setAuthPin(authPin);
+				this.selfCareRepository.save(selfcare);
 				
+				message = this.messagePlatformEmailService.sendGeneralMessage(client.getEmail(), builder.toString(), 
+						"Beenius StreamingMedia");	
+						
 			}else{
 				throw new PlatformDataIntegrityException("error.msg.beenius.process.invalid","Invalid data from Beenius adapter," +
 						" clientId: " + clientId + ",authpin: " + authPin, "clientId="+clientId+ ",authpin="+authPin);
@@ -93,8 +108,13 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			Long id = command.longValueOfParameterNamed("prdetailsId");
 			if (processRequestDetails.getId().longValue() == id.longValue()) {
 				processRequestDetails.updateStatus(command);
-				processRequestDetails.setReceiveMessage(processRequestDetails.getReceiveMessage() +
-						", generated authpin=" + authPin + ", Email output=" + message);
+				if(provSystem != null && provSystem.equalsIgnoreCase("Beenius")){
+					processRequestDetails.setReceiveMessage(processRequestDetails.getReceiveMessage() +
+							", generated authpin=" + authPin + ", Email output=" + message);
+				}else{
+					processRequestDetails.setReceiveMessage(processRequestDetails.getReceiveMessage());
+				}
+				
 			}
 		}
 

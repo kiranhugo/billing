@@ -1162,4 +1162,12 @@ public class CommandWrapper {
 		public boolean isConfirm() {
 			return this.actionName.equalsIgnoreCase("CONFIRM") && this.entityName.equalsIgnoreCase("PROVISIONINGDETAILS");
 		}
+
+		public boolean isSelfCareGeneratePassword() {
+			return this.actionName.equalsIgnoreCase("GENERATENEWPASSWORD") && this.entityName.equalsIgnoreCase("SELFCARE");
+		}
+
+		public boolean isChangePassword() {
+			return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("SELFCARE");
+		}
 }

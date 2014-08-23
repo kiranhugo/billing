@@ -15,9 +15,11 @@ import org.json.JSONObject;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporaryRepository;
+import org.mifosplatform.billing.selfcare.exception.PaymentStatusAlreadyActivatedException;
 import org.mifosplatform.billing.selfcare.exception.SelfCareNotVerifiedException;
 import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryEmailIdNotFoundException;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
+import org.mifosplatform.billing.selfcare.service.SelfCareWritePlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -91,7 +93,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         this.selfCareTemporaryRepository = selfCareTemporaryRepository;
         this.portfolioCommandSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
         this.selfCareRepository = selfCareRepository;
-        
+ 
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
@@ -185,21 +187,22 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 		try {
 			context.authenticatedUser();
 			commandFromApiJsonDeserializer.validateForCreate(command.json());
+			
+			Long id = new Long(1);		
+			CommandProcessingResult resultClient = null;
+			CommandProcessingResult resultSale = null;
+			CommandProcessingResult resultOrder = null;
+			String device = null;
+			String dateFormat = "dd MMMM yyyy";
+			String activationDate = new SimpleDateFormat(dateFormat).format(new Date());
+
 			GlobalConfigurationProperty deviceStatusConfiguration = configurationRepository.
 					findOneByName(ConfigurationConstants.CONFIR_REGISTRATION_REQUIRE_DEVICE);
-			
-			Long id = new Long(1);
-			String device = null;
+
 			String fullname = command.stringValueOfParameterNamed("fullname");
 			String city = command.stringValueOfParameterNamed("city");
 			Long phone = command.longValueOfParameterNamed("phone");	
 			String email = command.stringValueOfParameterNamed("email");
-			String dateFormat = "dd MMMM yyyy";
-			String activationDate = new SimpleDateFormat(dateFormat).format(new Date());
-			
-			CommandProcessingResult resultClient = null;
-			CommandProcessingResult resultSale = null;
-			CommandProcessingResult resultOrder = null;
 			
 			SelfCareTemporary temporary = selfCareTemporaryRepository.findOneByEmailId(email);
 			
@@ -208,8 +211,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			}
 
 			if(temporary.getPaymentStatus().equalsIgnoreCase("ACTIVE")){
-				throw new PlatformDataIntegrityException("error.msg.client.payment.already.exist","SelfCareTemporary paymentStatus already Activated For id:"
-					+ temporary.getId(),"SelfCareTemporary paymentStatus already Activated");	
+				throw new PaymentStatusAlreadyActivatedException(email);
 			}
 			
 			if(temporary.getStatus().equalsIgnoreCase("ACTIVE")){
@@ -241,13 +243,21 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 						null, null);
 				resultClient = this.clientWritePlatformService.createClient(clientCommand);
 
-				if (resultClient == null) {
-					throw new PlatformDataIntegrityException("error.msg.client.creation", "Client Creation Failed","Client Creation Failed");
+				if (resultClient == null && resultClient.getClientId() == null && resultClient.getClientId() <= 0) {
+					throw new PlatformDataIntegrityException("error.msg.client.creation.failed", "Client Creation Failed","Client Creation Failed");
 				}
 				
-				// create selfcare record
-				SelfCare selfcare = new SelfCare(resultClient.getClientId(),fullname, "1234", email, false);
-				this.selfCareRepository.save(selfcare);
+				// create selfcare record		userName uniqueReference
+				JSONObject selfcarecreation = new JSONObject();
+				selfcarecreation.put("userName", fullname);
+				selfcarecreation.put("uniqueReference", email);
+				selfcarecreation.put("clientId", resultClient.getClientId());;
+				final CommandWrapper selfcareCommandRequest = new CommandWrapperBuilder().createSelfCare().withJson(selfcarecreation.toString()).build();
+				final CommandProcessingResult selfcareCommandresult = this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
+				
+				if(selfcareCommandresult ==null && selfcareCommandresult.resourceId() <= 0){			
+					throw new PlatformDataIntegrityException("error.msg.selfcare.creation.failed", "selfcare Creation Failed","selfcare Creation Failed");
+				}
 
 				//book device
 				

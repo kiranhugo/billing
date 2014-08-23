@@ -27,7 +27,7 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("fullname", "phone", "city", 
-    		"device", "email", "planCode", "paytermCode", "contractPeriod", "amount", "transactionId" ));
+    		"device", "email", "planCode", "paytermCode", "contractPeriod", "amount", "transactionId" ,"emailSubject"));
 
     private final FromJsonHelper fromApiJsonHelper;
 

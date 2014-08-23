@@ -18,17 +18,12 @@ IF NOT EXISTS (
      and TABLE_SCHEMA = DATABASE())THEN
 alter  table temp add column payment_data varchar(500) DEFAULT NULL;
 END IF;
-
-IF EXISTS (SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE
-`TABLE_CATALOG` = 'def' AND `TABLE_SCHEMA` = DATABASE() AND
-`TABLE_NAME` = 'b_clientuser' AND `INDEX_NAME` = 'username')THEN
-alter table b_clientuser drop index username;
-END IF;
-
 END //
 DELIMITER ;
 call temp();
 
 Drop procedure IF EXISTS temp;
+
+INSERT IGNORE INTO `c_configuration`(`id`,`name`,`enabled`,`value`) values (null,'Registration_requires_device',1,'');
 
 

@@ -219,9 +219,28 @@ public class SelfCareApiResource {
 	    
 	}
     
+    @POST
+    @Path("forgotpassword")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String createNewSelfCarePassword(final String jsonRequestBody) {
+
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().createNewSelfCarePassword().withJson(jsonRequestBody).build();
+		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	    return this.toApiJsonSerializerForItem.serialize(result);	
+	    
+	}
     
+    @PUT
+    @Path("changepassword")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String selfCareChangePassword(final String jsonRequestBody) {
 
-
-
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSelfcarePassword().withJson(jsonRequestBody).build();
+		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	    return this.toApiJsonSerializerForItem.serialize(result);	
+	    
+	}
 	
 }

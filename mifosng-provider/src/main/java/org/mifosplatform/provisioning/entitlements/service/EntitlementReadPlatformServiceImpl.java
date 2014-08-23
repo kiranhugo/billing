@@ -224,8 +224,7 @@ public class EntitlementReadPlatformServiceImpl implements
 		}
 
 		public String schema() {
-
-			
+		
 			return " bpr.id as id, c.id as clientId, c.account_no as accountNo,c.firstname as firstName,c.lastname as lastName, " +
 					" o.external_id as officeUID,o.name as branch," +
 					" bpr.provisioing_system AS provisioingSystem,bprd.service_id AS serviceId," +

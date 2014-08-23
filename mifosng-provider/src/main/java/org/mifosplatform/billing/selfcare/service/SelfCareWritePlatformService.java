@@ -19,5 +19,9 @@ public interface SelfCareWritePlatformService {
 	public CommandProcessingResult registerSelfCare(JsonCommand command);
 
 	public CommandProcessingResult selfCareEmailVerification(JsonCommand command);
+
+	public CommandProcessingResult generateNewSelfcarePassword(JsonCommand command);
+
+	public CommandProcessingResult selfcareChangePassword(JsonCommand command);
 	
 }
