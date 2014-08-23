@@ -2433,6 +2433,14 @@ public CommandWrapperBuilder selfRegistrationProcess() {
 	return this;
 }
 
+public CommandWrapperBuilder updateIpDetails(Long orderId) {
+	this.actionName = "UPDATE";
+    this.entityName = "IPDETAILPARAMS";
+    this.entityId=orderId;
+    this.href = "/ipdetails/"+orderId;
+	return this;
+}
+
 public CommandWrapperBuilder reactiveOrder(Long orderId) {
 	this.actionName = "REACTIVE";
 	this.entityName = "ORDER";
@@ -2454,7 +2462,6 @@ public CommandWrapperBuilder updateSelfcarePassword() {
 	this.href = "/selfcare/changepassword";
 	return this;
 }
-
 
 }
 
