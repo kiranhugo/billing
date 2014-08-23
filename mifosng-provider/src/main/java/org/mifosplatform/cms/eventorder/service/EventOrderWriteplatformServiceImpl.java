@@ -115,12 +115,13 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 		
 		try {
 			this.context.authenticatedUser();
-			this.apiJsonDeserializer.validateForCreate(command.json());
+			GlobalConfigurationProperty configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIR_PROPERTY_REGISTRATION_DEVICE);
+			this.apiJsonDeserializer.validateForCreate(command.json(),configuration.isEnabled());
 			final Long eventId = command.longValueOfParameterNamed("eventId");
 			final String deviceId = command.stringValueOfParameterNamed("deviceId");
 			 Long clientId = command.longValueOfParameterNamed("clientId");
 			Long clientType=Long.valueOf(0);
-			GlobalConfigurationProperty configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIR_PROPERTY_REGISTRATION_DEVICE);
+			//GlobalConfigurationProperty configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIR_PROPERTY_REGISTRATION_DEVICE);
 			
 			if(configuration != null && configuration.isEnabled()){
 				MediaDeviceData deviceData = this.deviceReadPlatformService.retrieveDeviceDetails(deviceId);
