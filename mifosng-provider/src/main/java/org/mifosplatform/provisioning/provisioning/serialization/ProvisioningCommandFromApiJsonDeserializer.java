@@ -33,6 +33,7 @@ public final class ProvisioningCommandFromApiJsonDeserializer {
     private final Set<String> provisioningsupportedParameters = new HashSet<String>(Arrays.asList("id","provisioningSystem","commandName","status",
     		"commandParameters","commandParam","paramType","paramDefault","groupName","ipAddress","serviceName","vLan","planName","orderId","clientId",
     		"macId","serviceParameters","paramName","paramValue","orderId","deviceId","clientName","ipType","ipRange","subnet"));
+    private final Set<String> ipsupportedParameters = new HashSet<String>(Arrays.asList("clientId","newIps","removeIps","planName"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -127,24 +128,23 @@ final JsonArray serviceParametersArray=fromApiJsonHelper.extractJsonArrayNamed("
 throwExceptionIfValidationWarningsExist(dataValidationErrors);
 }
 
-/*public void validateForUpDateIpDetails(String json) {
+ /* public void validateForUpDateIpDetails(String json) {
 	
 	if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
     final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-    fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, provisioningsupportedParameters);
+    fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ipsupportedParameters);
 
     final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
     final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("ipDetails");
     
     final JsonElement element = fromApiJsonHelper.parse(json);
-    final JsonArray deletedIpsArray=fromApiJsonHelper.extractJsonArrayNamed("DeletedIPs",element);
-    final JsonArray newIpsArray=fromApiJsonHelper.extractJsonArrayNamed("NewIPsData",element);
-    
+    final JsonArray deletedIpsArray=fromApiJsonHelper.extractJsonArrayNamed("removeIps",element);
+    final JsonArray newIpsArray=fromApiJsonHelper.extractJsonArrayNamed("newIps",element);
+    int ipsSize=newIpsArray.size();
+   // baseDataValidator.reset().parameter(null).value(ipsSize).integerGreaterThanZero();
+    throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
 }*/
-
-
-		
 	
 }

@@ -12,11 +12,14 @@ import javax.persistence.Table;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
+@SuppressWarnings("serial")
 @Entity
 @Table(name = "b_process_request")
-public class ProcessRequest extends AbstractPersistable<Long>{
+public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long>{
 
 	
 	@Column(name = "client_id")

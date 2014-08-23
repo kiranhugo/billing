@@ -104,8 +104,12 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	 if(detailsData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_SEND_EMAIL)){
 				    		 
 				        	  	TicketMasterData data = this.ticketMasterReadPlatformService.retrieveTicket(clientId,new Long(resourceId));
+				        		AppUserData user=null;
+				        	  	if(data !=null){
+				        	  		 user = this.readPlatformService.retrieveUser(new Long(data.getUserId()));
+				        	  	}
 				        	  	TicketMaster ticketMaster=this.repository.findOne(new Long(resourceId));
-				        	  	AppUserData user = this.readPlatformService.retrieveUser(new Long(data.getUserId()));
+				        	  
 				        	  	
 				        	  	BillingMessageTemplate billingMessageTemplate = this.messageTemplateRepository.findOne((long) 11);
 				        	  	

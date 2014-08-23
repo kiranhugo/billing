@@ -15,6 +15,7 @@ public class JobParametersConstants {
 	public static final String PARAM_IS_RENEWAL="isAutoRenewal";
 	public static final String PARAM_MESSAGETEMPLATE = "messageTemplate";
 	public static final String PARAM_EMAIL = "EmailId";
-	
+	public static final String PARAM_TICKET = "Ticket";
+	public static final String PARAM_STATUS = "status";
 	
 }

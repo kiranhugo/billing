@@ -23,6 +23,8 @@ public class JobParameterData {
 	private String promotionalMessage;
 	private String messageTemplate;
 	private String emailId;
+	private String createTicket;
+	private String updateStatus;
 	
 	public JobParameterData(List<JobParameters> jobParameters) {
               
@@ -76,6 +78,11 @@ public class JobParameterData {
            }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_EMAIL)){
 		          this.emailId=parameter.getParamValue();	
 					
+		   }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_TICKET)){
+			       this.createTicket=parameter.isDynamic();
+			       
+		   }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_STATUS)){
+		            this.updateStatus=parameter.isDynamic();
 		   }else{
 				 this.batchName=parameter.getParamValue();
 				 this.defaultValue=parameter.getParamDefaultValue();
@@ -162,6 +169,22 @@ public class JobParameterData {
 
 	public String getEmailId() {
 		return emailId;
+	}
+
+	public String getcreateTicket() {
+		return createTicket;
+	}
+
+	public void setCreateTicket(String createTicket) {
+		this.createTicket = createTicket;
+	}
+
+	public String getUpdateStatus() {
+		return updateStatus;
+	}
+
+	public void setUpdateStatus(String updateStatus) {
+		this.updateStatus = updateStatus;
 	}
 	
 	
