@@ -52,11 +52,8 @@ import org.mifosplatform.organisation.message.data.BillingMessageDataForProcessi
 import org.mifosplatform.organisation.message.service.BillingMessageDataWritePlatformService;
 import org.mifosplatform.organisation.message.service.BillingMesssageReadPlatformService;
 import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
-import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderData;
-import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
-import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
 import org.mifosplatform.provisioning.entitlements.data.ClientEntitlementData;
 import org.mifosplatform.provisioning.entitlements.data.EntitlementsData;

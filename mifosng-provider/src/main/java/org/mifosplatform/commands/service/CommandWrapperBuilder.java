@@ -1835,8 +1835,8 @@ public CommandWrapperBuilder hardwareSwapping(Long clientId) {
 }
 
 public CommandWrapperBuilder activateProcess() {
-	this.actionName = "ACTIVATIONPROCESS";
-	this.entityName = "ACTIVATE";
+	this.actionName = "ACTIVATE";
+	this.entityName = "ACTIVATIONPROCESS";
 	this.href = "/clients/template";
 	return this;
 }
@@ -2446,6 +2446,20 @@ public CommandWrapperBuilder reactiveOrder(Long orderId) {
 	this.entityName = "ORDER";
 	this.entityId=orderId;
 	this.href = "reactive/"+orderId;
+	return this;
+}
+
+public CommandWrapperBuilder createNewSelfCarePassword() {
+	this.actionName = "GENERATENEWPASSWORD";
+	this.entityName = "SELFCARE";
+	this.href = "/selfcare/forgotpassword";
+	return this;
+}
+
+public CommandWrapperBuilder updateSelfcarePassword() {
+	this.actionName = "UPDATE";
+	this.entityName = "SELFCARE";
+	this.href = "/selfcare/changepassword";
 	return this;
 }
 

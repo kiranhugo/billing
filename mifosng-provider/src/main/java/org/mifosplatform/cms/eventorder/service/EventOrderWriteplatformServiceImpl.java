@@ -3,6 +3,8 @@ package org.mifosplatform.cms.eventorder.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import net.java.dev.obs.beesmart.AddExternalBeesmartMethod;
+
 import org.mifosplatform.cms.eventmaster.domain.EventDetails;
 import org.mifosplatform.cms.eventmaster.domain.EventDetailsRepository;
 import org.mifosplatform.cms.eventmaster.domain.EventMaster;
@@ -162,6 +164,9 @@ public class EventOrderWriteplatformServiceImpl implements
 					"bookedPrice:"+eventOrder.getBookedPrice(),"EventValidTillDate:"+eventOrder.getEventValidtill(),"EventId:"+eventOrder.getEventId(),"EventOrderID:"+eventOrder.getId());
 			
 			return new CommandProcessingResult(eventOrder.getEventOrderdetials().get(0).getMovieLink());
+			
+			
+			
 		} catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));

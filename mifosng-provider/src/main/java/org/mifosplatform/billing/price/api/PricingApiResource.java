@@ -129,24 +129,25 @@ public class PricingApiResource {
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	    return this.toApiJsonSerializer.serialize(settings, singlePriceData, RESPONSE_DATA_PARAMETERS);
 	}
-	 @PUT
-	 @Path("{priceId}/update")
-		@Consumes({MediaType.APPLICATION_JSON})
-		@Produces({MediaType.APPLICATION_JSON})
-		public String updatePrice(@PathParam("priceId") final Long priceId, final String apiRequestBodyAsJson){
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePrice(priceId).withJson(apiRequestBodyAsJson).build();
+
+	@PUT
+	@Path("{priceId}/update")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updatePrice(@PathParam("priceId") final Long priceId,final String apiRequestBodyAsJson) {
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePrice(priceId).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
-		}
-	 @DELETE
-		@Path("{priceId}")
-		@Consumes({MediaType.APPLICATION_JSON})
-		@Produces({MediaType.APPLICATION_JSON})
-		public String deletePrice(@PathParam("priceId") final Long priceId) {
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().deletePrice(priceId).build();
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
+	}
 
-		}
+	@DELETE
+	@Path("{priceId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deletePrice(@PathParam("priceId") final Long priceId) {
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().deletePrice(priceId).build();
+		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
 }
 	

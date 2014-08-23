@@ -30,6 +30,9 @@ public class SelfCare extends AbstractPersistable<Long>{
 	@Column(name="is_deleted")
 	private Boolean isDeleted=false;
 	
+	@Column(name="auth_pin")
+	private String authPin;
+	
 	public SelfCare() {
 		// TODO Auto-generated constructor stub
 	}
@@ -102,6 +105,12 @@ public class SelfCare extends AbstractPersistable<Long>{
 	}
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	public String getAuthPin() {
+		return authPin;
+	}
+	public void setAuthPin(String authPin) {
+		this.authPin = authPin;
 	}
 	
 	

@@ -102,8 +102,6 @@ public class PricingData {
 	public List<ServiceData> getServiceData() {
 		return serviceData;
 	}
-	
-	
 
 	public String getServiceCode() {
 		return serviceCode;

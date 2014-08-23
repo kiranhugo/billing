@@ -161,6 +161,10 @@ public class ProcessRequestDetails extends
 		return receiveMessage;
 	}
 
+	public void setReceiveMessage(String receiveMessage) {
+		this.receiveMessage = receiveMessage;
+	}
+
 	public char getIsDeleted() {
 		return isDeleted;
 	}

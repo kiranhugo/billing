@@ -9,6 +9,9 @@ buildscript {
      mavenCentral()
      mavenRepo(name: 'zt-public-snapshots',
                url: 'http://repos.zeroturnaround.com/nexus/content/groups/zt-public/')
+     flatDir {
+       dirs 'src/main/resources'
+     }
   }
 
   dependencies {
@@ -93,6 +96,7 @@ dependencies {
 	    }
 	    tomcat "org.apache.tomcat:tomcat-dbcp:${tomcatVersion}"
 
+    compile files('src/main/resources/addexternalbeesmart.jar')
 	providedCompile(
 				[group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
 			)

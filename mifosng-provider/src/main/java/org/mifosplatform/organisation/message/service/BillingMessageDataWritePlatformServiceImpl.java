@@ -24,13 +24,11 @@ public class BillingMessageDataWritePlatformServiceImpl implements BillingMessag
     @Autowired
     public BillingMessageDataWritePlatformServiceImpl(PlatformSecurityContext context,
     	    FromJsonHelper fromApiJsonHelper,BillingMesssageReadPlatformService billingMesssageReadPlatformService,
-    		MessageDataCommandFromApiJsonDeserializer messageDataCommandFromApiJsonDeserializer)
-    {
+    		MessageDataCommandFromApiJsonDeserializer messageDataCommandFromApiJsonDeserializer) {
     	this.context=context;
     	this.fromApiJsonHelper=fromApiJsonHelper;
     	this.billingMesssageReadPlatformService=billingMesssageReadPlatformService;
     	this.messageDataCommandFromApiJsonDeserializer=messageDataCommandFromApiJsonDeserializer;
-    	
     }
     
     
@@ -45,5 +43,4 @@ public class BillingMessageDataWritePlatformServiceImpl implements BillingMessag
 		return new CommandProcessingResultBuilder().withCommandId(id).withEntityId(id).build();
 
 	}
-
 }

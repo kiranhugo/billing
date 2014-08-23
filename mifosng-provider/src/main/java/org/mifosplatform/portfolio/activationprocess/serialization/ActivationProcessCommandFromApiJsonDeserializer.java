@@ -26,7 +26,8 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
 	/**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("fullname", "phone", "city", "device", "email"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("fullname", "phone", "city", 
+    		"device", "email", "planCode", "paytermCode", "contractPeriod", "amount", "transactionId" ,"emailSubject"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -50,13 +51,20 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("fullname").value(fullname).notBlank().notExceedingLengthOf(50);
         
         final Long phone = fromApiJsonHelper.extractLongNamed("phone", element);
-        baseDataValidator.reset().parameter("phone").value(phone).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter("phone").value(phone).notNull().longGreaterThanZero();
 
         final String city = fromApiJsonHelper.extractStringNamed("city", element);
         baseDataValidator.reset().parameter("city").value(city).notBlank().notExceedingLengthOf(50);
         
-        final String device = fromApiJsonHelper.extractStringNamed("device", element);
-        baseDataValidator.reset().parameter("device").value(device).notBlank().notExceedingLengthOf(18);
+        if (fromApiJsonHelper.parameterExists("transactionId", element)) {
+            final String transactionId = fromApiJsonHelper.extractStringNamed("transactionId", element);
+            baseDataValidator.reset().parameter("transactionId").value(transactionId).notNull();
+        }
+        
+        if (fromApiJsonHelper.parameterExists("amount", element)) {
+            final String amount = fromApiJsonHelper.extractStringNamed("amount", element);
+            baseDataValidator.reset().parameter("amount").value(amount).notNull();
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
