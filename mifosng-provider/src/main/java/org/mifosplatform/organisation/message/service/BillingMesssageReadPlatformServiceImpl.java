@@ -277,7 +277,8 @@ public class BillingMesssageReadPlatformServiceImpl implements
 						Long clientId = billingMesssageReadPlatformService.retrieveClientId(columndata.get(0).toString());
 						if(clientId!=null){
 							//ProcessRequest processRequest = new ProcessRequest(clientId, new Long(0), "Comvenient", requstStatus, new Long(0));
-							ProcessRequest processRequest=new  ProcessRequest(Long.valueOf(0), clientId, Long.valueOf(0), ProvisioningApiConstants.PROV_COMVENIENT, requstStatus);
+							ProcessRequest processRequest=new  ProcessRequest(Long.valueOf(0), clientId, Long.valueOf(0), ProvisioningApiConstants.PROV_COMVENIENT,
+									requstStatus,'N','N');
 							processRequest.setNotify();
 							Long id = new Long(0);
 							ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(id, id, body, "Recieved", 

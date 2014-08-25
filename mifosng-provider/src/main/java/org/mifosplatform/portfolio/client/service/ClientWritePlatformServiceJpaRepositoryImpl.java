@@ -230,6 +230,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 "Unknown data integrity issue with resource.");
     }
 
+    
     @Transactional
     @Override
     public CommandProcessingResult createClient(final JsonCommand command) {

@@ -212,7 +212,7 @@ public ProvisioningServiceParamsWriteplatformServiceImpl(final PlatformSecurityC
 			  PrepareRequest prepareRequest=this.prepareRequsetRepository.getLatestRequestByOrderId(orderId);
 			  InventoryItemDetails inventoryItemDetails=this.inventoryItemDetailsRepository.getInventoryItemDetailBySerialNum(command.stringValueOfParameterNamed("macId"));
   			  ProcessRequest processRequest=new ProcessRequest(prepareRequest.getId(),order.getClientId(),orderId,ProvisioningApiConstants.PROV_PACKETSPAN,
-  					             "CHANGE_PROVISIONING");
+  					             "CHANGE_PROVISIONING",'N','N');
 			  
   			  List<OrderLine> orderLines=order.getServices();
 			  

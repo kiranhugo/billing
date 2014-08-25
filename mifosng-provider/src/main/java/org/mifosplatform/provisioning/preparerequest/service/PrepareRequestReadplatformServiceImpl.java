@@ -202,7 +202,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 =======*/
 						 
 						 ProcessRequest processRequest=new ProcessRequest(requestData.getRequestId(),order.getClientId(), order.getId(),
-								 requestData.getProvisioningSystem(),requestType);
+								 requestData.getProvisioningSystem(),requestType,'N','N');
 						 List<OrderLine> orderLineData=order.getServices();
 						 
 						 JSONObject jobject = new JSONObject();

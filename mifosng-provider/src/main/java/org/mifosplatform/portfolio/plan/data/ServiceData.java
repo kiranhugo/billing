@@ -26,10 +26,13 @@ public class ServiceData {
     private String serviceType;
 	private String priceregion;
 	private String isPrepaid;
+	private Long contractId;
+	private String duration;
+	private String billingFrequency;
 
 	public ServiceData(Long id, String planCode, String serviceCode,
 			String planDescription, String chargeCode, String charging_variant,
-			BigDecimal price, String priceregion) {
+			BigDecimal price, String priceregion, Long contractId, String duration, String billingFrequency) {
 
 		this.id = id;
 		this.discountCode = null;
@@ -42,6 +45,9 @@ public class ServiceData {
 		this.price = price;
 		this.services = null;
 		this.priceregion=priceregion;
+		this.contractId=contractId;
+		this.duration=duration;
+		this.billingFrequency=billingFrequency;
 
 	}
 

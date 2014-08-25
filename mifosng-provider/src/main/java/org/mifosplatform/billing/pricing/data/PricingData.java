@@ -12,7 +12,7 @@ import org.mifosplatform.portfolio.plan.data.ServiceData;
 
 public class PricingData {
 
-	private List<ServiceData> serviceData;
+	private List<ServiceData> serviceData,pricingData;
 	private List<ChargesData> chargeData;
 	private List<EnumOptionData> chargevariant;
 	private List<DiscountMasterData> discountdata;
@@ -95,7 +95,7 @@ public class PricingData {
 
 	}
 
-	public PricingData(Long planId, Long priceId, String planCode,Long contractId, String contractPeriod, BigDecimal price,
+	/*public PricingData(Long planId, Long priceId, String planCode,Long contractId, String contractPeriod, BigDecimal price,
 			String chargeDescription, String billingFrequencyCode) {
 		
 		this.planId=planId;
@@ -105,6 +105,13 @@ public class PricingData {
 		this.contractPeriod=contractPeriod;
 		this.price=price;
 		this.chargeCode=billingFrequencyCode;
+	}*/
+
+	public PricingData(Long planId, String planCode, String isPrepaid,List<ServiceData> pricingData) {
+		this.planId=planId;
+		this.planCode=planCode;
+		this.isPrepaid=isPrepaid;
+		this.pricingData=pricingData;
 	}
 
 	public List<ServiceData> getServiceData() {

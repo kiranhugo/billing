@@ -67,12 +67,14 @@ public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long> {
 	
 	
 	}*/
-	 public ProcessRequest(Long prepareRequestId, Long clientId,Long orderId, String provisioningSytem, String requestType) {
+	 public ProcessRequest(Long prepareRequestId, Long clientId,Long orderId, String provisioningSytem, String requestType, char isProcessed, char isNotify) {
 		 	this.prepareRequestId = prepareRequestId;
 		 	this.clientId = clientId;
 		 	this.orderId = orderId;
 		 	this.provisioingSystem = provisioningSytem;
 		 	this.requestType = requestType;
+		 	this.isProcessed=isProcessed;
+		 	this.isNotify=isNotify;
 	 }
 
 
@@ -83,7 +85,7 @@ public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long> {
 		 	final Long orderId = command.longValueOfParameterNamed("orderId");
 		 	final String provisioningSytem = command.stringValueOfParameterNamed("provisioingSystem");
 		 	final String requestType = command.stringValueOfParameterNamed("requestType");
-		 	return new ProcessRequest(prepareRequestId,clientId,orderId,provisioningSytem,requestType);
+		 	return new ProcessRequest(prepareRequestId,clientId,orderId,provisioningSytem,requestType,'N','N');
 
 	 }
 	

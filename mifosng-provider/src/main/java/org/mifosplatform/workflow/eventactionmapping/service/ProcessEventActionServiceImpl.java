@@ -131,7 +131,7 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 					if(!associationDatas.isEmpty()){
 		   Long none=Long.valueOf(0);
 					ProcessRequest processRequest=new ProcessRequest(none,eventActionData.getClientId(),none,ProvisioningApiConstants.PROV_STALKER,
-													ProvisioningApiConstants.REQUEST_TERMINATE);
+													ProvisioningApiConstants.REQUEST_TERMINATE,'N','N');
 					ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(none,none,null,"success",associationDatas.get(0).getProvSerialNum(), 
 																	new Date(), null, new Date(),null,'N', ProvisioningApiConstants.REQUEST_TERMINATE,null);
 					processRequest.add(processRequestDetails);

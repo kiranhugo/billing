@@ -205,6 +205,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	   this.eventActionRepository.save(eventAction);
 				        	   	
 				      }else if(detailsData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_INVOICE)){
+				    	  
 				        	  jsonObject.put("dateFormat","dd MMMM yyyy");
                               jsonObject.put("locale","en");
 				        	  jsonObject.put("systemDate",dateFormat.format(new Date()));
@@ -226,11 +227,12 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			  	    	Client client=this.clientRepository.findOne(clientId);
 			  	    	EventOrder eventOrder=this.eventOrderRepository.findOne(Long.valueOf(resourceId));
 			  	    	EventMaster eventMaster=this.eventMasterRepository.findOne(eventOrder.getEventId());
+			  	    	
 			  	    	String response= AddExternalBeesmartMethod.addVodPackage(client.getOffice().getExternalId().toString(),client.getAccountNo(),
 			  	    			eventMaster.getEventName());
 			  	   
 						ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0), eventOrder.getClientId(),eventOrder.getId(),ProvisioningApiConstants.PROV_BEENIUS,
-								ProvisioningApiConstants.REQUEST_ACTIVATION_VOD);
+								ProvisioningApiConstants.REQUEST_ACTIVATION_VOD,'Y','Y');
 						List<EventOrderdetials> eventDetails=eventOrder.getEventOrderdetials();
 						//EventMaster eventMaster=this.eventMasterRepository.findOne(eventOrder.getEventId());
 						//JSONObject jsonObject=new JSONObject();

@@ -282,7 +282,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 				jsonObject.put(ProvisioningApiConstants.PROV_DATA_IPTYPE,ipType);
 				
 				ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0),clientId,orderId,ProvisioningApiConstants.PROV_PACKETSPAN,
-						                       UserActionStatusTypeEnum.ACTIVATION.toString());
+						                       UserActionStatusTypeEnum.ACTIVATION.toString(),'N','N');
 				Order order=this.orderRepository.findOne(orderId);
 				List<OrderLine> orderLines=order.getServices();
 				
@@ -358,7 +358,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			this.context.authenticatedUser();
 			List<ServiceParameters> parameters=this.serviceParametersRepository.findDataByOrderId(orderId);
 			if(!parameters.isEmpty()){
-			    ProcessRequest processRequest=new ProcessRequest(prepareId,order.getClientId(),order.getId(),ProvisioningApiConstants.PROV_PACKETSPAN, requestType);
+			    ProcessRequest processRequest=new ProcessRequest(prepareId,order.getClientId(),order.getId(),ProvisioningApiConstants.PROV_PACKETSPAN,
+			    		requestType,'N','N');
 			    List<OrderLine> orderLines=order.getServices();
 			    HardwareAssociation hardwareAssociation=this.associationRepository.findOneByOrderId(order.getId());
 			    	if(hardwareAssociation == null){
