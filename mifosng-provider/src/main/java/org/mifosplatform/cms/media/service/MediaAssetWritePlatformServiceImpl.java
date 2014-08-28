@@ -23,12 +23,12 @@ import com.google.gson.JsonElement;
 
 @Service
 public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatformService {
-	 private final static Logger logger = LoggerFactory.getLogger(MediaAssetWritePlatformServiceImpl.class);
+	private final static Logger logger = LoggerFactory.getLogger(MediaAssetWritePlatformServiceImpl.class);
 	private final PlatformSecurityContext context;
 	private final MediaAssetCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final FromJsonHelper fromApiJsonHelper;
 	private final MediaAssetRepository assetRepository;
-	   
+	  
 	@Autowired
 	public MediaAssetWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final FromJsonHelper fromApiJsonHelper,final MediaAssetRepository assetRepository,
@@ -37,7 +37,7 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 		this.assetRepository=assetRepository;
 		this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 		this.fromApiJsonHelper=fromApiJsonHelper;
-
+		
 	}
 
 	@Override
@@ -46,53 +46,62 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 		try {
 
 		 this.context.authenticatedUser();
-		     this.fromApiJsonDeserializer.validateForCreate(command.json());
-			  MediaAsset mediaAsset=MediaAsset.fromJson(command);
-			 final JsonArray mediaassetAttributesArray=command.arrayOfParameterNamed("mediaassetAttributes").getAsJsonArray();
-			    String[] mediaassetAttributes =null;
-			    mediaassetAttributes=new String[mediaassetAttributesArray.size()];
-			    for(int i=0; i<mediaassetAttributesArray.size();i++){
-			    	mediaassetAttributes[i] =mediaassetAttributesArray.get(i).toString();
-			    	//JsonObject temp = mediaassetAttributesArray.getAsJsonObject();
-			    	
+		 final String mediaTypeCheck = command.stringValueOfParameterNamed("mediaTypeCheck");
+		 this.fromApiJsonDeserializer.validateForCreate(command.json());
+		 MediaAsset mediaAsset=MediaAsset.fromJson(command);
+		 
+		/**
+		 * Enter here for create media
+		 * Doesn't allow advance media creation
+		 * */	  
+		if(!mediaTypeCheck.equalsIgnoreCase("ADVANCEMEDIA")){
+				 
+				 final JsonArray mediaassetAttributesArray=command.arrayOfParameterNamed("mediaassetAttributes").getAsJsonArray();
+				    String[] mediaassetAttributes =null;
+				    mediaassetAttributes=new String[mediaassetAttributesArray.size()];
+				    for(int i=0; i<mediaassetAttributesArray.size();i++){
+				    	mediaassetAttributes[i] =mediaassetAttributesArray.get(i).toString();
+				    	//JsonObject temp = mediaassetAttributesArray.getAsJsonObject();
+				    	
 
-			    }
-			   //For Media Attributes
-				 for (String mediaassetAttribute : mediaassetAttributes) 
-				 {
-					
-					     final JsonElement element = fromApiJsonHelper.parse(mediaassetAttribute);
-					     final String mediaAttributeType = fromApiJsonHelper.extractStringNamed("attributeType", element);
-					     final String mediaattributeName = fromApiJsonHelper.extractStringNamed("attributeName", element);
-					     final String mediaattributeValue = fromApiJsonHelper.extractStringNamed("attributevalue", element);
-					     final String mediaattributeNickname= fromApiJsonHelper.extractStringNamed("attributeNickname", element);
-					     final String mediaattributeImage= fromApiJsonHelper.extractStringNamed("attributeImage", element);
-	                     MediaassetAttributes attributes=new MediaassetAttributes(mediaAttributeType,mediaattributeName,mediaattributeValue,
-			              mediaattributeNickname,mediaattributeImage);
-   	                       mediaAsset.add(attributes);
-				  }
-				 
-				  final JsonArray mediaassetLocationsArray=command.arrayOfParameterNamed("mediaAssetLocations").getAsJsonArray();
-				  String[] mediaassetLocations =null;
-				  mediaassetLocations=new String[mediaassetLocationsArray.size()];
-				  for(int i=0; i<mediaassetLocationsArray.size();i++){
-					  
-				    	mediaassetLocations[i] =mediaassetLocationsArray.get(i).toString();
-   			       
-				  }
+				    }
 				   //For Media Attributes
-					 for (String mediaassetLocationData : mediaassetLocations) {
-						 
-						     final JsonElement element = fromApiJsonHelper.parse(mediaassetLocationData);
-						     final Long languageId = fromApiJsonHelper.extractLongNamed("languageId", element);
-						     final String formatType = fromApiJsonHelper.extractStringNamed("formatType", element);
-						     final String location = fromApiJsonHelper.extractStringNamed("location", element);
-		              MediaassetLocation mediaassetLocation = new MediaassetLocation(languageId,formatType,location);
-		              mediaAsset.addMediaLocations(mediaassetLocation);
-					  }		 
-				 
-                     this.assetRepository.save(mediaAsset);
-			         return new CommandProcessingResult(mediaAsset.getId());
+					 for (String mediaassetAttribute : mediaassetAttributes) 
+					 {
+						
+						     final JsonElement element = fromApiJsonHelper.parse(mediaassetAttribute);
+						     final String mediaAttributeType = fromApiJsonHelper.extractStringNamed("attributeType", element);
+						     final String mediaattributeName = fromApiJsonHelper.extractStringNamed("attributeName", element);
+						     final String mediaattributeValue = fromApiJsonHelper.extractStringNamed("attributevalue", element);
+						     final String mediaattributeNickname= fromApiJsonHelper.extractStringNamed("attributeNickname", element);
+						     final String mediaattributeImage= fromApiJsonHelper.extractStringNamed("attributeImage", element);
+		                     MediaassetAttributes attributes=new MediaassetAttributes(mediaAttributeType,mediaattributeName,mediaattributeValue,
+				              mediaattributeNickname,mediaattributeImage);
+	   	                       mediaAsset.add(attributes);
+					  }
+					 
+					  final JsonArray mediaassetLocationsArray=command.arrayOfParameterNamed("mediaAssetLocations").getAsJsonArray();
+					  String[] mediaassetLocations =null;
+					  mediaassetLocations=new String[mediaassetLocationsArray.size()];
+					  for(int i=0; i<mediaassetLocationsArray.size();i++){
+						  
+					    	mediaassetLocations[i] =mediaassetLocationsArray.get(i).toString();
+	   			       
+					  }
+					   //For Media Locations
+						 for (String mediaassetLocationData : mediaassetLocations) {
+							 
+							     final JsonElement element = fromApiJsonHelper.parse(mediaassetLocationData);
+							     final Long languageId = fromApiJsonHelper.extractLongNamed("languageId", element);
+							     final String formatType = fromApiJsonHelper.extractStringNamed("formatType", element);
+							     final String location = fromApiJsonHelper.extractStringNamed("location", element);
+			              MediaassetLocation mediaassetLocation = new MediaassetLocation(languageId,formatType,location);
+			              mediaAsset.addMediaLocations(mediaassetLocation);
+						  }		 
+		}
+			 				 
+        this.assetRepository.save(mediaAsset);
+		return new CommandProcessingResult(mediaAsset.getId());
 
 		} catch (DataIntegrityViolationException dve) {
 			 handleCodeDataIntegrityIssues(command, dve);
@@ -113,7 +122,7 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 		    final MediaAsset mediaAsset=retriveMessageBy(command.entityId());
 		    mediaAsset.getMediaassetAttributes().clear();
 		    mediaAsset.getMediaassetLocations().clear();
-		 
+		    
 	        final Map<String, Object> changes = mediaAsset.updateAssetDetails(command);
 	        
 	        final JsonArray mediaassetAttributesArray=command.arrayOfParameterNamed("mediaassetAttributes").getAsJsonArray();
@@ -125,7 +134,7 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 		    }
 		   //For Media Attributes
 			 for (String mediaassetAttribute : assetAttributes) {
-				
+				 		
 				     final JsonElement element = fromApiJsonHelper.parse(mediaassetAttribute);
 				     final String mediaAttributeType = fromApiJsonHelper.extractStringNamed("attributeType", element);
 				     final String mediaattributeName = fromApiJsonHelper.extractStringNamed("attributeName", element);
@@ -185,4 +194,63 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 			                  this.assetRepository.save(mediaAsset);
 			                  return new CommandProcessingResult(mediaAsset.getId());
 	    }
+
+	@Override
+	public CommandProcessingResult createMediaAssetLocationAttributes(JsonCommand command) {
+		
+		 context.authenticatedUser();
+		 this.fromApiJsonDeserializer.validateForCreateLocationAttributes(command.json());
+		 final MediaAsset mediaAsset=retriveMessageBy(command.entityId());
+		 String mediaDetailType=command.stringValueOfParameterNamed("mediaDetailType");
+		 /**
+		  * This is for media Attributes 
+		  * */
+		 if(mediaDetailType.equalsIgnoreCase("ATTRIBUTES")){
+		 final JsonArray mediaassetAttributesArray=command.arrayOfParameterNamed("mediaassetAttributes").getAsJsonArray();
+		 String[] mediaassetAttributes =null;
+		 mediaassetAttributes=new String[mediaassetAttributesArray.size()];
+		 for(int i=0; i<mediaassetAttributesArray.size();i++){
+		    mediaassetAttributes[i] =mediaassetAttributesArray.get(i).toString();
+		    	//JsonObject temp = mediaassetAttributesArray.getAsJsonObject();
+		 }
+		   //For Media Attributes
+		for (String mediaassetAttribute : mediaassetAttributes){
+				
+			final JsonElement element = fromApiJsonHelper.parse(mediaassetAttribute);
+			final String mediaAttributeType = fromApiJsonHelper.extractStringNamed("attributeType", element);
+			final String mediaattributeName = fromApiJsonHelper.extractStringNamed("attributeName", element);
+			final String mediaattributeValue = fromApiJsonHelper.extractStringNamed("attributevalue", element);
+			final String mediaattributeNickname= fromApiJsonHelper.extractStringNamed("attributeNickname", element);
+			final String mediaattributeImage= fromApiJsonHelper.extractStringNamed("attributeImage", element);
+            MediaassetAttributes attributes=new MediaassetAttributes(mediaAttributeType,mediaattributeName,mediaattributeValue,
+		    mediaattributeNickname,mediaattributeImage);
+            mediaAsset.add(attributes);
+		}
+		}
+		/**
+		  * This is for media Locations 
+		  * */
+		if(mediaDetailType.equalsIgnoreCase("LOCATIONS")){
+		final JsonArray mediaassetLocationsArray=command.arrayOfParameterNamed("mediaAssetLocations").getAsJsonArray();
+		String[] mediaassetLocations =null;
+		mediaassetLocations=new String[mediaassetLocationsArray.size()];
+		for(int i=0; i<mediaassetLocationsArray.size();i++){
+				  
+			 mediaassetLocations[i] =mediaassetLocationsArray.get(i).toString();
+		}
+		//For Media Locations
+		for (String mediaassetLocationData : mediaassetLocations) {
+					 
+			final JsonElement element = fromApiJsonHelper.parse(mediaassetLocationData);
+			final Long languageId = fromApiJsonHelper.extractLongNamed("languageId", element);
+			final String formatType = fromApiJsonHelper.extractStringNamed("formatType", element);
+			final String location = fromApiJsonHelper.extractStringNamed("location", element);
+	        MediaassetLocation mediaassetLocation = new MediaassetLocation(languageId,formatType,location);
+	        mediaAsset.addMediaLocations(mediaassetLocation);
+		}		 
+		}
+		this.assetRepository.save(mediaAsset);
+		
+		return new CommandProcessingResult(mediaAsset.getId());
+	}
 }

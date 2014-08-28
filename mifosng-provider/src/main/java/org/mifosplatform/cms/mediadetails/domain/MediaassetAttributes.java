@@ -50,6 +50,19 @@ private MediaAsset mediaAsset;
 	
 	}
 
+	public MediaassetAttributes(MediaAsset mediaId, String mediaAttributeType,
+			String mediaattributeName, String mediaattributeValue,
+			String mediaattributeNickname, String mediaattributeImage) {
+		this.mediaAsset=mediaId;
+		this.mediaName=mediaattributeName;
+        this.medaType=mediaAttributeType;
+        this.mediaValue=mediaattributeValue;
+        this.attributeNickname=mediaattributeNickname;
+        this.attributeImage=mediaattributeImage;
+		
+	}
+
+
 	public MediaAsset getMediaAsset() {
 		return mediaAsset;
 	}

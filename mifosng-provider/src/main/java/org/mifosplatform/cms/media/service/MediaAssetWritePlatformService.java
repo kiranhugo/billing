@@ -12,4 +12,6 @@ public interface MediaAssetWritePlatformService {
 
 	CommandProcessingResult deleteAsset(JsonCommand command);
 
+	CommandProcessingResult createMediaAssetLocationAttributes(JsonCommand command);
+
 }
