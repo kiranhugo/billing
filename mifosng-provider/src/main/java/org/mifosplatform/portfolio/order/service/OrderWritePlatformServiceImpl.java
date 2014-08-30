@@ -596,6 +596,11 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
          		     			//For Order History
          		     			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),new LocalDate(),newStartdate,null,requstStatus,userId,description);
          		     			this.orderHistoryRepository.save(orderHistory);
+
+         		     			//for TransactionHistory
+		   						transactionHistoryWritePlatformService.saveTransactionHistory(orderDetails.getClientId(),"Order Renewal", orderDetails.getStartDate(),
+		   								"Order No:"+orderDetails.getOrderNo(),"Plan Id:"+orderDetails.getPlanId(),"Contarct Period:"+contractDetails.getSubscriptionPeriod(),"Billing Align:"+orderDetails.getbillAlign());
+		   						
          		     			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()));
 			}catch (DataIntegrityViolationException dve) {
 				handleCodeDataIntegrityIssues(null,dve);

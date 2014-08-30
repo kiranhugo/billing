@@ -138,7 +138,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService{
 	}
 
 		 @Override
-			public List<ServiceData> retrievePriceDetails(String planId) {
+			public List<ServiceData> retrievePriceDetails(String planId, String region) {
 
 				  context.authenticatedUser();
 
@@ -148,6 +148,17 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService{
 			        		"pr.priceregion_name AS priceregion FROM b_plan_master p,b_service se,b_charge_codes c,b_plan_pricing pm  left join b_priceregion_master " +
 			        		"pr on  pm.price_region_id=pr.id  LEFT JOIN b_contract_period cp ON cp.contract_period = pm.duration WHERE p.id = pm.plan_id  AND pm.charge_code=c.charge_code and " +
 			        		" (pm.service_code = se.service_code or pm.service_code ='None') and pm.is_deleted='n' and se.is_deleted='n' and  pm.plan_id =? group by pm.id";
+			       
+			        if(region != null){
+			        	sql=" SELECT p.plan_code AS plan_code,cp.id AS contractId,pm.id AS id,pm.service_code AS serviceCode,se.service_description AS serviceDescription," +
+			        		" pm.duration AS contract,c.charge_description AS chargeDescription,pm.charge_code AS charge_code,pm.charging_variant AS chargingVariant," +
+			        		" pm.price AS price,c.billfrequency_code AS billingFrequency,pr.priceregion_name AS priceregion FROM b_plan_master p,b_service se, b_charge_codes c," +
+			        		" b_priceregion_detail pd, b_state s,b_plan_pricing pm LEFT JOIN b_priceregion_master pr ON pm.price_region_id = pr.id LEFT JOIN " +
+			        		" b_contract_period cp ON cp.contract_period = pm.duration WHERE p.id = pm.plan_id AND pm.charge_code = c.charge_code AND " +
+			        		" (pm.service_code = se.service_code OR pm.service_code = 'None') AND pm.is_deleted = 'n' AND se.is_deleted = 'n' and  " +
+			        		" pm.price_region_id = pd.priceregion_id AND ( s.id = pd.state_id OR (pd.state_id = 0 AND pd.country_id = s.parent_code)) AND " +
+			        		" s.state_name = '"+region+"' AND pm.plan_id =? GROUP BY pm.id";
+			        }
 
 
 			        RowMapper<ServiceData> rm = new PriceMapper();
@@ -321,11 +332,11 @@ private static final class PricingMapper implements RowMapper<PricingData> {
 }
 
 @Override
-public List<PricingData> retrievePlanAndPriceDetails() {
+public List<PricingData> retrievePlanAndPriceDetails(String region) {
 	
 	try{
 		this.context.authenticatedUser();
-		PlanAndPricingMapper mapper=new PlanAndPricingMapper(this);  
+		PlanAndPricingMapper mapper=new PlanAndPricingMapper(this,region);  
 		String sql="SELECT pm.plan_code AS planCode, pm.id AS planId, pm.is_prepaid as isPrepaid FROM b_plan_master pm where pm.is_deleted='N'";
 		
 		 return this.jdbcTemplate.query(sql, mapper, new Object[] {  });
@@ -338,8 +349,10 @@ public List<PricingData> retrievePlanAndPriceDetails() {
 private static final class PlanAndPricingMapper implements RowMapper<PricingData> {
 	
 	PriceReadPlatformServiceImpl priceReadPlatformServiceImp=null;
-    public PlanAndPricingMapper(PriceReadPlatformServiceImpl priceReadPlatformServiceImpl) {
+	private String region;
+    public PlanAndPricingMapper(PriceReadPlatformServiceImpl priceReadPlatformServiceImpl,String region) {
     	this.priceReadPlatformServiceImp=priceReadPlatformServiceImpl;
+    	this.region=region;
 		
 	}
 
@@ -349,7 +362,7 @@ private static final class PlanAndPricingMapper implements RowMapper<PricingData
 	  Long planId = rs.getLong("planId");
 	  String planCode = rs.getString("planCode");
 	  String isPrepaid = rs.getString("isPrepaid");
-      List<ServiceData> pricingData=this.priceReadPlatformServiceImp.retrievePriceDetails(planId.toString());
+      List<ServiceData> pricingData=this.priceReadPlatformServiceImp.retrievePriceDetails(planId.toString(),region);
       
         return new PricingData(planId,planCode,isPrepaid,pricingData);
     }

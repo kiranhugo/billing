@@ -110,6 +110,7 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 	public CommandProcessingResult createEventOrder(JsonCommand command) {
 		
 		try {
+			String response = "";
 			this.context.authenticatedUser();
 			GlobalConfigurationProperty configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIR_PROPERTY_REGISTRATION_DEVICE);
 			this.apiJsonDeserializer.validateForCreate(command.json(),configuration.isEnabled());
@@ -134,13 +135,15 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 			
 			//Check Client Custome Validation
 				CustomValidationData customValidationData = this.orderDetailsReadPlatformServices.checkForCustomValidations(clientId,EventActionConstants.EVENT_EVENT_ORDER, command.json());
-			if(customValidationData.getErrorCode() != 0 && customValidationData.getErrorMessage() != null){
-				throw new ActivePlansFoundException(customValidationData.getErrorMessage()); 
+			
+				if(customValidationData.getErrorCode() != 0 && customValidationData.getErrorMessage() != null){
+				 throw new ActivePlansFoundException(customValidationData.getErrorMessage()); 
 			}
 			
 			
 			final String formatType = command.stringValueOfParameterNamed("formatType");
 			final String optType=command.stringValueOfParameterNamed("optType");
+			
 			EventMaster eventMaster = this.eventMasterRepository.findOne(eventId);
 					if(eventMaster == null){
 						throw new NoEventMasterFoundException();
@@ -149,6 +152,7 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 					EventOrder eventOrder = EventOrder.fromJson(command,eventMaster,clientType);
 					
 						for(EventDetails detail:eventDetails){
+							
 							EventDetails eventDetail=this.eventDetailsRepository.findOne(detail.getId());
 							MediaAsset mediaAsset = this.mediaAssetRepository.findOne(eventDetail.getMediaId());
 							List<MediaassetLocation> mediaassetLocations = mediaAsset.getMediaassetLocations();
@@ -171,7 +175,6 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 					}*/
 				this.eventOrderRepository.save(eventOrder);
 				List<OneTimeSaleData> oneTimeSaleDatas = eventOrderReadplatformServie.retrieveEventOrderData(eventOrder.getClientId());
-				
 					for (OneTimeSaleData oneTimeSaleData : oneTimeSaleDatas) {
 							this.invoiceOneTimeSale.invoiceOneTimeSale(eventOrder.getClientId(), oneTimeSaleData);
 							this.updateOneTimeSale(oneTimeSaleData);
@@ -180,13 +183,14 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 						//Add New Action 
 				List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_EVENT_ORDER);
 				   if(!actionDetaislDatas.isEmpty()){
-					   this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,clientId,eventOrder.getId().toString());
+					  response = this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,clientId,eventOrder.getId().toString());
 				   }		
 				   transactionHistoryWritePlatformService.saveTransactionHistory(eventOrder.getClientId(), "Event Order", eventOrder.getEventBookedDate(),
 						   "CancelFlag:"+eventOrder.getCancelFlag(),"bookedPrice:"+eventOrder.getBookedPrice(),"EventValidTillDate:"+eventOrder.getEventValidtill(),
 						   "EventId:"+eventOrder.getEventId(),"EventOrderID:"+eventOrder.getId());
 			
-			return new CommandProcessingResult(eventOrder.getEventOrderdetials().get(0).getMovieLink());
+		//	return new CommandProcessingResult(eventOrder.getEventOrderdetials().get(0).getMovieLink());
+			    return new CommandProcessingResultBuilder().withEntityId(eventMaster.getId()).withResourceIdAsString(response).build();
 			
 			} catch (DataIntegrityViolationException dve) {
 				handleCodeDataIntegrityIssues(command, dve);

@@ -244,14 +244,13 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 			}
 
 			@Override
-			public List<OrderHistoryData> retrieveOrderHistoryDetails(
-					Long orderId) {
+			public List<OrderHistoryData> retrieveOrderHistoryDetails(String orderNo) {
 				
 
 				try {
 					final OrderHistoryMapper mapper = new OrderHistoryMapper();
 					final String sql = "select " + mapper.clientOrderLookupSchema();
-					return jdbcTemplate.query(sql, mapper, new Object[] { orderId});
+					return jdbcTemplate.query(sql, mapper, new Object[] { orderNo});
 					} catch (EmptyResultDataAccessException e) {
 					return null;
 					}
