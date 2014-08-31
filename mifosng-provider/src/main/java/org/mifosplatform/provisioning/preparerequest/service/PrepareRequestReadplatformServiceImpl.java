@@ -171,7 +171,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	                         order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
 	                         this.orderRepository.saveAndFlush(order);
 	                                        
-					 }else {
+					}else {
 
 /*<<<<<<< HEAD
 						String requestType=null,sentMessage=null;			        
@@ -212,23 +212,46 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 						 jobject.put("planIdentification", planMapping.getPlanIdentification());
 						 }
 						 
+						 
 						 if(requestData.getProvisioningSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_BEENIUS)){
 							 
-							JSONArray serviceArray = new JSONArray();
-							
-							for(OrderLine orderLine:orderLineData){
-								JSONObject subjson = new JSONObject();
-								List<ProvisionServiceDetails> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
-								ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId()); 
-								subjson.put("serviceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
-								subjson.put("serviceType", service.getServiceType());
-								serviceArray.put(subjson.toString());	 
-							}
-							jobject.put("services", serviceArray);
-							ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(orderLineData.get(0).getId(),
+							 JSONObject subjson = new JSONObject();
+							 JSONArray serviceArray = new JSONArray();
+							 if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
+								 
+								
+								 Order oldOrder=this.orderRepository.findOldOrderByOrderNO(order.getOrderNo());
+								 List<OrderLine> orderdetails=oldOrder.getServices();
+								
+								 for(OrderLine orderLine:orderdetails){
+									 
+									 JSONObject oldsubjson = new JSONObject();
+									
+									 List<ProvisionServiceDetails> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
+									 ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId()); 
+									 oldsubjson.put("oldServiceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+									 oldsubjson.put("oldServiceType", service.getServiceType());
+									serviceArray.put(oldsubjson.toString());
+								 }
+								 jobject.put("oldServices", serviceArray);
+								 
+							 }
+							 
+								 JSONArray newServiceArray = new JSONArray();
+								 for(OrderLine orderLine:orderLineData){
+									// JSONObject subjson = new JSONObject();
+									 List<ProvisionServiceDetails> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
+									 ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId()); 
+									 subjson.put("serviceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+									 subjson.put("serviceType", service.getServiceType());
+									 newServiceArray.put(subjson.toString());	 
+								 }
+								 jobject.put("services", newServiceArray);
+								 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(orderLineData.get(0).getId(),
 									orderLineData.get(0).getServiceId(),jobject.toString(),"Recieved",
 									null,order.getStartDate(),order.getEndDate(),null,null,'N',requestType,null);
-							processRequest.add(processRequestDetails);
+								 processRequest.add(processRequestDetails);
+							
 						 
 						 }else{
 							 for(OrderLine orderLine:orderLineData){
