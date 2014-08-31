@@ -52,7 +52,7 @@ public class TicketMasterFromApiJsonDeserializer {
 	        baseDataValidator.reset().parameter("problemCode").value(problemCode).notBlank().notExceedingLengthOf(100);
 	        baseDataValidator.reset().parameter("priority").value(priority).notBlank().notExceedingLengthOf(100);
 	        baseDataValidator.reset().parameter("assignedTo").value(assignedTo).notBlank().notExceedingLengthOf(100);
-	        baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(100);
+	        baseDataValidator.reset().parameter("description").value(description).notBlank();
 	        
 	        
 	        throwExceptionIfValidationWarningsExist(dataValidationErrors);

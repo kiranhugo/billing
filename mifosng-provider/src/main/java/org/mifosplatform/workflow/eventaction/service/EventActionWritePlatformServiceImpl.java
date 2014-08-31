@@ -98,7 +98,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 	
 	@Transactional
 	@Override
-	public void AddNewActions(List<ActionDetaislData> actionDetaislDatas,final Long clientId,final String resourceId) {
+	public String AddNewActions(List<ActionDetaislData> actionDetaislDatas,final Long clientId,final String resourceId) {
     
   try{
     	
@@ -258,8 +258,10 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			  	}
 			}
 		}
+	     return null;
     }catch(Exception exception){
     	exception.printStackTrace();
+    	return null;
     }
     
    

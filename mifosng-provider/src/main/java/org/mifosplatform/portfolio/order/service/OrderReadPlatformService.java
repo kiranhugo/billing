@@ -24,7 +24,7 @@ public interface OrderReadPlatformService {
 	
 	List<OrderData> retrieveClientOrderDetails(Long clientId);
 	
-	List<OrderHistoryData> retrieveOrderHistoryDetails(Long orderId);
+	List<OrderHistoryData> retrieveOrderHistoryDetails(String orderNo);
 	
 	List<OrderData> getActivePlans(Long clientId, String planType);
 	

@@ -232,8 +232,14 @@ public class DocumentManagementApiResource {
          **/
         Long createdbyId = context.authenticatedUser().getId();
         TicketMasterCommand ticketMasterCommand=new TicketMasterCommand(ticketId,comments,null,assignedTo,createdbyId,status);
-        DocumentCommand documentCommand = new DocumentCommand(null, null, entityType, entityId, null, fileDetails.getFileName(), fileSize,
+        DocumentCommand documentCommand=null;
+        if(fileDetails!=null&&bodyPart!=null){
+         documentCommand = new DocumentCommand(null, null, entityType, entityId, null, fileDetails.getFileName(), fileSize,
         bodyPart.getMediaType().toString(), null, null);
+        }else{
+        	documentCommand = new DocumentCommand(null, null, entityType, entityId, null, null, fileSize,
+        	        null, null, null);
+        }
 
 					Long detailId = this.ticketMasterWritePlatformService.upDateTicketDetails(ticketMasterCommand,documentCommand,ticketId,inputStream);
 					return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(detailId, null));

@@ -53,7 +53,7 @@ public class ContractPeriodWritePlatformServiceImp implements ContractPeriodWrit
 	        Throwable realCause = dve.getMostSpecificCause();
 	        if (realCause.getMessage().contains("contract_period_key")) {
 	            final String name = command.stringValueOfParameterNamed("subscriptionPeriod");
-	            throw new PlatformDataIntegrityException("error.msg.code.duplicate.name", "A code with name '" + name + "' already exists",name);
+	            throw new PlatformDataIntegrityException("error.msg.contract.code.duplicate.name", "A code with name '" + name + "' already exists",name);
 	        }
 
 	        

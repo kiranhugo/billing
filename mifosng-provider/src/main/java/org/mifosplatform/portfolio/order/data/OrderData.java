@@ -177,6 +177,95 @@ public class OrderData {
 		return billingFrequency;
 	}
 
+	
+	public String getPlanCode() {
+		return planCode;
+	}
+
+	public String getPlanDescription() {
+		return planDescription;
+	}
+
+	public LocalDate getCurrentDate() {
+		return currentDate;
+	}
+
+	public LocalDate getActiveDate() {
+		return activeDate;
+	}
+
+	public String getContractPeriod() {
+		return contractPeriod;
+	}
+
+	public Collection<McodeData> getDisconnectDetails() {
+		return disconnectDetails;
+	}
+
+	public List<OrderHistoryData> getOrderHistory() {
+		return orderHistory;
+	}
+
+	public String getIsPrepaid() {
+		return isPrepaid;
+	}
+
+	public String getAllowtopup() {
+		return allowtopup;
+	}
+
+	public List<OrderData> getClientOrders() {
+		return clientOrders;
+	}
+
+	public String getUserAction() {
+		return userAction;
+	}
+
+	public String getOrderNo() {
+		return orderNo;
+	}
+
+	public OrderData getOrderData() {
+		return orderData;
+	}
+
+	public String getProvisioningSys() {
+		return provisioningSys;
+	}
+
+	public boolean isIspaymentEnable() {
+		return ispaymentEnable;
+	}
+
+	public Collection<McodeData> getPaymodes() {
+		return paymodes;
+	}
+
+	public List<OrderLineData> getOrderServices() {
+		return orderServices;
+	}
+
+	public List<OrderDiscountData> getOrderDiscountDatas() {
+		return orderDiscountDatas;
+	}
+
+	public LocalDate getInvoiceTilldate() {
+		return invoiceTilldate;
+	}
+
+	public Collection<MCodeData> getReasons() {
+		return reasons;
+	}
+
+	public Collection<MCodeData> getExtensionPeriodDatas() {
+		return extensionPeriodDatas;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
 	public List<OrderPriceData> getOrderPriceData() {
 		return orderPriceData;
 	}

@@ -298,9 +298,9 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				throw new SelfCareTemporaryGeneratedKeyNotFoundException(verificationKey,uniqueReference);				
 			}else{		
 				
-				if(selfCareTemporary.getStatus().equalsIgnoreCase("INACTIVE")){
+				if(selfCareTemporary.getStatus().equalsIgnoreCase("INACTIVE") || selfCareTemporary.getStatus().equalsIgnoreCase("PENDING")){
 					
-					selfCareTemporary.setStatus("ACTIVE");
+					selfCareTemporary.setStatus("PENDING");
 					
 					transactionHistoryWritePlatformService.saveTransactionHistory(clientId, "Self Care User Registration is Verified Through Email", new Date(),
 							"EmailId: "+selfCareTemporary.getUserName());			

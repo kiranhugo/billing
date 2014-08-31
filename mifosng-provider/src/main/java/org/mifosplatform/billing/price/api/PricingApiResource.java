@@ -112,7 +112,7 @@ public class PricingApiResource {
 	    @Produces({ MediaType.APPLICATION_JSON })
 	    public String retrievePrice(@PathParam("planCode") final String planCode,@Context final UriInfo uriInfo) {
 	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	    	List<ServiceData> serviceData = this.priceReadPlatformService.retrievePriceDetails(planCode);
+	    	List<ServiceData> serviceData = this.priceReadPlatformService.retrievePriceDetails(planCode,null);
 	    	PricingData data = new PricingData(serviceData);
 	    	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	    	return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
@@ -121,9 +121,9 @@ public class PricingApiResource {
 	    @GET
 	    @Consumes({ MediaType.APPLICATION_JSON })
 	    @Produces({ MediaType.APPLICATION_JSON })
-	    public String retrievePlanAndPriceDetails(@Context final UriInfo uriInfo) {
+	    public String retrievePlanAndPriceDetails(@Context final UriInfo uriInfo,@QueryParam("region") final String region) {
 	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	    	List<PricingData> pricingDatas = this.priceReadPlatformService.retrievePlanAndPriceDetails();
+	    	List<PricingData> pricingDatas = this.priceReadPlatformService.retrievePlanAndPriceDetails(region);
 	    	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	    	return this.toApiJsonSerializer.serialize(settings, pricingDatas, RESPONSE_DATA_PARAMETERS);
 	    }

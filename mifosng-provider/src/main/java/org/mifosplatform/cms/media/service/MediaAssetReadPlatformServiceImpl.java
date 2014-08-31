@@ -41,10 +41,18 @@ public class MediaAssetReadPlatformServiceImpl implements MediaAssetReadPlatform
 
 
 	@Override
-	public List<MediaAssetData> retrievemediaAssetdata(Long pageNo) {
+	public List<MediaAssetData> retrievemediaAssetdata(Long pageNo,String clientType) {
 		
 		AllMediaAssestDataMapper mediaAssestDataMapper = new AllMediaAssestDataMapper();
-		String sql = "select " + mediaAssestDataMapper.mediaAssestDataSchema()+"  LIMIT ?, 10" ;
+		String sql = null;
+		if(clientType !=null ){
+			
+			sql="select " + mediaAssestDataMapper.mediaAssestDataSchema()+" where m.clientType ='"+clientType+"' LIMIT ?, 10" ;	
+		}else{
+			sql="select " + mediaAssestDataMapper.mediaAssestDataSchema()+" LIMIT ?, 10" ;
+		}
+		//
+		
 		return this.jdbcTemplate.query(sql, mediaAssestDataMapper,new Object[] {"", pageNo });
 
 	}
