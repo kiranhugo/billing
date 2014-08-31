@@ -516,7 +516,28 @@ public final class Client extends AbstractPersistable<Long> {
         this.imageKey = imageKey;
     }
 
-    public Long officeId() {
+    
+    public Long getGroupId() {
+		return groupId;
+	}
+
+	public CodeValue getClosureReason() {
+		return closureReason;
+	}
+
+	public AppUser getCloseddBy() {
+		return closeddBy;
+	}
+
+	public Date getClosureDate() {
+		return closureDate;
+	}
+
+	public String getEntryType() {
+		return entryType;
+	}
+
+	public Long officeId() {
         return this.office.getId();
     }
     
@@ -622,6 +643,8 @@ public final class Client extends AbstractPersistable<Long> {
 	public String getBillMode() {
 		return billMode;
 	}
+	
+	
 
 	public void setBillMode(String billMode) {
 		this.billMode = billMode;

@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.billing.pricing.exceptions.ChargeCOdeExists;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -42,13 +41,15 @@ public class Price extends AbstractPersistable<Long> {
 
 	@Column(name = "is_deleted")
 	private String isDeleted="n";
+	
+	@Column(name = "duration")
+	private String contractPeriod;
 
 	public Price() {
 	}
 
-	public Price(final Long planCode, final String chargeCode,
-			final String serviceCode, final String chargingVariant,
-			final BigDecimal price, final Long discountId, Long priceregion)
+	public Price(final Long planCode, final String chargeCode,final String serviceCode, final String chargingVariant,
+			final BigDecimal price, final Long discountId, Long priceregion,final String contractPeriod)
 
 	{
 
@@ -59,6 +60,7 @@ public class Price extends AbstractPersistable<Long> {
 		this.price = price;
 		this.discountId = discountId;
 		this.priceRegion=priceregion;
+		this.contractPeriod=contractPeriod;
 	}
 
 	public String getChargingVariant() {
@@ -97,13 +99,13 @@ public class Price extends AbstractPersistable<Long> {
 		return isDeleted;
 	}
 
+
+	public String getContractPeriod() {
+		return contractPeriod;
+	}
+	
 	public void delete() {
-
-
-
 			this.isDeleted = "y";
-
-
 	}
 
 	public static Price fromJson(JsonCommand command,
@@ -115,6 +117,7 @@ public class Price extends AbstractPersistable<Long> {
 		    final Long discountId = command.longValueOfParameterNamed("discountId");
 		    final Long priceregion = command.longValueOfParameterNamed("priceregion");
 		    final BigDecimal price=command.bigDecimalValueOfParameterNamed("price");
+		    final String duration = command.stringValueOfParameterNamed("duration");
 		/* for (ServiceData data : serviceData) {
 				if (data.getChargeCode() != null) {
 					if ((data.getPlanId() == planId))
@@ -125,7 +128,7 @@ public class Price extends AbstractPersistable<Long> {
 				}
 			}
 		}*/
-		return new Price(planId, chargeCode, serviceCode,chargevariant, price, discountId,priceregion);
+		return new Price(planId, chargeCode, serviceCode,chargevariant, price, discountId,priceregion,duration);
 		 
 	}
 
@@ -150,6 +153,14 @@ public class Price extends AbstractPersistable<Long> {
 				final String newValue = command.stringValueOfParameterNamed(chargingVariantParamName);
 				actualChanges.put(chargingVariantParamName, newValue);
 				this.chargingVariant=StringUtils.defaultIfEmpty(newValue,null);
+			}
+			
+			final String contractPeriodParamName = "duration";
+			if (command.isChangeInStringParameterNamed(contractPeriodParamName, this.contractPeriod)) {
+				   String newValue = command.stringValueOfParameterNamed(contractPeriodParamName);
+				  //  newValue=this.isPrepaid == 'Y'?newValue:null;
+				    actualChanges.put(contractPeriodParamName, newValue);
+				    this.contractPeriod = StringUtils.defaultIfEmpty(newValue, null);
 			}
 			
 			 final String discountIdParamName = "discountId";

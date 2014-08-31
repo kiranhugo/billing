@@ -33,7 +33,9 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.priceregion.data.PriceRegionData;
 import org.mifosplatform.organisation.priceregion.service.RegionalPriceReadplatformService;
+import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
+import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -44,110 +46,132 @@ import org.springframework.stereotype.Component;
 public class PricingApiResource {
 
 	private  final Set<String> RESPONSE_DATA_PARAMETERS=new HashSet<String>(Arrays.asList("planCode","planId","serviceId","chargeId","price","serviceCode","chargeCode",
-			"chargeVariantId","discountId","planCode","id", "serviceData","priceId","chargeData","data", "chargeCode","chargeVaraint","price","priceregion","priceRegionData"));
-    private final String resourceNameForPermissions = "PRICE";
-	  private final PlatformSecurityContext context;
+			"chargeVariantId","discountId","planCode","id", "isPrepaid","serviceData","priceId","chargeData","data", "chargeCode","chargeVaraint","price","priceregion","priceRegionData"));
+    	
+		private final String resourceNameForPermissions = "PRICE";
+		private final PlatformSecurityContext context;
 	    private final DefaultToApiJsonSerializer<PricingData> toApiJsonSerializer;
 	    private final ApiRequestParameterHelper apiRequestParameterHelper;
 	    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	    private final PriceReadPlatformService priceReadPlatformService;
 	    private final RegionalPriceReadplatformService regionalPriceReadplatformService;
+	    private final PlanReadPlatformService planReadPlatformService;
+	    
 	    @Autowired
 	    public PricingApiResource(final PlatformSecurityContext context,final RegionalPriceReadplatformService regionalPriceReadplatformService, 
-	   final DefaultToApiJsonSerializer<PricingData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-	   final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final PriceReadPlatformService priceReadPlatformService) {
-		        this.context = context;
+	    		final DefaultToApiJsonSerializer<PricingData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
+	    		final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final PriceReadPlatformService priceReadPlatformService,
+	    		final PlanReadPlatformService planReadPlatformService) {
+		        
+	    		this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
-		        this.apiRequestParameterHelper = apiRequestParameterHelper;
-		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+		        this.planReadPlatformService=planReadPlatformService;
 		        this.priceReadPlatformService=priceReadPlatformService;
+		        this.apiRequestParameterHelper = apiRequestParameterHelper;
 		        this.regionalPriceReadplatformService=regionalPriceReadplatformService;
+		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 		    }	
-	@POST
-	@Path("{planId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String createPrice(@PathParam("planId") final Long planId,final String apiRequestBodyAsJson) {
-		 final CommandWrapper commandRequest = new CommandWrapperBuilder().createPrice(planId).withJson(apiRequestBodyAsJson).build();
+	    
+	    @POST
+	    @Path("{planId}")
+	    @Consumes({ MediaType.APPLICATION_JSON })
+	    @Produces({ MediaType.APPLICATION_JSON })
+	    public String createPrice(@PathParam("planId") final Long planId,final String apiRequestBodyAsJson) {
+	    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createPrice(planId).withJson(apiRequestBodyAsJson).build();
 	        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 	        return this.toApiJsonSerializer.serialize(result);
 		
-	}
-	@GET
-	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrievePricing(@QueryParam("planId") final Long planCode,@Context final UriInfo uriInfo) {
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		List<ServiceData> serviceData = this.priceReadPlatformService.retrievePrcingDetails(planCode);
-		List<ChargesData> chargeDatas = this.priceReadPlatformService.retrieveChargeCode();
-		List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
-		List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
-		List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getThePriceregionsDetails();
-		PricingData data = new PricingData(serviceData, chargeDatas, datas,	discountdata, serviceData.get(0).getPlanCode(), planCode,null,priceRegionData);
-		 final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-	     return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
+	    }
+	    @GET
+	    @Path("template")
+	    @Consumes({ MediaType.APPLICATION_JSON })
+	    @Produces({ MediaType.APPLICATION_JSON })
+	    public String retrievePricing(@QueryParam("planId") final Long planCode,@Context final UriInfo uriInfo) {
+	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+	    	List<ServiceData> serviceData = this.priceReadPlatformService.retrievePrcingDetails(planCode);
+	    	List<ChargesData> chargeDatas = this.priceReadPlatformService.retrieveChargeCode();
+	    	List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
+	    	List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
+	    	List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getThePriceregionsDetails();
+	    	List<SubscriptionData> contractPeriods = this.planReadPlatformService.retrieveSubscriptionData();
+			
+	    		for(int i=0;i<contractPeriods.size();i++){
+	    			if(contractPeriods.get(i).getSubscriptionType().equalsIgnoreCase("None")){
+	    				contractPeriods.remove(contractPeriods.get(i));
+	 		}
+	    		}
+	    			PricingData data = new PricingData(serviceData, chargeDatas, datas,	discountdata, serviceData.get(0).getPlanCode(), planCode,null,
+	    					 priceRegionData,contractPeriods,serviceData.get(0).isPrepaid());
+	    			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+	    			return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
 	}
 
-	@GET
-	@Path("{planCode}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrievePrice(@PathParam("planCode") final String planCode,@Context final UriInfo uriInfo) {
-	 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	List<ServiceData> serviceData = this.priceReadPlatformService.retrievePriceDetails(planCode);
-	PricingData data = new PricingData(serviceData);
-	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-    return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
-	}
+	    @GET
+	    @Path("{planCode}")
+	    @Consumes({ MediaType.APPLICATION_JSON })
+	    @Produces({ MediaType.APPLICATION_JSON })
+	    public String retrievePrice(@PathParam("planCode") final String planCode,@Context final UriInfo uriInfo) {
+	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+	    	List<ServiceData> serviceData = this.priceReadPlatformService.retrievePriceDetails(planCode);
+	    	PricingData data = new PricingData(serviceData);
+	    	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+	    	return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
+	    }
 	
-	@GET
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrievePlanAndPriceDetails(@Context final UriInfo uriInfo) {
-		
-	 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	List<PricingData> pricingDatas = this.priceReadPlatformService.retrievePlanAndPriceDetails();
-	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-    return this.toApiJsonSerializer.serialize(settings, pricingDatas, RESPONSE_DATA_PARAMETERS);
-	}
+	    @GET
+	    @Consumes({ MediaType.APPLICATION_JSON })
+	    @Produces({ MediaType.APPLICATION_JSON })
+	    public String retrievePlanAndPriceDetails(@Context final UriInfo uriInfo) {
+	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+	    	List<PricingData> pricingDatas = this.priceReadPlatformService.retrievePlanAndPriceDetails();
+	    	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+	    	return this.toApiJsonSerializer.serialize(settings, pricingDatas, RESPONSE_DATA_PARAMETERS);
+	    }
 	
-	@GET
-	@Path("{priceId}/update")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveIndividualPrice(@PathParam("priceId") final String priceId,@Context final UriInfo uriInfo) {
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		PricingData singlePriceData = this.priceReadPlatformService.retrieveSinglePriceDetails(priceId);
-		List<ServiceData> serviceData = this.priceReadPlatformService.retrievePrcingDetails(singlePriceData.getPlanId());
-		List<ChargesData> chargeDatas = this.priceReadPlatformService.retrieveChargeCode();
-		List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
-		List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
-		List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getThePriceregionsDetails();
-		singlePriceData = new PricingData(serviceData, chargeDatas, datas,discountdata, serviceData.get(0).getCode(),
-		singlePriceData.getPlanId(),singlePriceData,priceRegionData);
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-	    return this.toApiJsonSerializer.serialize(settings, singlePriceData, RESPONSE_DATA_PARAMETERS);
-	}
+	    @GET
+	    @Path("{priceId}/update")
+	    @Consumes({ MediaType.APPLICATION_JSON })
+	    @Produces({ MediaType.APPLICATION_JSON })
+	    public String retrieveIndividualPrice(@PathParam("priceId") final String priceId,@Context final UriInfo uriInfo) {
+	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+	    	PricingData singlePriceData = this.priceReadPlatformService.retrieveSinglePriceDetails(priceId);
+	    	List<ServiceData> serviceData = this.priceReadPlatformService.retrievePrcingDetails(singlePriceData.getPlanId());
+	    	List<ChargesData> chargeDatas = this.priceReadPlatformService.retrieveChargeCode();
+	    	List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
+	    	List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
+	    	List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getThePriceregionsDetails();
+	    	List<SubscriptionData> contractPeriods = this.planReadPlatformService.retrieveSubscriptionData();
+			
+    		for(int i=0;i<contractPeriods.size();i++){
+    			if(contractPeriods.get(i).getSubscriptionType().equalsIgnoreCase("None")){
+    				contractPeriods.remove(contractPeriods.get(i));
+    			}
+    		}
+	    	singlePriceData = new PricingData(serviceData, chargeDatas, datas,discountdata, serviceData.get(0).getCode(),
+	    	singlePriceData.getPlanId(),singlePriceData,priceRegionData,contractPeriods,serviceData.get(0).isPrepaid());
+	    	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+	    	return this.toApiJsonSerializer.serialize(settings, singlePriceData, RESPONSE_DATA_PARAMETERS);
+	    }
+	 
+	    @PUT
+	    @Path("{priceId}/update")
+		@Consumes({MediaType.APPLICATION_JSON})
+		@Produces({MediaType.APPLICATION_JSON})
+		public String updatePrice(@PathParam("priceId") final Long priceId, final String apiRequestBodyAsJson){
+	    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePrice(priceId).withJson(apiRequestBodyAsJson).build();
+	    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	    	return this.toApiJsonSerializer.serialize(result);
+		}
+	    
+	    @DELETE
+		@Path("{priceId}")
+		@Consumes({MediaType.APPLICATION_JSON})
+		@Produces({MediaType.APPLICATION_JSON})
+		public String deletePrice(@PathParam("priceId") final Long priceId) {
+	    	final CommandWrapper commandRequest = new CommandWrapperBuilder().deletePrice(priceId).build();
+	    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	    	return this.toApiJsonSerializer.serialize(result);
+		}
 
-	@PUT
-	@Path("{priceId}/update")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String updatePrice(@PathParam("priceId") final Long priceId,final String apiRequestBodyAsJson) {
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePrice(priceId).withJson(apiRequestBodyAsJson).build();
-		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-		return this.toApiJsonSerializer.serialize(result);
-	}
-
-	@DELETE
-	@Path("{priceId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String deletePrice(@PathParam("priceId") final Long priceId) {
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().deletePrice(priceId).build();
-		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-		return this.toApiJsonSerializer.serialize(result);
-	}
 }
 	

@@ -180,14 +180,13 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         logger.error(dve.getMessage(), dve);
     }
 
-	@SuppressWarnings("unused")
+	//@SuppressWarnings("unused")
 	@Override
 	public CommandProcessingResult selfRegistrationProcess(JsonCommand command) {
 
 		try {
 			context.authenticatedUser();
 			commandFromApiJsonDeserializer.validateForCreate(command.json());
-			
 			Long id = new Long(1);		
 			CommandProcessingResult resultClient = null;
 			CommandProcessingResult resultSale = null;
@@ -197,7 +196,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			String activationDate = new SimpleDateFormat(dateFormat).format(new Date());
 
 			GlobalConfigurationProperty deviceStatusConfiguration = configurationRepository.
-					findOneByName(ConfigurationConstants.CONFIR_REGISTRATION_REQUIRE_DEVICE);
+					findOneByName(ConfigurationConstants.CONFIR_PROPERTY_REGISTRATION_DEVICE);
 
 			String fullname = command.stringValueOfParameterNamed("fullname");
 			String city = command.stringValueOfParameterNamed("city");
@@ -247,18 +246,6 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					throw new PlatformDataIntegrityException("error.msg.client.creation.failed", "Client Creation Failed","Client Creation Failed");
 				}
 				
-				// create selfcare record		userName uniqueReference
-				JSONObject selfcarecreation = new JSONObject();
-				selfcarecreation.put("userName", fullname);
-				selfcarecreation.put("uniqueReference", email);
-				selfcarecreation.put("clientId", resultClient.getClientId());;
-				final CommandWrapper selfcareCommandRequest = new CommandWrapperBuilder().createSelfCare().withJson(selfcarecreation.toString()).build();
-				final CommandProcessingResult selfcareCommandresult = this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
-				
-				if(selfcareCommandresult ==null && selfcareCommandresult.resourceId() <= 0){			
-					throw new PlatformDataIntegrityException("error.msg.selfcare.creation.failed", "selfcare Creation Failed","selfcare Creation Failed");
-				}
-
 				//book device
 				
 				if(deviceStatusConfiguration != null){
@@ -398,6 +385,18 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 							throw new PlatformDataIntegrityException("error.msg.client.payment.creation","Payment Failed for ClientId:"
 											+ resultClient.getClientId(),"Payment Failed");
 						}
+				}
+				
+				// create selfcare record		userName uniqueReference
+				JSONObject selfcarecreation = new JSONObject();
+				selfcarecreation.put("userName", fullname);
+				selfcarecreation.put("uniqueReference", email);
+				selfcarecreation.put("clientId", resultClient.getClientId());;
+				final CommandWrapper selfcareCommandRequest = new CommandWrapperBuilder().createSelfCare().withJson(selfcarecreation.toString()).build();
+				final CommandProcessingResult selfcareCommandresult = this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
+				
+				if(selfcareCommandresult ==null && selfcareCommandresult.resourceId() <= 0){			
+					throw new PlatformDataIntegrityException("error.msg.selfcare.creation.failed", "selfcare Creation Failed","selfcare Creation Failed");
 				}
 				
 				return resultClient;

@@ -67,8 +67,6 @@ public final class PlanCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("billRule").value(billRule).notNull();
         final boolean isPrepaid=fromApiJsonHelper.extractBooleanNamed("isPrepaid", element);
         if(isPrepaid){
-        	final String duration=fromApiJsonHelper.extractStringNamed("duration", element);
-        	baseDataValidator.reset().parameter("duration").value(duration).notBlank();
         	final String volumeType=fromApiJsonHelper.extractStringNamed("volume", element);
         	baseDataValidator.reset().parameter("volume").value(volumeType).notNull();
         	final String units=fromApiJsonHelper.extractStringNamed("units", element);

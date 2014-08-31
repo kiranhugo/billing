@@ -61,7 +61,7 @@ public class MediaDeviceReadPlatformServiceImpl implements MediaDeviceReadPlatfo
 					"left join b_owned_hardware oh on (c.id =oh.client_id AND oh.is_deleted = 'N') " +
 					"left join b_client_address ca on (c.id=ca.client_id and address_key='PRIMARY') " +
 					"left join b_country_currency cc on (cc.country=ca.country ) " +
-					"WHERE ifnull(a.serial_no, oh.serial_number) = ?";
+					"WHERE ifnull(a.serial_no, oh.serial_number) = ? group by deviceId";
 					
 		}
 		

@@ -39,7 +39,7 @@ public final class EventOrderCommandFromApiJsonDeserializer {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validateForCreate(final String json) {
+    public void validateForCreate(final String json, boolean isDeviceReq) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -49,9 +49,10 @@ public final class EventOrderCommandFromApiJsonDeserializer {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("eventorder");
 
         final JsonElement element = fromApiJsonHelper.parse(json);
-
-        final String deviceId = fromApiJsonHelper.extractStringNamed("deviceId", element);
-        baseDataValidator.reset().parameter("deviceId").value(deviceId).notBlank();
+        if(isDeviceReq){
+        	final String deviceId = fromApiJsonHelper.extractStringNamed("deviceId", element);
+        	baseDataValidator.reset().parameter("deviceId").value(deviceId).notBlank();
+        }
         final Long eventId = fromApiJsonHelper.extractLongNamed("eventId", element);
         baseDataValidator.reset().parameter("eventId").value(eventId).notBlank();
         final String formatType = fromApiJsonHelper.extractStringNamed("formatType", element);

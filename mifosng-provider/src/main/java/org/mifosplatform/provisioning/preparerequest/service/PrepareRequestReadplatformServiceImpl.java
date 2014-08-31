@@ -173,14 +173,44 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	                                        
 					 }else {
 
-						 ProcessRequest processRequest=new ProcessRequest(order.getClientId(), order.getId(), requestData.getProvisioningSystem(),
-								 'N',requestData.getUserName(),requestType,requestData.getRequestId());
+/*<<<<<<< HEAD
+						String requestType=null,sentMessage=null;			        
+						Order order=this.orderRepository.findOne(requestData.getOrderId());
+						AllocationDetailsData detailsData=this.allocationReadPlatformService.getTheHardwareItemDetails(requestData.getOrderId(),configProp);
+						requestType=requestData.getRequestType();
+						PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
+
+						if(requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData == null){
+							String status=OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
+							prepareRequest.setStatus(status);
+							this.prepareRequsetRepository.save(prepareRequest);
+								
+							//Update Order Status
+							order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
+							this.orderRepository.saveAndFlush(order);
+						
+						}else {
+							ProcessRequest processRequest=new ProcessRequest(requestData.getRequestId(),order.getClientId(),order.getId(),
+									                       requestData.getProvisioningSystem(),requestType);
+								List<OrderLine> orderLineData=order.getServices();
+								for(OrderLine orderLine:orderLineData){
+									String HardWareId=null;
+									
+									if(detailsData!=null){
+										HardWareId=detailsData.getSerialNo();
+									}
+=======*/
+						 
+						 ProcessRequest processRequest=new ProcessRequest(requestData.getRequestId(),order.getClientId(), order.getId(),
+								 requestData.getProvisioningSystem(),requestType,'N','N');
 						 List<OrderLine> orderLineData=order.getServices();
 						 
 						 JSONObject jobject = new JSONObject();
 						 PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
 						 
+						 if(planMapping != null){
 						 jobject.put("planIdentification", planMapping.getPlanIdentification());
+						 }
 						 
 						 if(requestData.getProvisioningSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_BEENIUS)){
 							 

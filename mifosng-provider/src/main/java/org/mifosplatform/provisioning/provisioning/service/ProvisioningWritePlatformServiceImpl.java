@@ -41,7 +41,6 @@ import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.portfolio.plan.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
-import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequsetRepository;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
@@ -225,18 +224,20 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 				final String iprange=command.stringValueOfParameterNamed("ipRange");
 				final Long subnet=command.longValueOfParameterNamed("subnet");
 				String[] ipAddressArray =null;
-			//	PrepareRequest prepareRequest=this.prepareRequsetRepository.getLatestRequestByOrderId(orderId);
+			
 				InventoryItemDetails inventoryItemDetails=this.inventoryItemDetailsRepository.getInventoryItemDetailBySerialNum(macId);
 					if(inventoryItemDetails == null){
 						throw new PairingNotExistException(orderId);
 					}
-			 final JsonElement element = fromJsonHelper.parse(command.json());
-			 JsonArray serviceParameters = fromJsonHelper.extractJsonArrayNamed("serviceParameters", element);
-			JSONObject jsonObject=new JSONObject();
+			
+					final JsonElement element = fromJsonHelper.parse(command.json());
+					JsonArray serviceParameters = fromJsonHelper.extractJsonArrayNamed("serviceParameters", element);
+					JSONObject jsonObject=new JSONObject();
 	        	
 				for(JsonElement j:serviceParameters){
 					ServiceParameters serviceParameter=ServiceParameters.fromJson(j,fromJsonHelper,clientId,orderId,planName,"ACTIVE",iprange,subnet);
 					this.serviceParametersRepository.saveAndFlush(serviceParameter);
+				
 					//	ip_pool_data status updation
 					String paramName = fromJsonHelper.extractStringNamed("paramName", j);
 					
@@ -253,10 +254,12 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 													throw new IpAddresAllocatedException(ipAddressArray[i]);
 												}
 										}
-							jsonObject.put(ProvisioningApiConstants.PROV_DATA_SUBNET,subnet);
+										jsonObject.put(ProvisioningApiConstants.PROV_DATA_SUBNET,subnet);
+										
 								}else{
 									ipAddressArray = fromJsonHelper.extractArrayNamed("paramValue", j);
 								}
+								
 								for(String ipAddress:ipAddressArray){
 									IpPoolManagementDetail ipPoolManagementDetail= this.ipPoolManagementJpaRepository.findIpAddressData(ipAddress);
 										if(ipPoolManagementDetail == null){
@@ -277,8 +280,9 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 				jsonObject.put(ProvisioningApiConstants.PROV_DATA_PLANNAME,planName);
 				jsonObject.put(ProvisioningApiConstants.PROV_DATA_MACID,macId);
 				jsonObject.put(ProvisioningApiConstants.PROV_DATA_IPTYPE,ipType);
-				ProcessRequest processRequest=new ProcessRequest(clientId,orderId,ProvisioningApiConstants.PROV_PACKETSPAN, 'N',
-					null,UserActionStatusTypeEnum.ACTIVATION.toString(), Long.valueOf(0));
+				
+				ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0),clientId,orderId,ProvisioningApiConstants.PROV_PACKETSPAN,
+						                       UserActionStatusTypeEnum.ACTIVATION.toString(),'N','N');
 				Order order=this.orderRepository.findOne(orderId);
 				List<OrderLine> orderLines=order.getServices();
 				
@@ -354,7 +358,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			this.context.authenticatedUser();
 			List<ServiceParameters> parameters=this.serviceParametersRepository.findDataByOrderId(orderId);
 			if(!parameters.isEmpty()){
-			    ProcessRequest processRequest=new ProcessRequest(prepareId,order.getClientId(),order.getId(),ProvisioningApiConstants.PROV_PACKETSPAN, requestType);
+			    ProcessRequest processRequest=new ProcessRequest(prepareId,order.getClientId(),order.getId(),ProvisioningApiConstants.PROV_PACKETSPAN,
+			    		requestType,'N','N');
 			    List<OrderLine> orderLines=order.getServices();
 			    HardwareAssociation hardwareAssociation=this.associationRepository.findOneByOrderId(order.getId());
 			    	if(hardwareAssociation == null){
@@ -370,6 +375,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_CLIENTNAME,client.getFirstname());
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_ORDERID,order.getId());
 			    	jsonObject.put(ProvisioningApiConstants.PROV_DATA_MACID,inventoryItemDetails.getSerialNumber());
+
 			    	if(requestType.equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
 			    		jsonObject.put("New_"+ProvisioningApiConstants.PROV_DATA_PLANNAME,planName);
 			    		Order Oldorder=this.orderRepository.findOne(orderId);
@@ -378,7 +384,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			    	}else{
 			    		jsonObject.put(ProvisioningApiConstants.PROV_DATA_PLANNAME,planName);
 			    	}
-			    	
+
 			    		if(groupname != null){
 			    			jsonObject.put(ProvisioningApiConstants.PROV_DATA_OLD_GROUPNAME,groupname);
 			    		}
@@ -391,6 +397,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			    		}
 		        
 		        for(ServiceParameters serviceParameters:parameters){
+		        	
 		        	if(serviceParameters.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_IPADDRESS)){
 		        			if(serviceParameters.getParameterValue().contains("/")){
 		        				jsonObject.put(ProvisioningApiConstants.PROV_DATA_IPTYPE,"Subnet");
@@ -482,7 +489,12 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			//this.fromApiJsonDeserializer.validateForUpDateIpDetails(command.json());
 			final Long clientId=command.longValueOfParameterNamed("clientId");
 			final JsonElement element = fromJsonHelper.parse(command.json());
+
+
+			final String[] exitIpsArray=fromApiJsonHelper.extractArrayNamed("existIps",element);
+
 			final String[] removeIpsArray=fromApiJsonHelper.extractArrayNamed("removeIps",element);
+
 			final String[] newIpsArray=fromApiJsonHelper.extractArrayNamed("newIps",element);
 			List<String> tmpList = Arrays.asList(newIpsArray);
 			Set<String> uniqueList = new HashSet<String>(tmpList);
@@ -495,10 +507,12 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			
 			for(ServiceParameters serviceData:parameters){
 				if(serviceData.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_IPADDRESS)){
+
 					for(String newIp:newIpsArray){
 						array.put(newIp);
 					}
 					serviceData.setParameterValue(array.toString());
+
 					 if(removeIpsArray.length >= 1){
 					      for (int i=0;i<removeIpsArray.length; i++){
 					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findByIpAddress(removeIpsArray[i]);
@@ -511,7 +525,9 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 					      }
 					     
 					   }
+
 					if(newIpsArray.length >= 1){
+
 					      for (int i=0;i<newIpsArray.length; i++){
 					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findByIpAddress(newIpsArray[i]);
 					    	  if(ipPoolManagement == null){
@@ -521,12 +537,10 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 					    	 // ipPoolManagement.setSubnet(null);
 					    	  this.ipPoolManagementJpaRepository.save(ipPoolManagement);
 					      }
-					     
 					   }	
 					this.serviceParametersRepository.save(serviceData);
 				}
 		}
-	
 		}catch(DataIntegrityViolationException dve){
 			handleCodeDataIntegrityIssues(null, dve);
 		}

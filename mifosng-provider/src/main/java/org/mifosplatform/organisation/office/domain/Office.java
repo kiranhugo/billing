@@ -77,8 +77,30 @@ public class Office extends AbstractPersistable<Long> {
         this.name = null;
         this.externalId = null;
     }
+    
+    
 
-    private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId, Long officeType) {
+    public List<Office> getChildren() {
+		return children;
+	}
+
+	public Office getParent() {
+		return parent;
+	}
+
+	public Date getOpeningDate() {
+		return openingDate;
+	}
+
+	public Long getOfficeType() {
+		return officeType;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	private Office(final Office parent, final String name, final LocalDate openingDate, final String externalId, Long officeType) {
         this.parent = parent;
         this.openingDate = openingDate.toDateMidnight().toDate();
         if (parent != null) {
