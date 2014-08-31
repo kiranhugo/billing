@@ -53,6 +53,8 @@ import org.mifosplatform.organisation.message.service.BillingMessageDataWritePla
 import org.mifosplatform.organisation.message.service.BillingMesssageReadPlatformService;
 import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
 import org.mifosplatform.portfolio.order.data.OrderData;
+import org.mifosplatform.portfolio.order.domain.Order;
+import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
 import org.mifosplatform.provisioning.entitlements.data.ClientEntitlementData;
@@ -90,7 +92,6 @@ public class SheduleJobWritePlatformServiceImpl implements SheduleJobWritePlatfo
 private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
 private final InvoiceClient invoiceClient;
 private final BillingMasterApiResourse billingMasterApiResourse;
-
 private final FromJsonHelper fromApiJsonHelper;
 private final OrderReadPlatformService orderReadPlatformService;
 private final BillingMessageDataWritePlatformService billingMessageDataWritePlatformService;
@@ -104,12 +105,13 @@ private final EntitlementReadPlatformService entitlementReadPlatformService;
 private final EntitlementWritePlatformService entitlementWritePlatformService;
 private final ActionDetailsReadPlatformService actionDetailsReadPlatformService;
 private final ProcessEventActionService actiondetailsWritePlatformService;
-private String ReceiveMessage;
 private final ScheduleJob scheduleJob;
 private final ReadReportingService readExtraDataAndReportingService;
 private final GlobalConfigurationRepository globalConfigurationRepository;
 private final TicketMasterApiResource ticketMasterApiResource;
 private final TicketMasterReadPlatformService ticketMasterReadPlatformService;
+private final OrderRepository orderRepository;
+private  String ReceiveMessage;
 
 
 
@@ -124,7 +126,7 @@ final ProcessRequestReadplatformService processRequestReadplatformService,final 
 final BillingMesssageReadPlatformService billingMesssageReadPlatformService,final MessagePlatformEmailService messagePlatformEmailService,
 final ScheduleJob scheduleJob,final EntitlementReadPlatformService entitlementReadPlatformService,
 final EntitlementWritePlatformService entitlementWritePlatformService,final ReadReportingService readExtraDataAndReportingService,
-final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,
+final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,final OrderRepository orderRepository,
 final GlobalConfigurationRepository globalConfigurationRepository,
 final TicketMasterApiResource ticketMasterApiResource, 
 final TicketMasterReadPlatformService ticketMasterReadPlatformService) {
@@ -146,6 +148,7 @@ this.entitlementWritePlatformService = entitlementWritePlatformService;
 this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 this.actiondetailsWritePlatformService=actiondetailsWritePlatformService;
 this.scheduleJob=scheduleJob;
+this.orderRepository=orderRepository;
 this.readExtraDataAndReportingService=readExtraDataAndReportingService;
 this.globalConfigurationRepository=globalConfigurationRepository;
 this.ticketMasterApiResource=ticketMasterApiResource;
@@ -411,6 +414,7 @@ try {
       if(data.getcreateTicket().equalsIgnoreCase("Y")){
        for (ProcessingDetailsData detailsData : processingDetails) {
     	   ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
+    	   Order order=this.orderRepository.findOne(processRequest.getOrderId());
     	   List<ProblemsData> problemsData=this.ticketMasterReadPlatformService.retrieveProblemData();
     	   List<EnumOptionData> priorityData = this.ticketMasterReadPlatformService.retrievePriorityData();
     	  // Collection<MCodeData> sourceData =this.codeReadPlatformService.getCodeValue("Ticket Source");
@@ -421,7 +425,8 @@ try {
  		   jsonobject.put("locale", "en");
  		   jsonobject.put("dateFormat", "dd MMMM yyyy");
  		   jsonobject.put("ticketTime"," "+new LocalTime().toString(formatter2));
- 		   jsonobject.put("description","orderUpdate");
+ 		   jsonobject.put("description","ClientId"+processRequest.getClientId()+" Order No:"+order.getOrderNo()+" Request Type:"+processRequest.getRequestType()
+ 				          +" Generated at:"+new LocalTime().toString(formatter2));
  		   jsonobject.put("ticketDate",formatter1.print(new LocalDate()));
  		   jsonobject.put("sourceOfTicket","Phone");
  		   jsonobject.put("assignedTo", userId);
