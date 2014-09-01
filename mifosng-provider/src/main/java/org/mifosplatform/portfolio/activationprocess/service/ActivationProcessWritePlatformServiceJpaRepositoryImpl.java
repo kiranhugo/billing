@@ -16,6 +16,7 @@ import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporaryRepository;
 import org.mifosplatform.billing.selfcare.exception.PaymentStatusAlreadyActivatedException;
+import org.mifosplatform.billing.selfcare.exception.SelfCareAlreadyVerifiedException;
 import org.mifosplatform.billing.selfcare.exception.SelfCareNotVerifiedException;
 import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryEmailIdNotFoundException;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
@@ -39,6 +40,7 @@ import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleWritePlatformS
 import org.mifosplatform.logistics.ownedhardware.service.OwnedHardwareWritePlatformService;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
+import org.mifosplatform.portfolio.activationprocess.exception.ClientAlreadyCreatedException;
 import org.mifosplatform.portfolio.activationprocess.serialization.ActivationProcessCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
@@ -214,7 +216,11 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				throw new PaymentStatusAlreadyActivatedException(email);
 			}
 			
-			if(temporary.getStatus().equalsIgnoreCase("ACTIVE")){
+			if (temporary.getStatus().equalsIgnoreCase("ACTIVE")) {
+				throw new ClientAlreadyCreatedException();
+			}
+			
+			if(temporary.getStatus().equalsIgnoreCase("PENDING")){
 				
 				// client creation
 				AddressData addressData = this.addressReadPlatformService.retrieveName(city);
@@ -246,19 +252,8 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				if (resultClient == null && resultClient.getClientId() == null && resultClient.getClientId() <= 0) {
 					throw new PlatformDataIntegrityException("error.msg.client.creation.failed", "Client Creation Failed","Client Creation Failed");
 				}
-				
-				// create selfcare record		userName uniqueReference
-				JSONObject selfcarecreation = new JSONObject();
-				selfcarecreation.put("userName", fullname);
-				selfcarecreation.put("uniqueReference", email);
-				selfcarecreation.put("clientId", resultClient.getClientId());;
-				final CommandWrapper selfcareCommandRequest = new CommandWrapperBuilder().createSelfCare().withJson(selfcarecreation.toString()).build();
-				final CommandProcessingResult selfcareCommandresult = this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
-				
-				if(selfcareCommandresult ==null && selfcareCommandresult.resourceId() <= 0){			
-					throw new PlatformDataIntegrityException("error.msg.selfcare.creation.failed", "selfcare Creation Failed","selfcare Creation Failed");
-				}
 
+				temporary.setStatus("ACTIVE");
 				//book device
 				
 				if(deviceStatusConfiguration != null){
@@ -369,24 +364,20 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				}
 				
 				// payment Processing
-				if(temporary.getPaymentStatus().equalsIgnoreCase("INTERMEDIATE")){
+				if(temporary.getPaymentStatus().equalsIgnoreCase("PENDING")){
 					  temporary.setPaymentStatus("ACTIVE");
 					  JSONObject json= new JSONObject(temporary.getPaymentData());
 					  
 				   	  String orderNumber = json.getString("order_num");
-				   	  Long clientId = json.getLong("user1");
-				   	  String returnUrl = json.getString("user2");
-				   	  String EmailId = json.getString("cust_email");
 				   	  String amount = json.getString("total_amount");
 				   	  BigDecimal totalAmount = new BigDecimal(amount);
-				   	  
-				   	  
+				   	  	   	  
 					  JsonObject object=new JsonObject();
 					  object.addProperty("txn_id", orderNumber);
 					  object.addProperty("dateFormat",dateFormat);
 					  object.addProperty("locale","en");
 					  object.addProperty("paymentDate",activationDate);
-					  object.addProperty("amountPaid",amount);
+					  object.addProperty("amountPaid",totalAmount);
 					  object.addProperty("isChequeSelected","no");
 					  object.addProperty("receiptNo",orderNumber);
 					  object.addProperty("remarks",email);
@@ -400,15 +391,25 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 						}
 				}
 				
+				// create selfcare record		userName uniqueReference
+				JSONObject selfcarecreation = new JSONObject();
+				selfcarecreation.put("userName", fullname);
+				selfcarecreation.put("uniqueReference", email);
+				selfcarecreation.put("clientId", resultClient.getClientId());;
+				final CommandWrapper selfcareCommandRequest = new CommandWrapperBuilder().createSelfCare().withJson(selfcarecreation.toString()).build();
+				final CommandProcessingResult selfcareCommandresult = this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
+				
+				if(selfcareCommandresult ==null && selfcareCommandresult.resourceId() <= 0){			
+					throw new PlatformDataIntegrityException("error.msg.selfcare.creation.failed", "selfcare Creation Failed","selfcare Creation Failed");
+				}
+				
 				return resultClient;
 				
-			}else{
-				if(temporary.getStatus().equalsIgnoreCase("INACTIVE")){
-					throw new SelfCareNotVerifiedException(email);
-				}
+			} else if (temporary.getStatus().equalsIgnoreCase("INACTIVE")) {
+				throw new SelfCareNotVerifiedException(email);			
+			}else {
 				return new CommandProcessingResult(-1l).empty();
-			}
-			
+			}				
 
 		} catch (DataIntegrityViolationException dve) {
 			handleDataIntegrityIssues(command, dve);

@@ -170,9 +170,11 @@ public class PaymentsApiResource {
 		   	  String orderNumber = json.getString("order_num");
 		   	  Long clientId = json.getLong("user1");
 		   	  String returnUrl = json.getString("user2");
+		   	  String screenName = json.getString("user3");
 		   	  String EmailId = json.getString("cust_email");
 		   	  String amount = json.getString("total_amount");
 		   	  BigDecimal totalAmount = new BigDecimal(amount);
+		   	  returnUrl.replace("index.html", "index.html#/"+screenName);
 		   	  
 			if (clientId !=null && clientId > 0) {
 				String date = new SimpleDateFormat("dd MMMM yyyy").format(new Date());
@@ -191,8 +193,7 @@ public class PaymentsApiResource {
 				final CommandWrapper commandRequest = new CommandWrapperBuilder().createPayment(clientId).withJson(object.toString()).build();
 				final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
 				return "<!-- success--> <span>Order Accepted Successfully</span>"
-						+ "OBS Payment Id:"
-						+ result.resourceId()
+						+ "ScreenName"
 						+ "<br>"
 						+ "<a href='"+ returnUrl +"'>"
 						+ "<strong>CLICK HERE</strong> to return to your account</a>";
@@ -202,7 +203,7 @@ public class PaymentsApiResource {
 				if(selfCareTemporary != null && selfCareTemporary.getPaymentStatus().equalsIgnoreCase("INACTIVE")){
 					
 					selfCareTemporary.setPaymentData(json.toString());
-					selfCareTemporary.setPaymentStatus("INTERMEDIATE");
+					selfCareTemporary.setPaymentStatus("PENDING");
 					this.selfCareTemporaryRepository.save(selfCareTemporary);
 					
 					return "<!-- success--> <span>Order Accepted Successfully</span>"
