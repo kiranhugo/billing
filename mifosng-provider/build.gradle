@@ -10,7 +10,7 @@ buildscript {
      mavenRepo(name: 'zt-public-snapshots',
                url: 'http://repos.zeroturnaround.com/nexus/content/groups/zt-public/')
      flatDir {
-       dirs '../src/main/resources'
+       dirs 'src/main/resources'
      }
   }
 
@@ -96,7 +96,7 @@ dependencies {
 	    }
 	    tomcat "org.apache.tomcat:tomcat-dbcp:${tomcatVersion}"
 
-    compile files('../src/main/resources/addexternalbeesmart.jar')
+    compile files('src/main/resources/addexternalbeesmart.jar')
 	providedCompile(
 				[group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
 			)
@@ -204,8 +204,9 @@ task dist(type:Zip){
         include '*'
         into('api-docs')
     }
-    from jar.outputs.files
+  
     from war.outputs.files
+     into(baseName + '-' + version)
 }
 
 task deployPentahoReports() {
@@ -326,13 +327,14 @@ buildscript {
 
 
 flyway {
-
+    driver = 'com.mysql.jdbc.Driver'
     url = "jdbc:mysql://localhost:3306/obstenant-default"
     user = mysqlUser
     password = mysqlPassword
     
     def filePath = "filesystem:$projectDir" + System.properties['file.separator'] + '..' + System.properties['file.separator'] + 'mifosng-db' + System.properties['file.separator'] + 'migrations'
     locations = [filePath]
+   
 }
 
 task migrateTenantDB<<{
@@ -348,8 +350,9 @@ task migrateTenantDB<<{
 	
     flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
     flyway.locations= [filePath]
-
+    
     flywayMigrate.execute()
+   
 }
 
 task showTenantDBInfo<<{
@@ -366,12 +369,11 @@ task showTenantDBInfo<<{
     flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
     flyway.locations= [filePath]
     flywayInfo.execute()
+    
 }
-
 
 task migrateTenantListDB<<{
     description="Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'obsplatform-tenants' (Example: -PdbName=someDBname)"
-
 	def filePath = "filesystem:$projectDir" + System.properties['file.separator'] + '..' + System.properties['file.separator'] + 'mifosng-db' + System.properties['file.separator'] + 'migrations/list_db'
  	def tenantsDbName = 'obsplatform-tenants';
     if (rootProject.hasProperty("dbName")) {
@@ -382,11 +384,11 @@ task migrateTenantListDB<<{
     flyway.locations= [filePath]
 
     flywayMigrate.execute()
+  
 }
 
 task showTenantListDBInfo<<{
     description="Shows the migration info for a List DB. Optionally can pass dbName. Defaults to 'obsplatform-tenants' (Example: -PdbName=someDBname)"
-    
     def filePath = "filesystem:$projectDir" + System.properties['file.separator'] + '..' + System.properties['file.separator'] + 'mifosng-db' + System.properties['file.separator'] + 'migrations/list_db'
     def tenantsDbName = 'obsplatform-tenants';
     if (rootProject.hasProperty("dbName")) {
@@ -396,8 +398,8 @@ task showTenantListDBInfo<<{
     flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
     flyway.locations= [filePath]
     flywayInfo.execute()
+   
 }
-
 /*
 * Support publication of artifacts versioned by topic branch.
 * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.

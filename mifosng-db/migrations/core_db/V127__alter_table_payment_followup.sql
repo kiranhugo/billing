@@ -1,5 +1,5 @@
-insert into r_enum_value VALUES ('order_status',7,'REACTIVE','REACTIVE');
-insert into m_permission VALUES (null,'Ordering','REACTIVE_ORDER','ORDER','REACTIVE',0);
+insert ignore into r_enum_value VALUES ('order_status',7,'REACTIVE','REACTIVE');
+insert ignore into m_permission VALUES (null,'Ordering','REACTIVE_ORDER','ORDER','REACTIVE',0);
 
 
 
@@ -12,7 +12,7 @@ Begin
      WHERE COLUMN_NAME = 'reactive_date'
      and TABLE_NAME = 'b_payment_followup'
      and TABLE_SCHEMA = DATABASE())THEN
-ALTER table b_payment_followup add `reactive_date` datetime DEFAULT NULL;
+ALTER table b_payment_followup add column `reactive_date` datetime DEFAULT NULL;
 END IF;
 END //
 DELIMITER ;
