@@ -332,5 +332,7 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 	 
 		
 	}
+	
+	
 
 }

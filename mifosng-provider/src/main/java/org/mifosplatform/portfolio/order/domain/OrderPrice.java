@@ -149,6 +149,22 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 	
 	
 
+	public Date getNextBillableDay() {
+		return nextBillableDay;
+	}
+
+	public char getIsDeleted() {
+		return isDeleted;
+	}
+
+	public boolean isTaxInclusive() {
+		return taxInclusive;
+	}
+
+	public OrderDiscount getOrderDiscount() {
+		return orderDiscount;
+	}
+
 	public void updateDates(LocalDate date) {
 		this.billEndDate =date.toDate();
 		//this.nextBillableDay=date.plusDays(1).toDate();

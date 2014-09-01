@@ -760,25 +760,35 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 			Order order=this.orderRepository.findOne(entityId);
 			order.updateDisconnectionstate();
 			Date billEndDate=order.getPrice().get(0).getBillEndDate();
-			this.orderRepository.save(order);
-			Plan oldPlan=this.planRepository.findOne(order.getPlanId());
-			GlobalConfigurationProperty configurationProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_DISCONNECT);
-				if(configurationProperty.isEnabled()){
-					if(oldPlan.getBillRule() !=400 && oldPlan.getBillRule() !=300){ 
-						this.reverseInvoice.reverseInvoiceServices(order.getId(), order.getClientId(),new LocalDate());
-					}
-				}
 			
+			Date invoicetillDate=order.getPrice().get(0).getInvoiceTillDate();
+			this.orderRepository.save(order);
+			//Plan oldPlan=this.planRepository.findOne(order.getPlanId());
+			GlobalConfigurationProperty property = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_CHANGE_PLAN_ALIGN_DATES);
+			if(!property.isEnabled()){
+			GlobalConfigurationProperty dcConfiguration= this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_DISCONNECT);
+				if(dcConfiguration.isEnabled()){
+					//if(oldPlan.getBillRule() !=400 && oldPlan.getBillRule() !=300){ 
+						this.reverseInvoice.reverseInvoiceServices(order.getId(), order.getClientId(),new LocalDate());
+					//}
+				}
+		}
 			CommandProcessingResult result=this.createOrder(order.getClientId(), command);
 			Order newOrder=this.orderRepository.findOne(result.resourceId());
 			newOrder.updateOrderNum(order.getOrderNo());
 			newOrder.updateActivationDate(order.getActiveDate());
-			GlobalConfigurationProperty property = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_CHANGE_PLAN_ALIGN_DATES);
+			
 			
 				if(property.isEnabled()){
 					List<OrderPrice> orderPrices=newOrder.getPrice();
 					for(OrderPrice orderPrice:orderPrices){
-						orderPrice.setBillEndDate(new LocalDate(billEndDate));
+						if(billEndDate == null){
+							orderPrice.setBillEndDate(null);	
+						}else{
+							orderPrice.setBillEndDate(new LocalDate(billEndDate));
+						}
+						orderPrice.setInvoiceTillDate(invoicetillDate);
+						orderPrice.setNextBillableDay(order.getPrice().get(0).getNextBillableDay());
 					}
 				}
 			newOrder.setuserAction(UserActionStatusTypeEnum.CHANGE_PLAN.toString());
@@ -1054,19 +1064,19 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 						throw new OrderNotFoundException(entityId);
 					}
 					
-					EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.PENDING.toString());	
+					Long pendingId=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.PENDING.toString()).getEnumId();	
 				    Plan plan=this.planRepository.findOne(order.getPlanId());
 
 				     if(!plan.getProvisionSystem().equalsIgnoreCase("None") && !plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
-								order.setStatus(enumDomainService.getEnumId());
+								order.setStatus(pendingId);
                         CommandProcessingResult commandProcessingResult=this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,UserActionStatusTypeEnum.SUSPENTATION.toString());
                         resourceId =commandProcessingResult.resourceId();
 					}else{
-								enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.SUSPENDED.toString());
+						EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.SUSPENDED.toString());
 								order.setStatus(enumDomainService.getEnumId());
 					}
 					order.setuserAction(UserActionStatusTypeEnum.SUSPENTATION.toString());
-					this.orderRepository.save(order);
+				
 					
 					//Post Details in Payment followup
 					PaymentFollowup paymentFollowup=PaymentFollowup.fromJson(command,order.getClientId(),order.getId(),
@@ -1074,9 +1084,11 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 					this.paymentFollowupRepository.save(paymentFollowup);
 					
 					if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
+						order.setStatus(pendingId);
 							this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order, plan.getCode(), UserActionStatusTypeEnum.SUSPENTATION.toString(), 
 											resourceId, null, null,order.getId());
 					}
+					this.orderRepository.save(order);
 					OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),resourceId,UserActionStatusTypeEnum.TERMINATION.toString(),
 							appUser.getId(),null);
                      this.orderHistoryRepository.save(orderHistory);	
@@ -1102,20 +1114,20 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 				throw new OrderNotFoundException(entityId);
 			}
 			
-			EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.PENDING.toString());	
+			 Long pendingId=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.PENDING.toString()).getEnumId();	
 		    Plan plan=this.planRepository.findOne(order.getPlanId());
 
 		    if(!plan.getProvisionSystem().equalsIgnoreCase("None") && !plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
 		    	
-						order.setStatus(enumDomainService.getEnumId());
+						
 				CommandProcessingResult processingResult=this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,UserActionStatusTypeEnum.REACTIVATION.toString());
 				resourceId=processingResult.resourceId();
 			}else{
-						enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.ACTIVE.toString());
+				EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.ACTIVE.toString());
 						order.setStatus(enumDomainService.getEnumId());
 			}
 			order.setuserAction(UserActionStatusTypeEnum.REACTIVATION.toString());
-			this.orderRepository.save(order);
+			
 			
 			PaymentFollowup paymentFollowup=this.paymentFollowupRepository.findOneByorderId(order.getId());
 			
@@ -1130,9 +1142,12 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 			this.paymentFollowupRepository.save(paymentFollowup);*/
 			
 			if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
+				order.setStatus(pendingId);
 					this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order, plan.getCode(), UserActionStatusTypeEnum.REACTIVATION.toString(), 
 									resourceId, null, null,order.getId());
 			}
+			
+			this.orderRepository.save(order);
 			OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),resourceId,UserActionStatusTypeEnum.REACTIVATION.toString(),
 					appUser.getId(),null);
              this.orderHistoryRepository.save(orderHistory);	

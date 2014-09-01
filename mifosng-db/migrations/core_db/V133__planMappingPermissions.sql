@@ -8,3 +8,4 @@ INSERT IGNORE INTO b_message_template(template_description,subject,header,body,f
 
 
 
+

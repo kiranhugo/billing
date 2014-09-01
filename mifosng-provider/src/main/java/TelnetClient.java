@@ -1,4 +1,3 @@
-import org.mifosplatform.logistics.item.domain.StatusTypeEnum;
 
 
 class Jasper
@@ -6,12 +5,13 @@ class Jasper
     public static void main(String args[]) throws Exception
     {
 
-		Long i=new Long(1);
-		Integer j=StatusTypeEnum.ACTIVE.getValue();
-		   if(i.equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
-		System.out.println("tu");
-		   }else	
-			   System.out.println("false");
-
+	
+    	String line="3,31;August;2014,Migration,CREDIT,120,ok;;";
+    	
+    	System.out.println(line);
+    	String[] strings=line.split(",");
+    	for(int i=0;i<strings.length;i++){
+    		System.out.println(strings[i]);
+    	}
     }
 }
