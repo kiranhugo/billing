@@ -44,14 +44,21 @@ public class MediaAssetData {
 	private Long ratingCount;
 	private List<McodeData> contentProviderData;
 	private BigDecimal cpShareValue;
+	private String quality;
+	private String optType;
+	private BigDecimal price;
 	
-public MediaAssetData(final Long mediaId,final String mediaTitle,final String image,final BigDecimal rating, Long eventId, String assetTag){
+public MediaAssetData(final Long mediaId,final String mediaTitle,final String image,final BigDecimal rating, Long eventId, 
+		               String assetTag, String quality, String optType, BigDecimal price){
 	this.mediaId=mediaId;
 	this.mediaTitle=mediaTitle;
 	this.mediaImage=image;
 	this.mediaRating=rating;
 	this.eventId=eventId;
 	this.assetTag=assetTag;
+	this.quality=quality;
+	this.optType=optType;
+	this.price=price;
 }
 public MediaAssetData(List<MediaAssetData> data, Long noOfPages, Long pageNo) {
 	this.mediaId=null;

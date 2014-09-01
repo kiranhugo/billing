@@ -53,7 +53,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
-		
+
 		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("Beenius") && requestType.equalsIgnoreCase("ACTIVATION")){
 			authPin = command.stringValueOfParameterNamed("authPin");
 			Long clientId = command.longValueOfParameterNamed("clientId");	
@@ -110,7 +110,8 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			Long id = command.longValueOfParameterNamed("prdetailsId");
 			if (processRequestDetails.getId().longValue() == id.longValue()) {
 				processRequestDetails.updateStatus(command);
-				if(provSystem != null && requestType != null && provSystem.equalsIgnoreCase("Beenius") && requestType.equalsIgnoreCase("ACTIVATION")){
+
+				if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("Beenius") && requestType.equalsIgnoreCase("ACTIVATION") ){
 					processRequestDetails.setReceiveMessage(processRequestDetails.getReceiveMessage() +
 							", generated authpin=" + authPin + ", Email output=" + message);
 				}else{

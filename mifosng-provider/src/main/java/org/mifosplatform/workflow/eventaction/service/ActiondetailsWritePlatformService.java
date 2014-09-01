@@ -6,7 +6,7 @@ import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
 
 public interface ActiondetailsWritePlatformService {
 
-	void AddNewActions(List<ActionDetaislData> actionDetaislDatas, Long clientId, String resorceId);
+	String AddNewActions(List<ActionDetaislData> actionDetaislDatas, Long clientId, String resorceId);
 
 	//void ProcessEventActions(EventActionData eventActionData);
 

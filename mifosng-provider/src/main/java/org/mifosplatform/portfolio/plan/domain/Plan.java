@@ -40,8 +40,6 @@ public class Plan{
 	@Column(name = "plan_status")
 	private Long status;
 	
-	@Column(name = "duration")
-	private String contractPeriod;
 
 	@Column(name = "start_date")
 	private Date startDate;
@@ -79,7 +77,7 @@ public class Plan{
 	}
 
 	public Plan(final String code, final String description,final LocalDate start_date, final LocalDate endDate,
-			final Long bill_rule, final Long status,final String contractPeriod,
+			final Long bill_rule, final Long status,
 			final List<PlanDetails> details, String provisioingSystem, boolean isPrepaid, boolean allowTopup,boolean isHwReq) {
 			
 				this.planCode = code;
@@ -88,7 +86,6 @@ public class Plan{
 						this.endDate = endDate.toDate();
 				this.startDate = start_date.toDate();
 				this.status = status;
-				this.contractPeriod = contractPeriod;
 				this.billRule = bill_rule;
 				this.provisionSystem=provisioingSystem;
 				this.isPrepaid=isPrepaid?'Y':'N';
@@ -144,9 +141,6 @@ public class Plan{
 		return deleted;
 	}
 
-	public String getContractPeriod() {
-		return contractPeriod;
-	}
 
 	public void addServieDetails(PlanDetails serviceDetail) {
 
@@ -232,13 +226,7 @@ public class Plan{
 				final char isPrepaidParamName =isPrepaid?'Y':'N';
 				this.isPrepaid=isPrepaidParamName;
 						
-		final String contractPeriodParamName = "duration";
-				if (command.isChangeInStringParameterNamed(contractPeriodParamName, this.contractPeriod)) {
-					   String newValue = command.stringValueOfParameterNamed(contractPeriodParamName);
-					    newValue=this.isPrepaid == 'Y'?newValue:null;
-					    actualChanges.put(contractPeriodParamName, newValue);
-					    this.contractPeriod = StringUtils.defaultIfEmpty(newValue, null);
-				}
+	
 		final boolean allowTopupParamName =command.booleanPrimitiveValueOfParameterNamed("allowTopup");
 				this.allowTopup=allowTopupParamName?'Y':'N';
 	          
@@ -254,7 +242,6 @@ public class Plan{
 		    final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
 		    final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
 		    final Long status = command.longValueOfParameterNamed("status");
-		    final String duration = command.stringValueOfParameterNamed("duration");
 		    final Long billRule = command.longValueOfParameterNamed("billRule");
 		    final String provisioingSystem=command.stringValueOfParameterNamed("provisioingSystem");
 		    boolean isPrepaid=command.booleanPrimitiveValueOfParameterNamed("isPrepaid");
@@ -262,7 +249,7 @@ public class Plan{
 		    boolean isHwReq=command.booleanPrimitiveValueOfParameterNamed("isHwReq");
 		   
 		    
-		return new Plan(planCode,planDescription,startDate,endDate,billRule,status,duration,null,provisioingSystem,isPrepaid,allowTopup,isHwReq);
+		return new Plan(planCode,planDescription,startDate,endDate,billRule,status,null,provisioingSystem,isPrepaid,allowTopup,isHwReq);
 	}
 
 	/**

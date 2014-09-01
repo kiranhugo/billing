@@ -6,6 +6,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -18,6 +20,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.plan.domain.StatusTypeEnum;
+import org.mifosplatform.portfolio.plan.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -25,7 +28,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
 public class Order extends AbstractAuditableCustom<AppUser, Long> {
 
 	
-
+	
 	@Column(name = "client_id")
 	private Long clientId;
 
@@ -312,6 +315,7 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 		this.endDate =new Date();
 		this.disconnectReason="Change Plan";
 		this.isDeleted='Y';
+		this.userAction=UserActionStatusTypeEnum.DISCONNECTION.toString();
 		this.status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.DISCONNECTED).getId();
 		
 	}
@@ -328,5 +332,7 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 	 
 		
 	}
+	
+	
 
 }

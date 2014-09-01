@@ -1,7 +1,6 @@
 package org.mifosplatform.provisioning.processrequest.domain;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,13 +13,12 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
-import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "b_process_request")
-public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long>{
 
+public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long> {
 	
 	@Column(name = "client_id")
 	private Long clientId;
@@ -59,7 +57,7 @@ public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long>{
 
 
 
-	public ProcessRequest(Long clientId, Long orderId, 
+	/*public ProcessRequest(Long clientId, Long orderId, 
 			 String provisioningSystem, char isDeleted,String userName, String requestType, Long requestId) {
             this.clientId=clientId;
             this.orderId=orderId;
@@ -68,13 +66,15 @@ public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long>{
             this.prepareRequestId=requestId;
 	
 	
-	}
-	 public ProcessRequest(Long prepareRequestId, Long clientId,Long orderId, String provisioningSytem, String requestType) {
+	}*/
+	 public ProcessRequest(Long prepareRequestId, Long clientId,Long orderId, String provisioningSytem, String requestType, char isProcessed, char isNotify) {
 		 	this.prepareRequestId = prepareRequestId;
 		 	this.clientId = clientId;
 		 	this.orderId = orderId;
 		 	this.provisioingSystem = provisioningSytem;
 		 	this.requestType = requestType;
+		 	this.isProcessed=isProcessed;
+		 	this.isNotify=isNotify;
 	 }
 
 
@@ -85,7 +85,7 @@ public class ProcessRequest extends AbstractAuditableCustom<AppUser, Long>{
 		 	final Long orderId = command.longValueOfParameterNamed("orderId");
 		 	final String provisioningSytem = command.stringValueOfParameterNamed("provisioingSystem");
 		 	final String requestType = command.stringValueOfParameterNamed("requestType");
-		 	return new ProcessRequest(prepareRequestId,clientId,orderId,provisioningSytem,requestType);
+		 	return new ProcessRequest(prepareRequestId,clientId,orderId,provisioningSytem,requestType,'N','N');
 
 	 }
 	

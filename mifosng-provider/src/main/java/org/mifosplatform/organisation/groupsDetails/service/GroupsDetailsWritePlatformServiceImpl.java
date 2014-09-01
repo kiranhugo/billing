@@ -89,7 +89,8 @@ public class GroupsDetailsWritePlatformServiceImpl implements GroupsDetailsWrite
 			 sentMsgObj.addProperty("attribute3", command.stringValueOfParameterNamed("attribute3"));
 			 sentMsgObj.addProperty("attribute4", command.stringValueOfParameterNamed("attribute4"));
 			 
-			 JsonCommand sentMsgCommand = new JsonCommand(null, sentMsgObj.toString(), sentMsgObj, fromJsonHelper, null, null, null, null, null, null, null, null, null, null, null,null);
+			 JsonCommand sentMsgCommand = new JsonCommand(null, sentMsgObj.toString(), sentMsgObj, fromJsonHelper,
+					                      null, null, null, null, null, null, null, null, null, null, null,null);
 			 /*String groupName = command.stringValueOfParameterNamed("groupName");
 			 String attr1 = command.stringValueOfParameterNamed("attr1");
 			 String attr2 = command.stringValueOfParameterNamed("attr2");

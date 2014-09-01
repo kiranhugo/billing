@@ -51,10 +51,12 @@ public class LogoutApiResource {
 	public String createNewContract(final String apiRequestBodyAsJson,@QueryParam("id") final Long id,@Context HttpServletRequest req) {
 				
         		LoginHistory loginHistory=this.loginHistoryRepository.findOne(id);
+        		if(loginHistory != null){
             	final Map<String, Object> changes = loginHistory.update();
             	if(!changes.isEmpty()){
             		this.loginHistoryRepository.save(loginHistory);
             	}
+        		}
         		req.getSession().invalidate();
         		//return "successfully logout";
         		return "loginHistoryId"+":"+id.toString();

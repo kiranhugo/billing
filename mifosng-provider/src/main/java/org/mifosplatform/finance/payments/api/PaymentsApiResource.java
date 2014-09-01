@@ -165,67 +165,63 @@ public class PaymentsApiResource {
 	 @Consumes({ MediaType.APPLICATION_JSON })
 	 @Produces({ MediaType.TEXT_HTML})
 	 public String dalpayCheckout(final String apiRequestBodyAsJson){
-	   try {
-		   	  JSONObject json= new JSONObject(apiRequestBodyAsJson);
-		   	  String orderNumber = json.getString("order_num");
-		   	  Long clientId = json.getLong("user1");
-		   	  String returnUrl = json.getString("user2");
-		   	  String screenName = json.getString("user3");
-		   	  String EmailId = json.getString("cust_email");
-		   	  String amount = json.getString("total_amount");
-		   	  BigDecimal totalAmount = new BigDecimal(amount);
-		   	  returnUrl.replace("index.html", "index.html#/"+screenName);
-		   	  
-			if (clientId !=null && clientId > 0) {
-				String date = new SimpleDateFormat("dd MMMM yyyy").format(new Date());
-				JsonObject object = new JsonObject();
 
-				object.addProperty("txn_id", orderNumber);
-				object.addProperty("dateFormat", "dd MMMM yyyy");
-				object.addProperty("locale", "en");
-				object.addProperty("paymentDate", date);
-				object.addProperty("amountPaid", totalAmount);
-				object.addProperty("isChequeSelected", "no");
-				object.addProperty("receiptNo", orderNumber);
-				object.addProperty("remarks", "Updated with Dalpay");
-				object.addProperty("paymentCode", 27);
+		   try {
+			   	  JSONObject json= new JSONObject(apiRequestBodyAsJson);
+			   	  String orderNumber = json.getString("order_num");
+			   	  Long clientId = json.getLong("user1");
+			   	  String returnUrl = json.getString("user2");
+			   	  String screenName = json.getString("user3");
+			   	  String EmailId = json.getString("cust_email");
+			   	  String amount = json.getString("total_amount");
+			   	  BigDecimal totalAmount = new BigDecimal(amount);
+			   	returnUrl = returnUrl.replace("index.html", "index.html#/"+screenName);
+			   	  
+				if (clientId !=null && clientId > 0) {
+					String date = new SimpleDateFormat("dd MMMM yyyy").format(new Date());
+					JsonObject object = new JsonObject();
+					object.addProperty("txn_id", orderNumber);
+					object.addProperty("dateFormat", "dd MMMM yyyy");
+					object.addProperty("locale", "en");
+					object.addProperty("paymentDate", date);
+					object.addProperty("amountPaid", totalAmount);
+					object.addProperty("isChequeSelected", "no");
+					object.addProperty("receiptNo", orderNumber);
+					object.addProperty("remarks", "Updated with Dalpay");
+					object.addProperty("paymentCode", 27);
 
-				final CommandWrapper commandRequest = new CommandWrapperBuilder().createPayment(clientId).withJson(object.toString()).build();
-				final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
-				return "<!-- success--> <span>Order Accepted Successfully</span>"
-						+ "ScreenName"
-						+ "<br>"
-						+ "<a href='"+ returnUrl +"'>"
-						+ "<strong>CLICK HERE</strong> to return to your account</a>";
-			}else if(clientId !=null && clientId == 0){
+					final CommandWrapper commandRequest = new CommandWrapperBuilder().createPayment(clientId).withJson(object.toString()).build();
+					final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+					
+				}else if(clientId !=null && clientId == 0){
+					
+					SelfCareTemporary selfCareTemporary = this.selfCareTemporaryRepository.findOneByEmailId(EmailId);
+					if(selfCareTemporary != null && selfCareTemporary.getPaymentStatus().equalsIgnoreCase("INACTIVE")){
+						
+						selfCareTemporary.setPaymentData(json.toString());
+						selfCareTemporary.setPaymentStatus("PENDING");
+						this.selfCareTemporaryRepository.save(selfCareTemporary);											
+						
+					}else if(selfCareTemporary != null){				
+						throw new SelfCareTemporaryAlreadyExistException(EmailId);					
+					}else{					
+						throw new SelfCareTemporaryEmailIdNotFoundException(EmailId);					
+					}		
+				}else{		
+					throw new DalpayRequestFailureException(clientId);				
+				}
 				
-				SelfCareTemporary selfCareTemporary = this.selfCareTemporaryRepository.findOneByEmailId(EmailId);
-				if(selfCareTemporary != null && selfCareTemporary.getPaymentStatus().equalsIgnoreCase("INACTIVE")){
-					
-					selfCareTemporary.setPaymentData(json.toString());
-					selfCareTemporary.setPaymentStatus("PENDING");
-					this.selfCareTemporaryRepository.save(selfCareTemporary);
-					
-					return "<!-- success--> <span>Order Accepted Successfully</span>"
-					+ "<br>"
-					+ "<a href='"+ returnUrl +"'>"
-					+ "<strong>CLICK HERE</strong> to return to your account</a>";
-					
-				}else if(selfCareTemporary != null){				
-					throw new SelfCareTemporaryAlreadyExistException(EmailId);					
-				}else{					
-					throw new SelfCareTemporaryEmailIdNotFoundException(EmailId);					
-				}		
-			}else{		
-				throw new DalpayRequestFailureException(clientId);				
-			}
-		   	  
-			  
-	  } 
-	   catch(Exception e){
-	    return e.getMessage();
-	   }
-	 }
+				return "<!-- success--> <span>Order Accepted Successfully</span>"
+				+ "<br>"
+				+ "<a href='"+ returnUrl +"'>"
+				+ "<strong>CLICK HERE</strong> to return to your account</a>";
+			   	  
+				  
+		  } 
+		   catch(Exception e){
+		    return e.getMessage();
+		   }
+		 }
 	 
 	 @POST
 	 @Path("authorizeNet")

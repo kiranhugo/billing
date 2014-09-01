@@ -16,7 +16,10 @@ public class ConfigurationConstants {
 	public static final String CONFIR_PROPERTY_SALE="SALE";
 	public static final String CONFIR_PROPERTY_OWN="OWN";
 	public static final String CONFIR_PROPERTY_SELF_REGISTRATION="Register_plan";
-	public static final String CONFIR_REGISTRATION_REQUIRE_DEVICE="Registration_requires_device";
+	public static final String CONFIR_PROPERTY_REGISTRATION_DEVICE="Registration_requires_device";
+	public final static String CONFIG_PROPERTY="Implicit Association";
+	public final static String CONFIG_DISCONNECT="Disconnection Credit";
+	public final static String CONFIG_CHANGE_PLAN_ALIGN_DATES="CHANGE_PLAN_ALIGN_DATES";
 
 	public static final String ENABLED = "enabled";
 	public static final String VALUE = "value";

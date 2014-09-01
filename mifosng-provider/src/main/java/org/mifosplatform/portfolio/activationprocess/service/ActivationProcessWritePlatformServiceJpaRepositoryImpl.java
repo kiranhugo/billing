@@ -24,6 +24,8 @@ import org.mifosplatform.billing.selfcare.service.SelfCareWritePlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
+import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationRepository;
@@ -71,7 +73,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 	private final ItemDetailsRepository itemDetailsRepository;
 	private final SelfCareTemporaryRepository selfCareTemporaryRepository;
 	private final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService;
-	private final SelfCareRepository selfCareRepository;
+	private final CodeValueRepository codeValueRepository;
 	
     @Autowired
     public ActivationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,final FromJsonHelper fromJsonHelper,
@@ -80,7 +82,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
     		final OwnedHardwareWritePlatformService ownedHardwareWritePlatformService, final AddressReadPlatformService addressReadPlatformService,
     		final ActivationProcessCommandFromApiJsonDeserializer commandFromApiJsonDeserializer, final ItemDetailsRepository itemDetailsRepository,
     		final SelfCareTemporaryRepository selfCareTemporaryRepository,final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService,
-    		final SelfCareRepository selfCareRepository) {
+    		final CodeValueRepository codeValueRepository) {
         
     	this.context = context;
         this.fromJsonHelper = fromJsonHelper;
@@ -94,7 +96,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         this.itemDetailsRepository = itemDetailsRepository;
         this.selfCareTemporaryRepository = selfCareTemporaryRepository;
         this.portfolioCommandSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
-        this.selfCareRepository = selfCareRepository;
+        this.codeValueRepository = codeValueRepository;
  
     }
 
@@ -172,6 +174,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 
            
         } catch (DataIntegrityViolationException dve) {
+        	
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(-1l).empty();
         }
@@ -182,14 +185,13 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         logger.error(dve.getMessage(), dve);
     }
 
-	@SuppressWarnings("unused")
+	//@SuppressWarnings("unused")
 	@Override
 	public CommandProcessingResult selfRegistrationProcess(JsonCommand command) {
 
 		try {
 			context.authenticatedUser();
 			commandFromApiJsonDeserializer.validateForCreate(command.json());
-			
 			Long id = new Long(1);		
 			CommandProcessingResult resultClient = null;
 			CommandProcessingResult resultSale = null;
@@ -199,7 +201,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			String activationDate = new SimpleDateFormat(dateFormat).format(new Date());
 
 			GlobalConfigurationProperty deviceStatusConfiguration = configurationRepository.
-					findOneByName(ConfigurationConstants.CONFIR_REGISTRATION_REQUIRE_DEVICE);
+					findOneByName(ConfigurationConstants.CONFIR_PROPERTY_REGISTRATION_DEVICE);
 
 			String fullname = command.stringValueOfParameterNamed("fullname");
 			String city = command.stringValueOfParameterNamed("city");
@@ -217,17 +219,18 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			}
 			
 			if (temporary.getStatus().equalsIgnoreCase("ACTIVE")) {
-				throw new ClientAlreadyCreatedException();
+				
+                  throw new ClientAlreadyCreatedException();
 			}
 			
-			if(temporary.getStatus().equalsIgnoreCase("PENDING")){
+			if (temporary.getStatus().equalsIgnoreCase("PENDING")){
 				
 				// client creation
 				AddressData addressData = this.addressReadPlatformService.retrieveName(city);
-				
+				CodeValue codeValue=this.codeValueRepository.findOneByCodeValue("Normal");
 				JSONObject clientcreation = new JSONObject();
 				clientcreation.put("officeId", new Long(1));
-				clientcreation.put("clientCategory", new Long(1));
+				clientcreation.put("clientCategory", codeValue.getId());
 				clientcreation.put("firstname", fullname);
 				clientcreation.put("lastname", "Mr.");
 				clientcreation.put("phone", phone);
@@ -252,10 +255,10 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				if (resultClient == null && resultClient.getClientId() == null && resultClient.getClientId() <= 0) {
 					throw new PlatformDataIntegrityException("error.msg.client.creation.failed", "Client Creation Failed","Client Creation Failed");
 				}
-
+	
 				temporary.setStatus("ACTIVE");
+
 				//book device
-				
 				if(deviceStatusConfiguration != null){
 					
 					if(deviceStatusConfiguration.isEnabled()){
@@ -368,7 +371,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					  temporary.setPaymentStatus("ACTIVE");
 					  JSONObject json= new JSONObject(temporary.getPaymentData());
 					  
-				   	  String orderNumber = json.getString("order_num");
+				   	  String orderNumber = json.getString("order_num");				   	  
 				   	  String amount = json.getString("total_amount");
 				   	  BigDecimal totalAmount = new BigDecimal(amount);
 				   	  	   	  
@@ -399,7 +402,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				final CommandWrapper selfcareCommandRequest = new CommandWrapperBuilder().createSelfCare().withJson(selfcarecreation.toString()).build();
 				final CommandProcessingResult selfcareCommandresult = this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
 				
-				if(selfcareCommandresult ==null && selfcareCommandresult.resourceId() <= 0){			
+				if(selfcareCommandresult == null && selfcareCommandresult.resourceId() <= 0){			
 					throw new PlatformDataIntegrityException("error.msg.selfcare.creation.failed", "selfcare Creation Failed","selfcare Creation Failed");
 				}
 				
@@ -407,9 +410,11 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				
 			} else if (temporary.getStatus().equalsIgnoreCase("INACTIVE")) {
 				throw new SelfCareNotVerifiedException(email);			
-			}else {
+
+			} else {
 				return new CommandProcessingResult(-1l).empty();
-			}				
+			}	
+
 
 		} catch (DataIntegrityViolationException dve) {
 			handleDataIntegrityIssues(command, dve);
