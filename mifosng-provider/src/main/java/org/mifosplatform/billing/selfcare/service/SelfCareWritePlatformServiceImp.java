@@ -1,6 +1,7 @@
 package org.mifosplatform.billing.selfcare.service;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
@@ -104,11 +105,11 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				
 				//platformEmailService.sendToUserAccount(new EmailDetail("OBS Self Care Organisation ", "SelfCare",email, selfCare.getUserName()), unencodedPassword); 
 
-				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findOneByTemplate("SELFCARE REGISTRATION");
+				List<BillingMessageTemplate> messageDetails=this.billingMessageTemplateRepository.findOneByTemplate("SELFCARE REGISTRATION");
 				
-				String subject=messageDetails.getSubject();
-				String body=messageDetails.getBody();
-				String header=messageDetails.getHeader().replace("<PARAM1>", selfCare.getUserName() +","+"\n");
+				String subject=messageDetails.get(0).getSubject();
+				String body=messageDetails.get(0).getBody();
+				String header=messageDetails.get(0).getHeader().replace("<PARAM1>", selfCare.getUserName() +","+"\n");
 				body=body.replace("<PARAM2>", selfCare.getUniqueReference());
 				body=body.replace("<PARAM3>", selfCare.getPassword());
 				
@@ -116,7 +117,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				prepareEmail.append(header);
 				prepareEmail.append("\t").append(body);
 				prepareEmail.append("\n").append("\n");
-				prepareEmail.append(messageDetails.getFooter());
+				prepareEmail.append(messageDetails.get(0).getFooter());
 				
 				String message = messagePlatformEmailService.sendGeneralMessage(selfCare.getUniqueReference(), prepareEmail.toString().trim(), subject);
 				
@@ -298,9 +299,9 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				throw new SelfCareTemporaryGeneratedKeyNotFoundException(verificationKey,uniqueReference);				
 			}else{		
 				
-				if(selfCareTemporary.getStatus().equalsIgnoreCase("INACTIVE")){
+				if(selfCareTemporary.getStatus().equalsIgnoreCase("INACTIVE") || selfCareTemporary.getStatus().equalsIgnoreCase("PENDING")){
 					
-					selfCareTemporary.setStatus("ACTIVE");
+					selfCareTemporary.setStatus("PENDING");
 					
 					transactionHistoryWritePlatformService.saveTransactionHistory(clientId, "Self Care User Registration is Verified Through Email", new Date(),
 							"EmailId: "+selfCareTemporary.getUserName());			

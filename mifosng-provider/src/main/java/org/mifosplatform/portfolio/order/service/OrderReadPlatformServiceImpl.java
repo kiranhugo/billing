@@ -131,9 +131,9 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	public List<PaytermData> getChargeCodes(Long planCode) {
 
 		   context.authenticatedUser();
-	        String sql = "SELECT DISTINCT b.billfrequency_code AS billfrequency_code,b.id AS id,c.id AS duration,pm.is_prepaid AS isPrepaid" +
-	        		" FROM b_plan_pricing a, b_charge_codes b, b_plan_master pm left join b_contract_period c on c.contract_period=pm.duration" +
-	        		" WHERE a.charge_code = b.charge_code AND a.is_deleted = 'n' AND a.plan_id = ? AND pm.id = a.plan_id";
+	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequency_code,b.id AS id,c.id AS duration,pm.is_prepaid AS isPrepaid" +
+	        		" FROM b_charge_codes b, b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration" +
+	        		"  WHERE  a.charge_code = b.charge_code AND a.is_deleted = 'n' AND a.plan_id = ? AND pm.id = a.plan_id";
 
 
 	        RowMapper<PaytermData> rm = new BillingFreaquencyMapper();
@@ -244,14 +244,13 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 			}
 
 			@Override
-			public List<OrderHistoryData> retrieveOrderHistoryDetails(
-					Long orderId) {
+			public List<OrderHistoryData> retrieveOrderHistoryDetails(String orderNo) {
 				
 
 				try {
 					final OrderHistoryMapper mapper = new OrderHistoryMapper();
 					final String sql = "select " + mapper.clientOrderLookupSchema();
-					return jdbcTemplate.query(sql, mapper, new Object[] { orderId});
+					return jdbcTemplate.query(sql, mapper, new Object[] { orderNo});
 					} catch (EmptyResultDataAccessException e) {
 					return null;
 					}

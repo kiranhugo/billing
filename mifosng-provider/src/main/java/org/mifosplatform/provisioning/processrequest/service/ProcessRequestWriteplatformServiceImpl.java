@@ -1,7 +1,16 @@
 package org.mifosplatform.provisioning.processrequest.service;
 
+import java.util.Date;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.mifosplatform.cms.eventmaster.domain.EventDetails;
+import org.mifosplatform.cms.eventmaster.domain.EventMaster;
+import org.mifosplatform.cms.eventmaster.domain.EventMasterRepository;
+import org.mifosplatform.cms.eventorder.domain.EventOrder;
+import org.mifosplatform.cms.eventorder.domain.EventOrderRepository;
+import org.mifosplatform.cms.eventorder.domain.EventOrderdetials;
 import org.mifosplatform.infrastructure.configuration.domain.EnumDomainService;
 import org.mifosplatform.infrastructure.configuration.domain.EnumDomainServiceRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -10,10 +19,8 @@ import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DataSourcePerTenantService;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
-import org.mifosplatform.infrastructure.jobs.service.MiddlewareJobConstants;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
-import org.mifosplatform.organisation.ippool.service.IpPoolManagementWritePlatformService;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
@@ -33,8 +40,6 @@ import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
-import org.mifosplatform.provisioning.provisioning.domain.ServiceParameters;
-import org.mifosplatform.provisioning.provisioning.domain.ServiceParametersRepository;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
 import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
 import org.mifosplatform.workflow.eventaction.service.ActiondetailsWritePlatformService;
@@ -58,7 +63,9 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	  private final PlatformSecurityContext context;
 	  private final OrderRepository orderRepository;
 	  private final ClientRepository clientRepository;
+	  private final EventOrderRepository eventOrderRepository;
 	  private final TenantDetailsService tenantDetailsService;
+	  private final EventMasterRepository eventMasterRepository;
 	  private final OrderReadPlatformService orderReadPlatformService;
 	  private final PrepareRequsetRepository prepareRequsetRepository;
 	  private final ProcessRequestRepository processRequestRepository;
@@ -77,13 +84,16 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	    		final OrderRepository orderRepository,final ProcessRequestRepository processRequestRepository,final PrepareRequsetRepository prepareRequsetRepository,
 	    		final ClientRepository clientRepository,final PlanRepository planRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 	    		final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final PlatformSecurityContext context,
-	    		final EnumDomainServiceRepository enumDomainServiceRepository) {
+	    		final EnumDomainServiceRepository enumDomainServiceRepository,final EventOrderRepository eventOrderRepository,
+	    		final EventMasterRepository eventMasterRepository) {
 	    	
 	    	    this.context = context;
 	    	    this.planRepository=planRepository;
 	    	    this.orderRepository=orderRepository;
 	    	    this.clientRepository=clientRepository;
+	    	    this.eventOrderRepository=eventOrderRepository;
 	    	    this.tenantDetailsService = tenantDetailsService;
+	    	    this.eventMasterRepository=eventMasterRepository;
 	    	    this.prepareRequsetRepository=prepareRequsetRepository;
 	    	    this.processRequestRepository=processRequestRepository;
 	    	    this.orderReadPlatformService=orderReadPlatformService;
@@ -102,32 +112,28 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	        final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
 	        ThreadLocalContextUtil.setTenant(tenant);
             List<PrepareRequestData> data=this.prepareRequestReadplatformService.retrieveDataForProcessing();
-
-            for(PrepareRequestData requestData:data){
-            	
+            	for(PrepareRequestData requestData:data){
                        //Get the Order details
                      final List<Long> clientOrderIds = this.prepareRequestReadplatformService.retrieveRequestClientOrderDetails(requestData.getClientId());
-
-                     //Processing the request
-                     if(clientOrderIds!=null){
+                     	//Processing the request
+                     	if(clientOrderIds!=null){
                                      this.processingClientDetails(clientOrderIds,requestData);
                                     //Update RequestData
                                      PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
                                      prepareRequest.updateProvisioning('Y');
                                      this.prepareRequsetRepository.save(prepareRequest);
-                            }
-            }
-	    }
+                     	}
+            	}
+	    	}
                     
-		private void processingClientDetails(List<Long> clientOrderIds,PrepareRequestData requestData) {
-			
-			for(Long orderId:clientOrderIds){
-
-				final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
+		
+	    private void processingClientDetails(List<Long> clientOrderIds,PrepareRequestData requestData) {
+	    		for(Long orderId:clientOrderIds){
+	    			final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
 			        ThreadLocalContextUtil.setTenant(tenant);
 			        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
+	    		}
 			}
-		}
 
 		@Override
 		public void notifyProcessingDetails(ProcessRequest detailsData,char status) {
@@ -201,14 +207,11 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 			try{
 				this.context.authenticatedUser();
 				ProcessRequest processRequest = ProcessRequest.fromJson(command);
-				
 				ProcessRequestDetails processRequestDetails = ProcessRequestDetails.fromJson(processRequest,command);	
-				
 				processRequest.add(processRequestDetails);
-				
 				this.processRequestRepository.save(processRequest);
-				
 				return	new CommandProcessingResult(Long.valueOf(processRequest.getPrepareRequestId()));
+
 			}catch(DataIntegrityViolationException dve){
 				handleCodeDataIntegrityIssues(command,dve);
 				return CommandProcessingResult.empty();
@@ -216,15 +219,45 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 			
 		}
 		
-		 private void handleCodeDataIntegrityIssues(JsonCommand command,
-					DataIntegrityViolationException dve) {
+		 private void handleCodeDataIntegrityIssues(JsonCommand command,DataIntegrityViolationException dve) {
 				 Throwable realCause = dve.getMostSpecificCause();
-
 			        logger.error(dve.getMessage(), dve);
 			        throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
 			                "Unknown data integrity issue with resource: " + realCause.getMessage());
-				
 			}
 
 		
+	/*	@Transactional
+		@Override
+		public void postProvisioningdetails(Client client,EventOrder eventOrder,String requestType,String provSystem, String response) {
+			try{
+				
+				
+				this.context.authenticatedUser();
+				ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0), eventOrder.getClientId(),eventOrder.getId(),ProvisioningApiConstants.PROV_BEENIUS,
+						ProvisioningApiConstants.REQUEST_ACTIVATION_VOD);
+				List<EventOrderdetials> eventDetails=eventOrder.getEventOrderdetials();
+				EventMaster eventMaster=this.eventMasterRepository.findOne(eventOrder.getEventId());
+				JSONObject jsonObject=new JSONObject();
+				jsonObject.put("officeUid",client.getOffice().getExternalId());
+				jsonObject.put("subscriberUid",client.getAccountNo());
+				jsonObject.put("vodUid",eventMaster.getEventName());
+						
+					for(EventOrderdetials details:eventDetails){
+						ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(details.getId(),details.getEventDetails().getId(),jsonObject.toString(),
+								response,null,eventMaster.getEventStartDate(), eventMaster.getEventEndDate(),new Date(),new Date(),'N',
+								ProvisioningApiConstants.REQUEST_ACTIVATION_VOD,null);
+						processRequest.add(processRequestDetails);
+					}
+				this.processRequestRepository.save(processRequest);
+			}catch(DataIntegrityViolationException dve){
+				handleCodeDataIntegrityIssues(null, dve);
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+		}*/
 }

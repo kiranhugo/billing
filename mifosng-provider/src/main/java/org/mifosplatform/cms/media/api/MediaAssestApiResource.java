@@ -82,10 +82,10 @@ public class MediaAssestApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveMediaAssestdata(@QueryParam("deviceId") final String deviceId, @QueryParam("pageNo")  Long pageNum,
-			@QueryParam("filterType") final String filterType,@Context final UriInfo uriInfo) {
+			@QueryParam("filterType") final String filterType,@QueryParam("clientType") final String clientType, @Context final UriInfo uriInfo) {
 		
           context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-          MediaDeviceData details=this.deviceReadPlatformService.retrieveDeviceDetails(deviceId);
+        //  MediaDeviceData details=this.deviceReadPlatformService.retrieveDeviceDetails(deviceId);
             Long pageNo=new Long(0);
             Long noOfPages=new Long(0);
             if(pageNum == null || pageNum == 0){
@@ -96,14 +96,14 @@ public class MediaAssestApiResource {
             List<MediaAssetData> data=new ArrayList<MediaAssetData>();
            if(filterType.equalsIgnoreCase("ALL")){
         	   
-        	   data = this.mediaAssetReadPlatformService.retrievemediaAssetdata(pageNo);
+        	   data = this.mediaAssetReadPlatformService.retrievemediaAssetdata(pageNo,clientType);
         	   
         	   final String queryFOrPages=" SELECT count(0)  FROM b_media_asset m inner join b_event_detail ed on ed.media_id = m.id"
 			                   +" inner join b_event_master em on em.id = ed.event_id  GROUP BY m.id  having  count( ed.media_id) = 1 ";
          	   noOfPages=this.mediaAssetReadPlatformService.retrieveNoofPages(queryFOrPages);
          	  for(MediaAssetData assetData:data){
          		  
-         		  List<MediaLocationData> locationData=this.mediaAssetReadPlatformService.retrievemediaAssetLocationdata(assetData.getMediaId());
+         		 // List<MediaLocationData> locationData=this.mediaAssetReadPlatformService.retrievemediaAssetLocationdata(assetData.getMediaId());
          	  }
          	  
          	  //data.add(new MediaAssetData(noOfPages,pageNum));
