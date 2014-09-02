@@ -53,11 +53,15 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
-
-		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("Beenius") && requestType.equalsIgnoreCase("ACTIVATION")){
+		
+		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("Beenius") 
+				&& requestType.equalsIgnoreCase("ACTIVATION")){
+			
 			authPin = command.stringValueOfParameterNamed("authPin");
 			Long clientId = command.longValueOfParameterNamed("clientId");	
-			if(clientId !=null && authPin !=null && authPin.length()>0){
+			
+			if(clientId !=null && authPin !=null && authPin.length()>0 && clientId>0){
+				
 				Client client = this.clientRepository.findOne(clientId);
 				SelfCare selfcare = this.selfCareRepository.findOneByClientId(clientId);
 				
@@ -89,12 +93,13 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 				message = this.messagePlatformEmailService.sendGeneralMessage(client.getEmail(), builder.toString(), 
 						"Beenius StreamingMedia");	
 						
-			}else{
+			}/*else{
 				throw new PlatformDataIntegrityException("error.msg.beenius.process.invalid","Invalid data from Beenius adapter," +
 						" clientId: " + clientId + ",authpin: " + authPin, "clientId="+clientId+ ",authpin="+authPin);
-			}
+			}*/
 			
 		}
+		
 		ProcessRequest processRequest = this.entitlementRepository.findOne(command.entityId());
 		String receiveMessage = command.stringValueOfParameterNamed("receiveMessage");
 		char status;
@@ -103,15 +108,16 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		} else {
 			status = 'Y';
 		}
-
+			
 		List<ProcessRequestDetails> details = processRequest.getProcessRequestDetails();
+		
 
 		for (ProcessRequestDetails processRequestDetails : details) {
 			Long id = command.longValueOfParameterNamed("prdetailsId");
 			if (processRequestDetails.getId().longValue() == id.longValue()) {
 				processRequestDetails.updateStatus(command);
 
-				if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("Beenius") && requestType.equalsIgnoreCase("ACTIVATION") ){
+				if(provSystem != null && requestType !=null && authPin !=null && provSystem.equalsIgnoreCase("Beenius") && requestType.equalsIgnoreCase("ACTIVATION") ){
 					processRequestDetails.setReceiveMessage(processRequestDetails.getReceiveMessage() +
 							", generated authpin=" + authPin + ", Email output=" + message);
 				}else{
