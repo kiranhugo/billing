@@ -61,7 +61,6 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 
 		this.messageDataRepository = messageDataRepository;
 		this.repository=repository;
-		SmtpDataProcessing();
 	}
 	
 	public void SmtpDataProcessing() {
@@ -108,6 +107,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 		     Properties properties = System.getProperties();  
 		     properties.setProperty("mail.smtp.host", hostName);   
 		     properties.put("mail.smtp.auth", "true");  
+
 		     properties.put("mail.smtp.starttls.enable", "true");
 		     properties.put("mail.smtp.starttls.required", "true");
 
@@ -138,7 +138,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 				if (emailDetail.getAttachment() != null) {
 					Date date = new Date();
 					String dateTime = date.getHours() + "" + date.getMinutes();
-					String fileName = "Statement_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".pdf";
+					String fileName = "estatement_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".pdf";
 					
 					// 4) create new MimeBodyPart object and set DataHandler object to this object
 					MimeBodyPart mimeBodyPart = new MimeBodyPart();
@@ -153,6 +153,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 				message.setContent(multipart);
 
 				// 7) send message
+				System.out.println("message sending....");
 				Transport.send(message);
 				System.out.println("message sent....");
 				BillingMessage billingMessage = this.messageDataRepository.findOne(emailDetail.getId());
@@ -163,6 +164,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 				return "success";
 
 			}catch(Exception e){
+				 System.out.println("message sending failed :" + e.getMessage());
 		    	 handleCodeDataIntegrityIssues(null, e);
 			     return e.getMessage();
 		     }

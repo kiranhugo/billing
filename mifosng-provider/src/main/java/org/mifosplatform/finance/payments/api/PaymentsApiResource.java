@@ -165,6 +165,7 @@ public class PaymentsApiResource {
 	 @Consumes({ MediaType.APPLICATION_JSON })
 	 @Produces({ MediaType.TEXT_HTML})
 	 public String dalpayCheckout(final String apiRequestBodyAsJson){
+
 		   try {
 			   	  JSONObject json= new JSONObject(apiRequestBodyAsJson);
 			   	  String orderNumber = json.getString("order_num");
@@ -179,7 +180,6 @@ public class PaymentsApiResource {
 				if (clientId !=null && clientId > 0) {
 					String date = new SimpleDateFormat("dd MMMM yyyy").format(new Date());
 					JsonObject object = new JsonObject();
-
 					object.addProperty("txn_id", orderNumber);
 					object.addProperty("dateFormat", "dd MMMM yyyy");
 					object.addProperty("locale", "en");

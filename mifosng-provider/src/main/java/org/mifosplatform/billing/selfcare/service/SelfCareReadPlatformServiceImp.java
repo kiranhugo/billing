@@ -3,6 +3,8 @@ package org.mifosplatform.billing.selfcare.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.mifosplatform.billing.selfcare.data.SelfCareData;
+import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,13 +50,14 @@ public class SelfCareReadPlatformServiceImp implements SelfCareReadPlatformServi
 	
 	
 	@Override
-	public Long login(String userName, String password) {
+	public SelfCareData login(String userName, String password) {
 		try{
 		String sql = "";
 		if(userName.contains("@")){
-			sql = "select client_id as clientId from b_clientuser where unique_reference=? and password=? and is_deleted=0";
+
+			sql = "select client_id as clientId, auth_pin as authPin, password as password from b_clientuser where unique_reference=? and password=? and is_deleted=0";
 		}else{
-			sql = "select client_id as clientId from b_clientuser where username=? and password=? and is_deleted=0";
+			sql = "select client_id as clientId, auth_pin as authPin, password as password from b_clientuser where username=? and password=? and is_deleted=0";
 		}	
 		PasswordMapper mapper1 = new PasswordMapper();
 		return jdbcTemplate.queryForObject(sql,mapper1,new Object[]{userName,password});
@@ -80,11 +83,14 @@ public class SelfCareReadPlatformServiceImp implements SelfCareReadPlatformServi
 			return clientId;
 		}
 	}
-	private class PasswordMapper implements RowMapper<Long>{
+	private class PasswordMapper implements RowMapper<SelfCareData>{
 		@Override
-		public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public SelfCareData mapRow(ResultSet rs, int rowNum) throws SQLException {
 			Long clientId = rs.getLong("clientId");
-			return clientId;
+			String authPin = rs.getString("authPin");
+			String password = rs.getString("password");
+				
+			return new SelfCareData(authPin, clientId, password);
 		}
 	}
 }

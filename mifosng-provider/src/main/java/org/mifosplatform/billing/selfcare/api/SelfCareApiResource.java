@@ -130,11 +130,35 @@ public class SelfCareApiResource {
         
         SelfCareData careData = new SelfCareData();
         try{
-        final Long clientId = this.selfCareReadPlatformService.login(username, password);
-        if(clientId == null){
+        final SelfCareData selfcare = this.selfCareReadPlatformService.login(username, password);
+        
+      /*  if(selfcare == null && selfcare.getClientId() == null){
         	  MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
         	   throw new BadCredentialsException(messages.getMessage(
                        "AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
+        }*/
+        
+        if(selfcare != null && selfcare.getPassword().equals(password) && selfcare.getClientId()>0){
+        	Long clientId = selfcare.getClientId();
+        	careData.setClientId(clientId);
+            ClientData clientsData = this.clientReadPlatformService.retrieveOne(clientId);
+            ClientBalanceData balanceData = this.clientBalanceReadPlatformService.retrieveBalance(clientId);
+            List<AddressData> addressData = this.addressReadPlatformService.retrieveAddressDetails(clientId);
+            final List<OrderData> clientOrdersData = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
+            final List<FinancialTransactionsData> statementsData = this.billMasterReadPlatformService.retrieveStatments(clientId);
+            List<PaymentData> paymentsData = paymentReadPlatformService.retrivePaymentsData(clientId);
+            final List<TicketMasterData> ticketMastersData = this.ticketMasterReadPlatformService.retrieveClientTicketDetails(clientId);
+            
+            careData.setDetails(clientsData,balanceData,addressData,clientOrdersData,statementsData,paymentsData,ticketMastersData);
+            
+            //adding Is_paypal Global Data by Ashok
+            GlobalConfigurationProperty paypalConfigData=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_IS_PAYPAL_CHECK);
+            careData.setPaypalConfigData(paypalConfigData);
+        	
+        }else{
+        	MessageSourceAccessor messages = SpringSecurityMessageSource.getAccessor();
+      	    throw new BadCredentialsException(messages.getMessage(
+                     "AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
         }
         
      /*   SelfCare selfCare=this.selfCareRepository.findOneByClientId(clientId);
@@ -145,20 +169,7 @@ public class SelfCareApiResource {
         	this.selfCareRepository.saveAndFlush(selfCare);
         }*/
         
-        careData.setClientId(clientId);
-        ClientData clientsData = this.clientReadPlatformService.retrieveOne(clientId);
-        ClientBalanceData balanceData = this.clientBalanceReadPlatformService.retrieveBalance(clientId);
-        List<AddressData> addressData = this.addressReadPlatformService.retrieveAddressDetails(clientId);
-        final List<OrderData> clientOrdersData = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
-        final List<FinancialTransactionsData> statementsData = this.billMasterReadPlatformService.retrieveStatments(clientId);
-        List<PaymentData> paymentsData = paymentReadPlatformService.retrivePaymentsData(clientId);
-        final List<TicketMasterData> ticketMastersData = this.ticketMasterReadPlatformService.retrieveClientTicketDetails(clientId);
         
-        careData.setDetails(clientsData,balanceData,addressData,clientOrdersData,statementsData,paymentsData,ticketMastersData);
-        
-        //adding Is_paypal Global Data by Ashok
-        GlobalConfigurationProperty paypalConfigData=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_IS_PAYPAL_CHECK);
-        careData.setPaypalConfigData(paypalConfigData);
         
         }catch(EmptyResultDataAccessException e){
         	throw new PlatformDataIntegrityException("result.set.is.null","result.set.is.null","result.set.is.null");

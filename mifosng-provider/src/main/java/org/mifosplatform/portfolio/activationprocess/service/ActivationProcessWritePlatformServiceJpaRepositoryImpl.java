@@ -224,7 +224,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			}
 			
 			if (temporary.getStatus().equalsIgnoreCase("PENDING")){
-				
+				String zipCode = command.stringValueOfParameterNamed("zipCode");
 				// client creation
 				AddressData addressData = this.addressReadPlatformService.retrieveName(city);
 				CodeValue codeValue=this.codeValueRepository.findOneByCodeValue("Normal");
@@ -245,6 +245,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				clientcreation.put("dateFormat", dateFormat);
 				clientcreation.put("activationDate", activationDate);
 				clientcreation.put("flag", false);
+				clientcreation.put("zipCode", zipCode);
 
 				final JsonElement element = fromJsonHelper.parse(clientcreation.toString());
 				JsonCommand clientCommand = new JsonCommand(null,clientcreation.toString(), element, fromJsonHelper,
@@ -255,9 +256,9 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				if (resultClient == null && resultClient.getClientId() == null && resultClient.getClientId() <= 0) {
 					throw new PlatformDataIntegrityException("error.msg.client.creation.failed", "Client Creation Failed","Client Creation Failed");
 				}
-				
+	
 				temporary.setStatus("ACTIVE");
-				
+
 				//book device
 				if(deviceStatusConfiguration != null){
 					
@@ -374,8 +375,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				   	  String orderNumber = json.getString("order_num");				   	  
 				   	  String amount = json.getString("total_amount");
 				   	  BigDecimal totalAmount = new BigDecimal(amount);
-				   	  
-				   	  
+				   	  	   	  
 					  JsonObject object=new JsonObject();
 					  object.addProperty("txn_id", orderNumber);
 					  object.addProperty("dateFormat",dateFormat);
@@ -411,10 +411,11 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				
 			} else if (temporary.getStatus().equalsIgnoreCase("INACTIVE")) {
 				throw new SelfCareNotVerifiedException(email);			
+
 			} else {
 				return new CommandProcessingResult(-1l).empty();
 			}	
-			
+
 
 		} catch (DataIntegrityViolationException dve) {
 			handleDataIntegrityIssues(command, dve);

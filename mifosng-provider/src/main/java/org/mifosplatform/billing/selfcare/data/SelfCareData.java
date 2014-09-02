@@ -29,6 +29,7 @@ private Long clientId;
 	private List<PaymentData> paymentsData;
 	private List<TicketMasterData> ticketMastersData;
 	private GlobalConfigurationProperty paypalConfigData;
+	private String authPin;
 
 	public SelfCareData(Long clientId, String email) {
 		this.clientId = clientId;
@@ -40,6 +41,12 @@ private Long clientId;
 	}
 
 
+
+	public SelfCareData(String authPin, Long clientId, String password) {
+		this.authPin = authPin;
+		this.clientId = clientId;
+		this.password = password;
+	}
 
 	public Long getClientId() {
 		return clientId;
