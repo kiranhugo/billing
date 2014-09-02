@@ -14,6 +14,7 @@ import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationProperty;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -77,6 +78,7 @@ final public class ClientData implements Comparable<ClientData> {
     private final Collection<CodeValueData> closureReasons;
     private final Boolean balanceCheck;
     private final String  entryType;
+    private SelfCare selfcare;
    
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
@@ -297,5 +299,14 @@ final public class ClientData implements Comparable<ClientData> {
 	public void setConfigurationProperty(GlobalConfigurationProperty configurationProperty) {
 		this.configurationProperty = configurationProperty;
 	}
+
+	public SelfCare getSelfcare() {
+		return selfcare;
+	}
+
+	public void setSelfcare(SelfCare selfcare) {
+		this.selfcare = selfcare;
+	}
+	
 
 }

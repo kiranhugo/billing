@@ -224,7 +224,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			}
 			
 			if (temporary.getStatus().equalsIgnoreCase("PENDING")){
-				
+				String zipCode = command.stringValueOfParameterNamed("zipCode");
 				// client creation
 				AddressData addressData = this.addressReadPlatformService.retrieveName(city);
 				CodeValue codeValue=this.codeValueRepository.findOneByCodeValue("Normal");
@@ -245,6 +245,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				clientcreation.put("dateFormat", dateFormat);
 				clientcreation.put("activationDate", activationDate);
 				clientcreation.put("flag", false);
+				clientcreation.put("zipCode", zipCode);
 
 				final JsonElement element = fromJsonHelper.parse(clientcreation.toString());
 				JsonCommand clientCommand = new JsonCommand(null,clientcreation.toString(), element, fromJsonHelper,
