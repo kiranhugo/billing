@@ -134,13 +134,17 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = invoiceTillDate.plusDays(1);
 		
+		List<InvoiceTaxCommand> listOfTaxes=null;
+		
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			
+			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+		}else{
+			 listOfTaxes = this.calculateTax(billingOrderData,price);	
 		}
 
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);
+		
 
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);  
 
@@ -169,12 +173,22 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = invoiceTillDate.plusDays(1);
 		
+       List<InvoiceTaxCommand> listOfTaxes=null;
+		
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
+			
+			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
+			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+		}else{
+			 listOfTaxes = this.calculateTax(billingOrderData,price);	
+		}
+		
+		/*if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
 			
 		}
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);
+		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);*/
 
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
@@ -211,14 +225,24 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = invoiceTillDate.plusDays(1);
 		
+        List<InvoiceTaxCommand> listOfTaxes=null;
+		
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
+			
+			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
+			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+		}else{
+			 listOfTaxes = this.calculateTax(billingOrderData,price);	
+		}
+		
+		/*if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
 			
 		}
 
 		// List<InvoiceTax> listOfTaxes = this.calculateTax(billingOrderData,price);
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);
+		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);*/
 		
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
@@ -262,13 +286,23 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = endDate.plusDays(1);
 		
+          List<InvoiceTaxCommand> listOfTaxes=null;
+		
+		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
+			
+			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
+			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+		}else{
+			 listOfTaxes = this.calculateTax(billingOrderData,price);	
+		}
+		/*
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
 			
 		}
 
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);
+		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);*/
 
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
@@ -297,13 +331,23 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = endDate.plusDays(1);
 		
+          List<InvoiceTaxCommand> listOfTaxes=null;
+		
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
+			
+			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
+			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+		}else{
+			 listOfTaxes = this.calculateTax(billingOrderData,price);	
+		}
+		
+		/*if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
 			
 		}
 
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price); listOfTaxes = this.calculateTax(billingOrderData,price);
+		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price); listOfTaxes = this.calculateTax(billingOrderData,price);*/
 
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
@@ -338,13 +382,23 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = invoiceTillDate.plusDays(1);
 		
+        List<InvoiceTaxCommand> listOfTaxes=null;
+		
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
+			
+			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
+			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+		}else{
+			 listOfTaxes = this.calculateTax(billingOrderData,price);	
+		}
+		
+		/*if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
 			
 		}
 		
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);
+		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);*/
 
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 	}

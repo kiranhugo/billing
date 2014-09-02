@@ -107,7 +107,9 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 			 //1) get the session object      
 		     Properties properties = System.getProperties();  
 		     properties.setProperty("mail.smtp.host", hostName);   
-		     properties.put("mail.smtp.auth", "true");    
+		     properties.put("mail.smtp.auth", "true");  
+		     properties.put("mail.smtp.starttls.enable", "true");
+		     properties.put("mail.smtp.starttls.required", "true");
 
 		     Session session = Session.getDefaultInstance(properties,   
 		             new javax.mail.Authenticator() {   

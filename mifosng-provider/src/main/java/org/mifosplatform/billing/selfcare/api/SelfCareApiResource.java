@@ -16,7 +16,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.mifosplatform.billing.paymode.service.PaymodeReadPlatformService;
 import org.mifosplatform.billing.selfcare.data.SelfCareData;
-import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.billing.selfcare.service.SelfCareReadPlatformService;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -40,7 +39,6 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.exception.ClientStatusException;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
@@ -63,11 +61,7 @@ public class SelfCareApiResource {
 	private final String resourceNameForPermissions = "SELFCARE";
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	private final DefaultToApiJsonSerializer<SelfCareData> toApiJsonSerializerForItem;
-	private final ApiRequestParameterHelper apiRequestParameterHelper;
-	
 	private final SelfCareReadPlatformService selfCareReadPlatformService;
-	
-	
 	private final ClientReadPlatformService clientReadPlatformService;
 	private final AddressReadPlatformService addressReadPlatformService;
 	private final ClientBalanceReadPlatformService clientBalanceReadPlatformService;
@@ -76,23 +70,19 @@ public class SelfCareApiResource {
 	private final PaymodeReadPlatformService paymentReadPlatformService;
 	private final TicketMasterReadPlatformService ticketMasterReadPlatformService;
 	private final GlobalConfigurationRepository configurationRepository;
-	private final SelfCareRepository selfCareRepository;
+	
 	
 	@Autowired
-	public SelfCareApiResource(final PlatformSecurityContext context,final SelfCareRepository selfCareRepository,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService, 
-			final DefaultToApiJsonSerializer<SelfCareData> toApiJsonSerializerForItem, 
-			final ApiRequestParameterHelper apiRequestParameterHelper, final SelfCareReadPlatformService selfCareReadPlatformService, 
+	public SelfCareApiResource(final PlatformSecurityContext context,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService, 
+			final DefaultToApiJsonSerializer<SelfCareData> toApiJsonSerializerForItem,final SelfCareReadPlatformService selfCareReadPlatformService, 
 			final PaymodeReadPlatformService paymentReadPlatformService, final AddressReadPlatformService addressReadPlatformService, 
 			final ClientBalanceReadPlatformService balanceReadPlatformService, final ClientReadPlatformService clientReadPlatformService, 
 			final OrderReadPlatformService  orderReadPlatformService, final BillMasterReadPlatformService billMasterReadPlatformService,
-			final TicketMasterReadPlatformService ticketMasterReadPlatformService, 
-			final GlobalConfigurationRepository configurationRepository) {
+			final TicketMasterReadPlatformService ticketMasterReadPlatformService,final GlobalConfigurationRepository configurationRepository) {
 		
 				this.context = context;
 				this.commandsSourceWritePlatformService = commandSourceWritePlatformService;
 				this.toApiJsonSerializerForItem = toApiJsonSerializerForItem;
-				this.apiRequestParameterHelper = apiRequestParameterHelper;
 				this.selfCareReadPlatformService = selfCareReadPlatformService;
 				this.paymentReadPlatformService = paymentReadPlatformService;
 				this.addressReadPlatformService = addressReadPlatformService;
@@ -102,7 +92,6 @@ public class SelfCareApiResource {
 				this.billMasterReadPlatformService = billMasterReadPlatformService;
 				this.ticketMasterReadPlatformService = ticketMasterReadPlatformService;
 				this.configurationRepository=configurationRepository;
-				this.selfCareRepository=selfCareRepository;
 	}
 	
 	

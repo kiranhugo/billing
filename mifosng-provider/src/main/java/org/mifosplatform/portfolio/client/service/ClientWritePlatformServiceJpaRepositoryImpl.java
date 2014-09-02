@@ -17,6 +17,8 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.billing.selfcare.domain.SelfCare;
+import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
@@ -94,6 +96,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final PrepareRequestWriteplatformService prepareRequestWriteplatformService;
     private final ProvisioningWritePlatformService ProvisioningWritePlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
+    private final SelfCareRepository selfCareRepository;
   
     
    
@@ -106,7 +109,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ActionDetailsReadPlatformService actionDetailsReadPlatformService,final CodeValueRepository codeValueRepository,
             final OrderReadPlatformService orderReadPlatformService,final ProvisioningWritePlatformService  ProvisioningWritePlatformService,
             final GroupsDetailsRepository groupsDetailsRepository,final OrderRepository orderRepository,final PlanRepository planRepository,
-            final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService) {
+            final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService,
+            final SelfCareRepository selfCareRepository) {
     	
         this.context = context;
         this.clientRepository = clientRepository;
@@ -126,6 +130,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.groupsDetailsRepository=groupsDetailsRepository;
         this.planRepository=planRepository;
         this.clientReadPlatformService = clientReadPlatformService;
+        this.selfCareRepository=selfCareRepository;
        
     }
 
@@ -168,7 +173,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             if (ClientStatus.fromInt(client.getStatus()).isClosed()) {
-                final String errorMessage = "Client is alread closed.";
+                final String errorMessage = "Client is already closed.";
                 throw new InvalidClientStateTransitionException("close", "is.already.closed", errorMessage);
             } 
 
@@ -180,6 +185,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             client.close(currentUser,closureReason, closureDate.toDate());
             this.clientRepository.saveAndFlush(client);
+            
+            if(client.getEmail() != null){
+            	SelfCare selfCare=this.selfCareRepository.findOneByEmailId(client.getEmail());
+            	 if(selfCare != null){
+            		 selfCare.setIsDeleted(true);
+            	 }
+            	 this.selfCareRepository.save(selfCare);
+            }
+            
             
             List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CLOSE_CLIENT);
 			if(actionDetaislDatas.size() != 0){

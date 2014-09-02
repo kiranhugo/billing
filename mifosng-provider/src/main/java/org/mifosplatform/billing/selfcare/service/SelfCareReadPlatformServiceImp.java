@@ -52,9 +52,9 @@ public class SelfCareReadPlatformServiceImp implements SelfCareReadPlatformServi
 		try{
 		String sql = "";
 		if(userName.contains("@")){
-			sql = "select client_id as clientId from b_clientuser where unique_reference=? and password=?";
+			sql = "select client_id as clientId from b_clientuser where unique_reference=? and password=? and is_deleted=0";
 		}else{
-			sql = "select client_id as clientId from b_clientuser where username=? and password=?";
+			sql = "select client_id as clientId from b_clientuser where username=? and password=? and is_deleted=0";
 		}	
 		PasswordMapper mapper1 = new PasswordMapper();
 		return jdbcTemplate.queryForObject(sql,mapper1,new Object[]{userName,password});

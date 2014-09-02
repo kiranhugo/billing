@@ -170,7 +170,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				throw new PlatformDataIntegrityException("client does not exist", "this user is not registered","clientId", "client is null ");
 			}
 			selfCare.setClientId(clientId);
-			selfCareRepository.save(selfCare);
+			this.selfCareRepository.save(selfCare);
 			transactionHistoryWritePlatformService.saveTransactionHistory(clientId, "Self Care user activation", new Date(), "USerName: "+selfCare.getUserName()+" ClientId"+selfCare.getClientId());
 			}
 			catch(EmptyResultDataAccessException dve){
