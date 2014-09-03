@@ -5,8 +5,6 @@ INSERT IGNORE INTO  m_permission VALUES(null,'billing', 'GENERATENEWPASSWORD_SEL
 INSERT IGNORE INTO  m_permission VALUES(null,'billing', 'UPDATE_SELFCARE', 'SELFCARE', 'UPDATE', '0');
 
 
-INSERT IGNORE INTO b_message_template(template_description,subject,header,body,footer,message_type) values ('SELFCARE REGISTRATION','Streaming Media Selfcare','Dear <param1>','Your Selfcare User Account has been successfully created,Following are the User login Details. \n userName : <param2> , \n password : <param3> .','Thankyou','E'); 
-
 
 
 

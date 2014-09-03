@@ -23,6 +23,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.billing.selfcare.domain.SelfCare;
+import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.cms.mediadevice.service.MediaDeviceReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
@@ -67,13 +69,15 @@ public class ClientsApiResource {
     private final AddressReadPlatformService addressReadPlatformService;
     private final AllocationReadPlatformService allocationReadPlatformService;
     private final GlobalConfigurationRepository configurationRepository;
+    private final SelfCareRepository selfCareRepository;
 
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final ToApiJsonSerializer<ClientData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,AddressReadPlatformService addressReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final AllocationReadPlatformService allocationReadPlatformService,
-            final GlobalConfigurationRepository configurationRepository,final MediaDeviceReadPlatformService deviceReadPlatformService) {
+            final GlobalConfigurationRepository configurationRepository,final MediaDeviceReadPlatformService deviceReadPlatformService, 
+            final SelfCareRepository selfCareRepository) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
@@ -84,6 +88,7 @@ public class ClientsApiResource {
         this.allocationReadPlatformService=allocationReadPlatformService;
         this.configurationRepository=configurationRepository;
         this.mediaDeviceReadPlatformService=deviceReadPlatformService;
+        this.selfCareRepository = selfCareRepository;
     }
 
     @GET
@@ -160,6 +165,8 @@ public class ClientsApiResource {
 
         }
         
+        SelfCare selfcare = this.selfCareRepository.findOneByClientId(clientId);
+        clientData.setSelfcare(selfcare);
         GlobalConfigurationProperty paypalconfigurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_IS_PAYPAL_CHECK);
         clientData.setConfigurationProperty(paypalconfigurationProperty);
         
