@@ -20,9 +20,8 @@ and c.office_id=of.id
 and of.hierarchy like concat((select ino.hierarchy from m_office ino where ino.id = ${officeId}),"%" ) 
 group by mcv.code_value','PaymodeCollection Chart',1,1);
 
-
-DELIMITER $$
-Drop procedure IF EXISTS addstatus $$
+Drop procedure IF EXISTS addstatus;
+DELIMITER //
 create procedure addstatus() 
 Begin
   IF NOT EXISTS (
@@ -30,9 +29,10 @@ Begin
      WHERE COLUMN_NAME = 'status'
      and TABLE_NAME = 'b_clientuser'
      and TABLE_SCHEMA = DATABASE())THEN
-alter table b_clientuser ADD column status varchar(10) NOT NULL after password;
+alter table b_clientuser add column status varchar(10) NOT NULL after password;
 END IF;
-END $$
+END //
+DELIMITER ;
 call addstatus();
 update b_clientuser set status = 'ACTIVE';
 
