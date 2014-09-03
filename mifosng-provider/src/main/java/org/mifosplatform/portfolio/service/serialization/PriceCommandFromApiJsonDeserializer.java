@@ -31,7 +31,7 @@ public final class PriceCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id","planCode","locale","serviceCode","chargeCode","chargevariant","price",
-    		"discountId","priceregion"));
+    		"discountId","priceregion","duration","isPrepaid"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -59,6 +59,11 @@ public final class PriceCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("priceregion").value(priceregion).notNull();
         final BigDecimal price = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("price", element);
         baseDataValidator.reset().parameter("price").value(price).notNull();
+        final boolean isPrepaid=fromApiJsonHelper.extractBooleanNamed("isPrepaid", element);
+        	if(isPrepaid){
+        		final String duration=fromApiJsonHelper.extractStringNamed("duration", element);
+            	baseDataValidator.reset().parameter("duration").value(duration).notBlank();
+        	}
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -77,6 +82,12 @@ public final class PriceCommandFromApiJsonDeserializer {
             final String name = fromApiJsonHelper.extractStringNamed("name", element);
             baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
         }
+        
+        final boolean isPrepaid=fromApiJsonHelper.extractBooleanNamed("isPrepaid", element);
+    	if(isPrepaid){
+    		final String duration=fromApiJsonHelper.extractStringNamed("duration", element);
+        	baseDataValidator.reset().parameter("duration").value(duration).notBlank();
+    	}
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

@@ -140,8 +140,8 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	private static final class PlanDataMapper implements RowMapper<PlanData> {
 
 		public String schema() {
-			return "  pm.id,pm.plan_code,pm.plan_description,pm.start_date,pm.end_date,pm.plan_status,pm.duration AS duration,pm.is_prepaid as isprepaid," +
-					"p.id as contractId FROM b_plan_master pm left join b_contract_period p on p.contract_period=pm.duration WHERE pm.is_deleted = 'n' ";
+			return "  pm.id,pm.plan_code,pm.plan_description,pm.start_date,pm.end_date,pm.plan_status,pm.is_prepaid AS isprepaid" +
+					"  FROM    b_plan_master pm WHERE pm.is_deleted = 'n' ";
 
 		}
 
@@ -154,9 +154,9 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			LocalDate startDate = JdbcSupport.getLocalDate(rs, "start_date");
 		    Long planStatus = rs.getLong("plan_status");
 			LocalDate endDate = JdbcSupport.getLocalDate(rs, "end_date");
-			String duration=rs.getString("duration");
+			
 			long plan=planStatus;
-			Long contractId=rs.getLong("contractId");
+			//Long contractId=rs.getLong("contractId");
 			EnumOptionData enumstatus=OrderStatusEnumaration.OrderStatusType(planStatus.intValue());
 			//return new PlanData(id, planCode, planDescription, startDate,plan, endDate,status);
 			/*return new PlanData(id,planCode,startDate,endDate,null,null,plan,planDescription,null,null,
@@ -167,8 +167,8 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			services=priceReadPlatformService.retrievePrcingDetails(id);
 			}
 			
-			return new PlanData(id, planCode, startDate, endDate,null,duration, plan, planDescription, plan, null, enumstatus,
-					null,null, null,null,null,services,contractId,null);
+			return new PlanData(id, planCode, startDate, endDate,null,null, plan, planDescription, plan, null, enumstatus,
+					null,null, null,null,null,services,null,null);
 		}
 		
 	}
@@ -222,7 +222,7 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 		  context.authenticatedUser();
 
 	        String sql = "SELECT pm.id AS id,pm.plan_code AS plan_code,pm.plan_description AS plan_description,pm.start_date AS start_date,pm.end_date AS end_date,"
-	        		   +"pm.plan_status AS plan_status,pm.provision_sys AS provisionSys,pm.bill_rule AS bill_rule,pm.duration AS contract_period,pm.is_prepaid as isPrepaid,"
+	        		   +"pm.plan_status AS plan_status,pm.provision_sys AS provisionSys,pm.bill_rule AS bill_rule,pm.is_prepaid as isPrepaid,"
 	        		  +" pm.allow_topup as allowTopup,v.volume_type as volumeType, v.units as units,pm.is_hw_req as isHwReq,v.units_type as unitType FROM b_plan_master pm  left join b_volume_details v" +
 	        		  " on pm.id = v.plan_id WHERE pm.id = ? AND pm.is_deleted = 'n'";
 
@@ -245,7 +245,7 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	            Long billRule = rs.getLong("bill_rule");
 	            int planStatus = JdbcSupport.getInteger(rs,"plan_status");
 	            String planDescription = rs.getString("plan_description");
-	            String contractPeriod = rs.getString("contract_period");
+	        
 	            String provisionSys=rs.getString("provisionSys");
 	            String isPrepaid=rs.getString("isPrepaid");
 	            String volume=rs.getString("volumeType");
@@ -256,7 +256,7 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 
 	            //EnumOptionData status = SavingStatusEnumaration.OrderStatusType(plan_status);
 	            long status1=planStatus;
-	            return new PlanData(id,planCode,startDate,endDate,billRule,contractPeriod,status1,planDescription,status1,
+	            return new PlanData(id,planCode,startDate,endDate,billRule,null,status1,planDescription,status1,
 	            		provisionSys,null,isPrepaid,allowTopup,volume,units,unitType,null,null,isHwReq);
 	        }
 	}

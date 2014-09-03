@@ -107,7 +107,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService{
 
 			  context.authenticatedUser();
 
-		        String sql = "SELECT sm.id AS id,sm.service_description AS service_description,p.plan_code AS planCode,pm.service_code AS service_code," +
+		        String sql = "SELECT sm.id AS id,sm.service_description AS service_description,p.plan_code AS planCode,pm.service_code AS service_code,p.is_prepaid as isprepaid," +
 		        		" c.billfrequency_code as billingfreq FROM b_plan_detail pm, b_service sm, b_plan_master p left join b_plan_pricing pr on pr.plan_id = p.id" +
 		        		" left join b_charge_codes c ON c.charge_code = pr.charge_code WHERE pm.service_code = sm.service_code AND p.id = pm.plan_id " +
 		        		" AND sm.is_deleted = 'n' AND pm.plan_id = ? group by pm.service_code";
@@ -129,22 +129,36 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService{
 		            String serviceCode = rs.getString("service_code");
 		            String serviceDescription = rs.getString("service_description");
 		            String billingfreq = rs.getString("billingfreq");
+		            String isprepaid = rs.getString("isprepaid");
 		         //   return new ServiceData(id,null,planCode,null,serviceCode,serviceDescription,null,null);
-		            return new  ServiceData(id, null, planCode,billingfreq, serviceCode, serviceDescription,null);
-		            
+		            ServiceData serviceData = new  ServiceData(id, null, planCode,billingfreq, serviceCode, serviceDescription,null);
+		            serviceData.setIsPrepaid(isprepaid);
+		            return serviceData;
 		        }
 	}
 
 		 @Override
-			public List<ServiceData> retrievePriceDetails(String planId) {
+			public List<ServiceData> retrievePriceDetails(String planId, String region) {
 
 				  context.authenticatedUser();
 
-			        String sql = "SELECT p.plan_code AS plan_code,pm.id AS id,pm.service_code AS serviceCode,se.service_description AS serviceDescription," +
-			        		"c.charge_description AS chargeDescription,pm.charge_code AS charge_code,pm.charging_variant AS chargingVariant,pm.price AS price," +
+			        String sql = "SELECT p.plan_code AS plan_code, cp.id as contractId,pm.id AS id,pm.service_code AS serviceCode," +
+			        		"se.service_description AS serviceDescription, pm.duration as contract,c.charge_description AS chargeDescription," +
+			        		"pm.charge_code AS charge_code,pm.charging_variant AS chargingVariant,pm.price AS price,c.billfrequency_code as billingFrequency," +
 			        		"pr.priceregion_name AS priceregion FROM b_plan_master p,b_service se,b_charge_codes c,b_plan_pricing pm  left join b_priceregion_master " +
-			        		"pr on  pm.price_region_id=pr.id WHERE p.id = pm.plan_id  AND pm.charge_code=c.charge_code and " +
+			        		"pr on  pm.price_region_id=pr.id  LEFT JOIN b_contract_period cp ON cp.contract_period = pm.duration WHERE p.id = pm.plan_id  AND pm.charge_code=c.charge_code and " +
 			        		" (pm.service_code = se.service_code or pm.service_code ='None') and pm.is_deleted='n' and se.is_deleted='n' and  pm.plan_id =? group by pm.id";
+			       
+			        if(region != null){
+			        	sql=" SELECT p.plan_code AS plan_code,cp.id AS contractId,pm.id AS id,pm.service_code AS serviceCode,se.service_description AS serviceDescription," +
+			        		" pm.duration AS contract,c.charge_description AS chargeDescription,pm.charge_code AS charge_code,pm.charging_variant AS chargingVariant," +
+			        		" pm.price AS price,c.billfrequency_code AS billingFrequency,pr.priceregion_name AS priceregion FROM b_plan_master p,b_service se, b_charge_codes c," +
+			        		" b_priceregion_detail pd, b_state s,b_plan_pricing pm LEFT JOIN b_priceregion_master pr ON pm.price_region_id = pr.id LEFT JOIN " +
+			        		" b_contract_period cp ON cp.contract_period = pm.duration WHERE p.id = pm.plan_id AND pm.charge_code = c.charge_code AND " +
+			        		" (pm.service_code = se.service_code OR pm.service_code = 'None') AND pm.is_deleted = 'n' AND se.is_deleted = 'n' and  " +
+			        		" pm.price_region_id = pd.priceregion_id AND ( s.id = pd.state_id OR (pd.state_id = 0 AND pd.country_id = s.parent_code)) AND " +
+			        		" s.state_name = '"+region+"' AND pm.plan_id =? GROUP BY pm.id";
+			        }
 
 
 			        RowMapper<ServiceData> rm = new PriceMapper();
@@ -158,18 +172,21 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService{
 			        @Override
 			        public ServiceData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-			        Long id = rs.getLong("id");
+			             Long id = rs.getLong("id");
+			             Long contractId = rs.getLong("contractId");
 			            String planCode = rs.getString("plan_code");
+			            String duration = rs.getString("contract");
 			            String planDescription=null;
 			            String serviceCode = rs.getString("serviceCode");
 			            String chargeCode = rs.getString("chargeDescription");
+			            String billingFrequency = rs.getString("billingFrequency");
 			           String chargingVariant=rs.getString("chargingVariant");
 			           String priceregion=rs.getString("priceregion");
 			            BigDecimal price=rs.getBigDecimal("price");
 			            int chargingVariant1 = new Integer(chargingVariant);
 			           EnumOptionData chargingvariant = SavingChargeVaraint.interestCompoundingPeriodType(chargingVariant1);
 			           String chargeValue=chargingvariant.getValue();
-			            return new ServiceData(id,planCode,serviceCode,planDescription,chargeCode,chargeValue,price,priceregion);
+			            return new ServiceData(id,planCode,serviceCode,planDescription,chargeCode,chargeValue,price,priceregion,contractId,duration,billingFrequency);
 			        }
 		}
 
@@ -279,10 +296,11 @@ public PricingData retrieveSinglePriceDetails(String priceId) {
 	 
 try{
 	context.authenticatedUser();
-     String sql = "SELECT p.plan_id AS planId,pm.plan_code AS planCode,p.id AS priceId,p.service_code AS serviceCode,c.charge_code AS chargeCode," +
-     		"p.charging_variant AS chargeVariant,p.price AS price,p.discount_id AS discountId,p.price_region_id AS priceregion FROM b_plan_pricing p," +
-     		"b_service s,b_charge_codes c,b_plan_master pm  WHERE p.charge_code = c.charge_code  AND (p.service_code = s.service_code or p.service_code ='None')" +
-     		" AND pm.id = p.plan_id AND p.id =? group by p.id";
+     
+	String sql = "SELECT p.plan_id AS planId,pm.plan_code AS planCode,p.id AS priceId,p.service_code AS serviceCode,c.charge_code AS chargeCode," +
+     		" p.charging_variant AS chargeVariant,p.price AS price,p.discount_id AS discountId,p.duration as contractperiod,p.price_region_id AS priceregion " +
+     		" FROM b_plan_pricing p,b_service s,b_charge_codes c,b_plan_master pm  WHERE p.charge_code = c.charge_code  AND (p.service_code = s.service_code or " +
+     		" p.service_code ='None') AND pm.id = p.plan_id AND p.id =? group by p.id";
 
      RowMapper<PricingData> rm = new PricingMapper();
      return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { priceId });
@@ -308,20 +326,18 @@ private static final class PricingMapper implements RowMapper<PricingData> {
          int chargeVariantId=new Integer(chargeVariant);
          Long priceregion = rs.getLong("priceregion");
          String planCode = rs.getString("planCode");
-         return new PricingData(planId,serviceCode,chargeCode,price,discountId,chargeVariantId,priceregion,planCode,priceId);
+         String contractperiod = rs.getString("contractperiod");
+         return new PricingData(planId,serviceCode,chargeCode,price,discountId,chargeVariantId,priceregion,planCode,priceId,contractperiod);
      }
 }
 
 @Override
-public List<PricingData> retrievePlanAndPriceDetails() {
+public List<PricingData> retrievePlanAndPriceDetails(String region) {
 	
 	try{
 		this.context.authenticatedUser();
-		PlanAndPricingMapper mapper=new PlanAndPricingMapper();  
-		String sql=" SELECT pr.id as priceId,cp.id as contractId, pm.plan_code as planCode,pr.plan_id as planId,c.charge_description as chargeDescription," +
-				"  pm.duration as contractPeriod,c.billfrequency_code as billingFrequencyCode,(SELECT sum(r.price) FROM b_plan_pricing r WHERE r.plan_id = pm.id " +
-				"  and r.charge_code = c.charge_code ) AS price FROM b_plan_pricing pr, b_charge_codes c, b_plan_master pm left join b_contract_period cp on " +
-				"  cp.contract_period = pm.duration WHERE pr.charge_code = c.charge_code AND pr.charge_code = c.charge_code and pr.plan_id = pm.id GROUP BY pm.id";
+		PlanAndPricingMapper mapper=new PlanAndPricingMapper(this,region);  
+		String sql="SELECT pm.plan_code AS planCode, pm.id AS planId, pm.is_prepaid as isPrepaid FROM b_plan_master pm where pm.is_deleted='N'";
 		
 		 return this.jdbcTemplate.query(sql, mapper, new Object[] {  });
 		
@@ -331,19 +347,24 @@ public List<PricingData> retrievePlanAndPriceDetails() {
 }
 
 private static final class PlanAndPricingMapper implements RowMapper<PricingData> {
+	
+	PriceReadPlatformServiceImpl priceReadPlatformServiceImp=null;
+	private String region;
+    public PlanAndPricingMapper(PriceReadPlatformServiceImpl priceReadPlatformServiceImpl,String region) {
+    	this.priceReadPlatformServiceImp=priceReadPlatformServiceImpl;
+    	this.region=region;
+		
+	}
 
-    @Override
+	@Override
     public PricingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
 	  Long planId = rs.getLong("planId");
-	  Long priceId = rs.getLong("priceId");
-	  Long contractId = rs.getLong("contractId");
 	  String planCode = rs.getString("planCode");
-      BigDecimal price = rs.getBigDecimal("price");
-      String chargeDescription = rs.getString("chargeDescription");
-      String contractPeriod = rs.getString("contractPeriod");
-      String billingFrequencyCode=rs.getString("billingFrequencyCode");
-        return new PricingData(planId,priceId,planCode,contractId,contractPeriod,price,chargeDescription,billingFrequencyCode);
+	  String isPrepaid = rs.getString("isPrepaid");
+      List<ServiceData> pricingData=this.priceReadPlatformServiceImp.retrievePriceDetails(planId.toString(),region);
+      
+        return new PricingData(planId,planCode,isPrepaid,pricingData);
     }
 }
 

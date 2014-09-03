@@ -53,6 +53,8 @@ import org.mifosplatform.organisation.message.service.BillingMessageDataWritePla
 import org.mifosplatform.organisation.message.service.BillingMesssageReadPlatformService;
 import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
 import org.mifosplatform.portfolio.order.data.OrderData;
+import org.mifosplatform.portfolio.order.domain.Order;
+import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
 import org.mifosplatform.provisioning.entitlements.data.ClientEntitlementData;
@@ -90,7 +92,6 @@ public class SheduleJobWritePlatformServiceImpl implements SheduleJobWritePlatfo
 private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
 private final InvoiceClient invoiceClient;
 private final BillingMasterApiResourse billingMasterApiResourse;
-
 private final FromJsonHelper fromApiJsonHelper;
 private final OrderReadPlatformService orderReadPlatformService;
 private final BillingMessageDataWritePlatformService billingMessageDataWritePlatformService;
@@ -104,12 +105,13 @@ private final EntitlementReadPlatformService entitlementReadPlatformService;
 private final EntitlementWritePlatformService entitlementWritePlatformService;
 private final ActionDetailsReadPlatformService actionDetailsReadPlatformService;
 private final ProcessEventActionService actiondetailsWritePlatformService;
-private String ReceiveMessage;
 private final ScheduleJob scheduleJob;
 private final ReadReportingService readExtraDataAndReportingService;
 private final GlobalConfigurationRepository globalConfigurationRepository;
 private final TicketMasterApiResource ticketMasterApiResource;
 private final TicketMasterReadPlatformService ticketMasterReadPlatformService;
+private final OrderRepository orderRepository;
+private  String ReceiveMessage;
 
 
 
@@ -124,7 +126,7 @@ final ProcessRequestReadplatformService processRequestReadplatformService,final 
 final BillingMesssageReadPlatformService billingMesssageReadPlatformService,final MessagePlatformEmailService messagePlatformEmailService,
 final ScheduleJob scheduleJob,final EntitlementReadPlatformService entitlementReadPlatformService,
 final EntitlementWritePlatformService entitlementWritePlatformService,final ReadReportingService readExtraDataAndReportingService,
-final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,
+final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService,final OrderRepository orderRepository,
 final GlobalConfigurationRepository globalConfigurationRepository,
 final TicketMasterApiResource ticketMasterApiResource, 
 final TicketMasterReadPlatformService ticketMasterReadPlatformService) {
@@ -146,6 +148,7 @@ this.entitlementWritePlatformService = entitlementWritePlatformService;
 this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 this.actiondetailsWritePlatformService=actiondetailsWritePlatformService;
 this.scheduleJob=scheduleJob;
+this.orderRepository=orderRepository;
 this.readExtraDataAndReportingService=readExtraDataAndReportingService;
 this.globalConfigurationRepository=globalConfigurationRepository;
 this.ticketMasterApiResource=ticketMasterApiResource;
@@ -226,41 +229,41 @@ try
 @CronTarget(jobName = JobName.REQUESTOR)
 public void processRequest() {
 
- try {
-   System.out.println("Processing Request Details.......");
-     List<PrepareRequestData> data = this.prepareRequestReadplatformService.retrieveDataForProcessing();
-     
-     if(!data.isEmpty()){
-           MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
-           final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
-           LocalTime date=new LocalTime(zone);
-           String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-           String path=FileUtils.generateLogFileDirectory()+JobName.REQUESTOR.toString()+ File.separator +"Requester_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
-           GlobalConfigurationProperty globalConfiguration=this.globalConfigurationRepository.findOneByName("CPE_TYPE");
-           File fileHandler = new File(path.trim());
-           fileHandler.createNewFile();
-           FileWriter fw = new FileWriter(fileHandler);
-           FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
-           fw.append("Processing Request Details....... \r\n");
-           
-           for (PrepareRequestData requestData : data) {
+	try {
+		System.out.println("Processing Request Details.......");
+		List<PrepareRequestData> data = this.prepareRequestReadplatformService.retrieveDataForProcessing();
 
-               fw.append("Prepare Request id="+requestData.getRequestId()+" ,clientId="+requestData.getClientId()+" ,orderId="
-               +requestData.getOrderId()+" ,HardwareId="+requestData.getHardwareId()+" ,planName="+requestData.getPlanName()+
-                " ,Provisiong system="+requestData.getProvisioningSystem()+"\r\n");
-               this.prepareRequestReadplatformService.processingClientDetails(requestData,globalConfiguration.getValue());
-             }
-          fw.append(" Requestor Job is Completed...."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+"\r\n");
-          fw.flush();
-          fw.close();
-         }
+			if(!data.isEmpty()){
+			   MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+			   final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+			   LocalTime date=new LocalTime(zone);
+	           String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
+	           String path=FileUtils.generateLogFileDirectory()+JobName.REQUESTOR.toString()+ File.separator +"Requester_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+	           GlobalConfigurationProperty globalConfiguration=this.globalConfigurationRepository.findOneByName("CPE_TYPE");
+	           File fileHandler = new File(path.trim());
+	           fileHandler.createNewFile();
+	           FileWriter fw = new FileWriter(fileHandler);
+	           FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
+	           fw.append("Processing Request Details....... \r\n");
+           
+	           		for (PrepareRequestData requestData : data) {
+
+	           			fw.append("Prepare Request id="+requestData.getRequestId()+" ,clientId="+requestData.getClientId()+" ,orderId="
+	           					+requestData.getOrderId()+" ,HardwareId="+requestData.getHardwareId()+" ,planName="+requestData.getPlanName()+
+	           					" ,Provisiong system="+requestData.getProvisioningSystem()+"\r\n");
+	           			this.prepareRequestReadplatformService.processingClientDetails(requestData,globalConfiguration.getValue());
+	           		}
+	           		
+	           		fw.append(" Requestor Job is Completed...."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+"\r\n");
+	           		fw.flush();
+	           		fw.close();
+			}
      
-     System.out.println(" Requestor Job is Completed...."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
- 
-   }catch (Exception exception) {
-     exception.printStackTrace();
-    }
-}
+			System.out.println(" Requestor Job is Completed...."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+	}catch (Exception exception) {
+		exception.printStackTrace();
+    	}
+	}
 
 /*@Transactional
 @Override
@@ -374,6 +377,7 @@ exception.printStackTrace();
 @CronTarget(jobName = JobName.SIMULATOR)
 public void processSimulator() {
 
+
 try {
   System.out.println("Processing Simulator Details.......");
   JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.SIMULATOR.toString());
@@ -410,6 +414,7 @@ try {
       if(data.getcreateTicket().equalsIgnoreCase("Y")){
        for (ProcessingDetailsData detailsData : processingDetails) {
     	   ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
+    	   Order order=this.orderRepository.findOne(processRequest.getOrderId());
     	   List<ProblemsData> problemsData=this.ticketMasterReadPlatformService.retrieveProblemData();
     	   List<EnumOptionData> priorityData = this.ticketMasterReadPlatformService.retrievePriorityData();
     	  // Collection<MCodeData> sourceData =this.codeReadPlatformService.getCodeValue("Ticket Source");
@@ -420,7 +425,8 @@ try {
  		   jsonobject.put("locale", "en");
  		   jsonobject.put("dateFormat", "dd MMMM yyyy");
  		   jsonobject.put("ticketTime"," "+new LocalTime().toString(formatter2));
- 		   jsonobject.put("description","orderUpdate");
+ 		   jsonobject.put("description","ClientId"+processRequest.getClientId()+" Order No:"+order.getOrderNo()+" Request Type:"+processRequest.getRequestType()
+ 				          +" Generated at:"+new LocalTime().toString(formatter2));
  		   jsonobject.put("ticketDate",formatter1.print(new LocalDate()));
  		   jsonobject.put("sourceOfTicket","Phone");
  		   jsonobject.put("assignedTo", userId);
@@ -439,10 +445,10 @@ try {
      System.out.println("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 } catch (DataIntegrityViolationException exception) {
 
-} catch (Exception exception) {
-System.out.println(exception.getMessage());
-exception.printStackTrace();
-}
+	} catch (Exception exception) {
+		System.out.println(exception.getMessage());
+		exception.printStackTrace();
+	}
 }
 
 @Override
@@ -452,74 +458,66 @@ public void generateStatment() {
 try {
 	System.out.println("Processing statement Details.......");
 	JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.GENERATE_STATEMENT.toString());
-	
-	if(data!=null){
-		MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
-		final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
-		LocalTime date=new LocalTime(zone);
-		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-		String path=FileUtils.generateLogFileDirectory()+ JobName.GENERATE_STATEMENT.toString() + File.separator +"statement_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
-		File fileHandler = new File(path.trim());
-		fileHandler.createNewFile();
-		FileWriter fw = new FileWriter(fileHandler);
-		FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
-       fw.append("Processing statement Details....... \r\n");
-       List<ScheduleJobData> sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(data.getBatchName());
+		
+		if(data!=null){
+			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+			LocalTime date=new LocalTime(zone);
+			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
+			String path=FileUtils.generateLogFileDirectory()+ JobName.GENERATE_STATEMENT.toString() + File.separator +"statement_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+			File fileHandler = new File(path.trim());
+			fileHandler.createNewFile();
+			FileWriter fw = new FileWriter(fileHandler);
+			FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
+			fw.append("Processing statement Details....... \r\n");
+			List<ScheduleJobData> sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(data.getBatchName());
        
-       if(sheduleDatas.isEmpty()){
-    	   fw.append("ScheduleJobData Empty \r\n");
-       }
-       for(ScheduleJobData scheduleJobData:sheduleDatas)
-       {
-    	   fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
+			if(sheduleDatas.isEmpty()){
+				fw.append("ScheduleJobData Empty \r\n");
+			}
+				for(ScheduleJobData scheduleJobData:sheduleDatas){
+					
+					fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
     			   " ,query="+scheduleJobData.getQuery()+"\r\n");
-    	   List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery());
+					List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery());
 
-    	   if(clientIds.isEmpty()){
-    		   fw.append("no records are available for statement generation \r\n");
-    	   
-    	   }else{
-    		   fw.append("generate Statements for the clients..... \r\n");
-    	   }
-    	   for(Long clientId:clientIds)
-    	   {
-    		  
-    		   fw.append("processing clientId: "+clientId+ " \r\n");
-    		   JSONObject jsonobject = new JSONObject();
-    		   DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
-    		   String formattedDate ;
-
-    		   if(data.isDynamic().equalsIgnoreCase("Y")){
-    			   formattedDate = formatter1.print(new LocalDate());	
-    		   }else{
-    			   formattedDate = formatter1.print(data.getDueDate());
-    		   }
-    		   jsonobject.put("dueDate",formattedDate);
-    		   jsonobject.put("locale", "en");
-    		   jsonobject.put("dateFormat", "dd MMMM YYYY");
-    		   jsonobject.put("message", data.getPromotionalMessage());
-    		   fw.append("sending jsonData for Statement Generation is: "+jsonobject.toString()+" . \r\n");
-    		  
-    		   try{
-    			   this.billingMasterApiResourse.retrieveBillingProducts(clientId,	jsonobject.toString()); 
-    		   }catch(BillingOrderNoRecordsFoundException e){
-    			   e.getMessage();
-    		   }
-    		   
-    	   }
+					if(clientIds.isEmpty()){
+						fw.append("no records are available for statement generation \r\n");
+					}else{
+						fw.append("generate Statements for the clients..... \r\n");
+					}
+					for(Long clientId:clientIds){
+						fw.append("processing clientId: "+clientId+ " \r\n");
+						JSONObject jsonobject = new JSONObject();
+						DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
+						String formattedDate ;
+							if(data.isDynamic().equalsIgnoreCase("Y")){
+								formattedDate = formatter1.print(new LocalDate());	
+							}else{
+								formattedDate = formatter1.print(data.getDueDate());
+							}
+							jsonobject.put("dueDate",formattedDate);
+							jsonobject.put("locale", "en");
+							jsonobject.put("dateFormat", "dd MMMM YYYY");
+							jsonobject.put("message", data.getPromotionalMessage());
+							fw.append("sending jsonData for Statement Generation is: "+jsonobject.toString()+" . \r\n");
+								try{
+									this.billingMasterApiResourse.retrieveBillingProducts(clientId,	jsonobject.toString()); 
+								}catch(BillingOrderNoRecordsFoundException e){
+									e.getMessage();
+								}
+					}
        }
-       fw.append("statement Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
-       fw.flush();
-       fw.close();
-	}
-	System.out.println("statement Job is Completed..."
-			+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
-	
+				fw.append("statement Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
+				fw.flush();
+				fw.close();
+		}
+		System.out.println("statement Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 	} catch (Exception exception) {
-	System.out.println(exception.getMessage());
-	exception.printStackTrace();
-	}
-	}
+		System.out.println(exception.getMessage());
+		exception.printStackTrace();
+		}	
+		}
 
 @Transactional
 @Override

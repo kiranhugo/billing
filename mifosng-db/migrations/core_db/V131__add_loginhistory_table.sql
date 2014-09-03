@@ -8,3 +8,4 @@ CREATE TABLE IF NOT EXISTS `b_login_history` (
   `status` char(1) NOT NULL DEFAULT 'N',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=396 DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
+insert ignore into b_eventaction_mapping VALUES (null,'Event Order','Provision IT','Workflow_events','N','N');

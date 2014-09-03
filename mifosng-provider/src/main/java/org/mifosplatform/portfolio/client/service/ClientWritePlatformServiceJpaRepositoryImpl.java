@@ -230,6 +230,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 "Unknown data integrity issue with resource.");
     }
 
+    
     @Transactional
     @Override
     public CommandProcessingResult createClient(final JsonCommand command) {
@@ -495,33 +496,35 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
 	@Override
 	public CommandProcessingResult createClientParent(Long entityId,JsonCommand command) {
-		Client childClient=null;
-		Client parentClient=null;
-		try {
-			this.fromApiJsonDeserializer.ValidateParent(command);
-			final String parentAcntId=command.stringValueOfParameterNamed("accountNo");
-			childClient = this.clientRepository.findOneWithNotFoundDetection(entityId);
-			Boolean count =this.clientReadPlatformService.countChildClients(entityId);
-			parentClient=this.clientRepository.findOneWithAccountId(parentAcntId);
-	    	if(parentClient.getParentId() == null && !parentClient.getId().equals(childClient.getId())&&count.equals(false)){	
-				childClient.setParentId(parentClient.getId());
-				this.clientRepository.save(childClient);
-			}else if(parentClient.getId().equals(childClient.getId())){
-				final String errorMessage="himself can not be parent to his account.";
-				throw new InvalidClientStateTransitionException("Not parent", "himself.can.not.be.parent.to his.account", errorMessage);
-			}else if(count){ 
-				final String errorMessage="he is already parent to some other clients";
-				throw new InvalidClientStateTransitionException("Not Parent", "he.is. already. a parent.to.some other clients", errorMessage);
-			}else{
-				final String errorMessage="can not be parent to this account.";
-				throw new InvalidClientStateTransitionException("Not parent", "can.not.be.parent.to this.account", errorMessage);
-			  }
+			Client childClient=null;
+			Client parentClient=null;
+		
+				try {
+					this.fromApiJsonDeserializer.ValidateParent(command);
+					final String parentAcntId=command.stringValueOfParameterNamed("accountNo");
+					childClient = this.clientRepository.findOneWithNotFoundDetection(entityId);
+					Boolean count =this.clientReadPlatformService.countChildClients(entityId);
+					parentClient=this.clientRepository.findOneWithAccountId(parentAcntId);
+					
+						if(parentClient.getParentId() == null && !parentClient.getId().equals(childClient.getId())&&count.equals(false)){	
+							childClient.setParentId(parentClient.getId());
+							this.clientRepository.save(childClient);
+						}else if(parentClient.getId().equals(childClient.getId())){
+							final String errorMessage="himself can not be parent to his account.";
+							throw new InvalidClientStateTransitionException("Not parent", "himself.can.not.be.parent.to his.account", errorMessage);
+						}else if(count){ 
+							final String errorMessage="he is already parent to some other clients";
+							throw new InvalidClientStateTransitionException("Not Parent", "he.is. already. a parent.to.some other clients", errorMessage);
+						}else{
+							final String errorMessage="can not be parent to this account.";
+							throw new InvalidClientStateTransitionException("Not parent", "can.not.be.parent.to this.account", errorMessage);
+						}
 			
-			}catch(DataIntegrityViolationException dve){
-			 handleDataIntegrityIssues(command, dve);
+				}catch(DataIntegrityViolationException dve){
+					handleDataIntegrityIssues(command, dve);
 	            return CommandProcessingResult.empty();
+				}
+				return new CommandProcessingResultBuilder().withEntityId(childClient.getId()).build();
 		}
-		 return new CommandProcessingResultBuilder().withEntityId(childClient.getId()).build();
-	}
 
 }

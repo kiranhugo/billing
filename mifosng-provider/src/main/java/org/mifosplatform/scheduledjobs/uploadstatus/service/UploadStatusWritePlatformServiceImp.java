@@ -663,6 +663,7 @@ public class UploadStatusWritePlatformServiceImp implements UploadStatusWritePla
 					line = csvFileBufferedReader.readLine();
 					while((line = csvFileBufferedReader.readLine()) != null){
 						try{
+							line=line.replace(";"," ");
 						String[] currentLineData = line.split(splitLineRegX);
 						
 						if(currentLineData!=null && currentLineData[0].equalsIgnoreCase("EOF")){
@@ -783,6 +784,7 @@ public class UploadStatusWritePlatformServiceImp implements UploadStatusWritePla
 					line = csvFileBufferedReader.readLine();
 					while((line = csvFileBufferedReader.readLine()) != null){
 						try{
+							line=line.replace(";"," ");
 						String[] currentLineData = line.split(splitLineRegX);
 						
 						if(currentLineData!=null && currentLineData[0].equalsIgnoreCase("EOF")){
@@ -796,7 +798,7 @@ public class UploadStatusWritePlatformServiceImp implements UploadStatusWritePla
 							return new CommandProcessingResult(Long.valueOf(-1));
 						}
 						
-						if(currentLineData.length>=5){
+						if(currentLineData.length>=6){
 							paymodeDataList = this.paymodeReadPlatformService.retrievemCodeDetails("Payment Mode");
 						       
 				             if(paymodeDataList!=null && paymodeDataList.size()>0)
@@ -822,6 +824,7 @@ public class UploadStatusWritePlatformServiceImp implements UploadStatusWritePla
 				                 jsonObject.put("remarks",  currentLineData[4]);
 				                 jsonObject.put("locale", "en");
 				                 jsonObject.put("dateFormat","dd MMMM yyyy");
+				                 jsonObject.put("receiptNo",currentLineData[4]);
 				                 totalRecordCount++;
 				                 final CommandWrapper commandRequest = new CommandWrapperBuilder().createPayment(Long.valueOf(currentLineData[0])).withJson(jsonObject.toString().toString()).build();
 				                 final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -1088,6 +1091,7 @@ public class UploadStatusWritePlatformServiceImp implements UploadStatusWritePla
 				line = csvFileBufferedReader.readLine();
 				while((line = csvFileBufferedReader.readLine()) != null){
 					try{
+						line=line.replace(";"," ");
 					String[] currentLineData = line.split(splitLineRegX);
 					
 					if(currentLineData!=null && currentLineData[0].equalsIgnoreCase("EOF")){

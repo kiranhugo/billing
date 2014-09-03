@@ -1354,10 +1354,10 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-public CommandWrapperBuilder createEventOrder( ) {
+public CommandWrapperBuilder createEventOrder(Long clientId ) {
 	this.actionName="CREATE";
 	this.entityName="EVENTORDER";
-	this.entityId=null;
+	this.entityId=clientId;
 	this.href="eventorder/template";
 	return this;
 }

@@ -41,16 +41,47 @@ public class MediaAssetReadPlatformServiceImpl implements MediaAssetReadPlatform
 
 
 	@Override
-	public List<MediaAssetData> retrievemediaAssetdata(Long pageNo) {
+	public List<MediaAssetData> retrievemediaAssetdata(Long pageNo,String clientType) {
 		
-		MediaAssestDataMapper mediaAssestDataMapper = new MediaAssestDataMapper();
-		String sql = "select " + mediaAssestDataMapper.mediaAssestDataSchema()+"  LIMIT ?, 10" ;
+		AllMediaAssestDataMapper mediaAssestDataMapper = new AllMediaAssestDataMapper();
+		String sql = null;
+		if(clientType !=null ){
+			
+			sql="select " + mediaAssestDataMapper.mediaAssestDataSchema()+" where m.clientType ='"+clientType+"' LIMIT ?, 10" ;	
+		}else{
+			sql="select " + mediaAssestDataMapper.mediaAssestDataSchema()+" LIMIT ?, 10" ;
+		}
+		//
+		
 		return this.jdbcTemplate.query(sql, mediaAssestDataMapper,new Object[] {"", pageNo });
 
 	}
+	
+	private static final class AllMediaAssestDataMapper implements RowMapper<MediaAssetData> {
 
-	private static final class MediaAssestDataMapper implements
-			RowMapper<MediaAssetData> {
+		@Override
+		public MediaAssetData mapRow(ResultSet rs, int rowNum)
+
+				throws SQLException {
+			Long mediaId = rs.getLong("mediaId");
+			String mediaTitle = rs.getString("title");
+			String mediaImage = rs.getString("image");
+			BigDecimal rating = rs.getBigDecimal("rating");
+			Long eventId=rs.getLong("eventId");
+			String assetTag=rs.getString("assetTag");
+			String quality=rs.getString("quality");
+			String optType=rs.getString("optType");
+			BigDecimal price=rs.getBigDecimal("price");
+
+			return new MediaAssetData(mediaId,mediaTitle,mediaImage,rating,eventId,assetTag,quality,optType,price);
+		}
+		public String mediaAssestDataSchema() {
+
+			return " *,? as assetTag from mvAll_vw m  ";
+		}
+	}
+
+	private static final class MediaAssestDataMapper implements RowMapper<MediaAssetData> {
 
 		@Override
 		public MediaAssetData mapRow(ResultSet rs, int rowNum)
@@ -63,7 +94,7 @@ public class MediaAssetReadPlatformServiceImpl implements MediaAssetReadPlatform
 			Long eventId=rs.getLong("eventId");
 			String assetTag=rs.getString("assetTag");
 
-			return new MediaAssetData(mediaId,mediaTitle,mediaImage,rating,eventId,assetTag);
+			return new MediaAssetData(mediaId,mediaTitle,mediaImage,rating,eventId,assetTag,null,null,null);
 		}
 		public String mediaAssestDataSchema() {
 

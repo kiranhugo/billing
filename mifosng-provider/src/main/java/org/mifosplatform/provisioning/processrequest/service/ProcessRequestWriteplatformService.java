@@ -8,10 +8,10 @@ public interface ProcessRequestWriteplatformService {
 
 	void ProcessingRequestDetails();
 
-	//void notifyProcessingDetails(ProcessingDetailsData detailsData);
-	
-	 CommandProcessingResult addProcessRequest(JsonCommand command);
+    CommandProcessingResult addProcessRequest(JsonCommand command);
 
 	void notifyProcessingDetails(ProcessRequest detailsData, char status);
+
+	//void postProvisioningdetails(Client client, EventOrder eventOrder,String requestType, String provsystem, String response);
 
 }

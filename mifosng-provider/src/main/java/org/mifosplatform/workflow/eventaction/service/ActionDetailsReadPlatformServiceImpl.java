@@ -89,7 +89,7 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 			  if(result != null){
 			  	if(result.equalsIgnoreCase("true") && resource != null){
 			  		isCheck=true;
-			  		String[] resultdatas=resource.split(" ");
+			  		String[] resultdatas=resource.split(",");
 			  		Map<String,String> map=new HashMap<String, String>();
 			  			for(String resultData:resultdatas){
 			  				String[] data=resultData.split(":");
