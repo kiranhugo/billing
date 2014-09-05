@@ -123,7 +123,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		BigDecimal paymentAmount = BigDecimal.ZERO;
 		BigDecimal dueAmount = BigDecimal.ZERO;
 		BigDecimal taxAmount = BigDecimal.ZERO;
-		BigDecimal adjustMentsAndPayments = BigDecimal.ZERO;
+		//BigDecimal adjustMentsAndPayments = BigDecimal.ZERO;
 		BigDecimal OneTimeSaleAmount =BigDecimal.ZERO;
 		for (BillDetail billDetail : billDetails) {
 			if (billDetail.getTransactionType().equalsIgnoreCase("SERVICE_CHARGES")) {
@@ -154,7 +154,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	  billMaster.setTaxAmount(taxAmount);
 	  billMaster.setPaidAmount(paymentAmount);
 	  billMaster.setDueAmount(dueAmount);
-	  billMaster.setAdjustmentsAndPayments(paymentAmount.subtract(adjustmentAmount));
+	  //billMaster.setAdjustmentsAndPayments(paymentAmount.subtract(adjustmentAmount));
 	  billMaster.setPreviousBalance(clientBalance);
 	  this.billMasterRepository.save(billMaster);
 	  return new CommandProcessingResult(billMaster.getId());

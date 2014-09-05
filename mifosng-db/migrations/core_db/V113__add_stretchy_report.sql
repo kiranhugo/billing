@@ -34,10 +34,11 @@ END IF;
 END //
 DELIMITER ;
 call addstatus();
-update b_clientuser set status = 'ACTIVE';
-
 
 delete from m_permission where code='UPDATECRASH_MEDIADEVICE';
 INSERT IGNORE INTO m_permission VALUES (null,'organisation', 'UPDATECRASH_MEDIADEVICE', 'MEDIADEVICE', 'UPDATECRASH', 0);
 
 Drop procedure IF EXISTS addstatus;
+
+update IGNORE b_clientuser set status = 'ACTIVE';
+

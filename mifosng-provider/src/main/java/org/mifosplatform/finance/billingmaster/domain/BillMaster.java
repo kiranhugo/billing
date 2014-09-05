@@ -67,14 +67,14 @@ public class BillMaster {
 	@Column(name="promotion_description")
 	private String promotionDescription;
 
-	@Column(name="bill_Period")
+	/*@Column(name="bill_Period")
 	private String billPeriod;
 
 	@Column(name="adjustments_payments")
-	private BigDecimal adjustmentsAndPayments;
+	private BigDecimal adjustmentsAndPayments;*/
 	
-	@Column(name="group_id")
-	private Long groupId;
+	@Column(name="parent_id")
+	private Long parentId;
 	
 	
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -90,7 +90,7 @@ public class BillMaster {
 			final BigDecimal previousBalance,final BigDecimal chargeAmount,
 			final BigDecimal adjustmentAmount,final BigDecimal taxAmount,
 			final BigDecimal paidAmount,final BigDecimal dueAmount,final String fileName,
-			final String promotionDescription, Long groupId) {
+			final String promotionDescription, Long parentId) {
 
 		this.billNumber = billNumber;
 		this.clientId = clientId;
@@ -106,8 +106,8 @@ public class BillMaster {
 		this.dueAmount = dueAmount;
 		this.promotionDescription = promotionDescription;
 		this.fileName="invoice";
-		this.billPeriod="monthly";
-		this.groupId=groupId;
+		//this.billPeriod="monthly";
+		this.parentId=parentId;
 
 	}
 
@@ -231,13 +231,6 @@ public class BillMaster {
 		this.promotionDescription = promotionDescription;
 	}
 
-	public BigDecimal getAdjustmentsAndPayments() {
-		return adjustmentsAndPayments;
-	}
-
-	public void setAdjustmentsAndPayments(BigDecimal adjustmentsAndPayments) {
-		this.adjustmentsAndPayments = adjustmentsAndPayments;
-	}
 
 	public void addBillDetails(BillDetail billDetail) {
          billDetail.updateBillMaster(this);
@@ -246,12 +239,8 @@ public class BillMaster {
 		
 	}
 
-	public String getBillPeriod() {
-		return billPeriod;
-	}
-
-	public Long getGroupId() {
-		return groupId;
+	public Long getparentId() {
+		return parentId;
 	}
 
 	public List<BillDetail> getBillDetails() {
