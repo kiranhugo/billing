@@ -197,6 +197,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     }
 
     private void scheduleJob(final ScheduledJobDetail scheduledJobDetails) {
+    	
         if (!scheduledJobDetails.isActiveSchedular()) {
             scheduledJobDetails.updateNextRunTime(null);
             scheduledJobDetails.updateCurrentlyRunningStatus(false);
