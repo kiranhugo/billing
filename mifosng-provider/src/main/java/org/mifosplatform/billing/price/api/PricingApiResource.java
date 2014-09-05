@@ -93,7 +93,7 @@ public class PricingApiResource {
 	    	List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
 	    	List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
 	    	List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getThePriceregionsDetails();
-	    	List<SubscriptionData> contractPeriods = this.planReadPlatformService.retrieveSubscriptionData();
+	    	List<SubscriptionData> contractPeriods = this.planReadPlatformService.retrieveSubscriptionData(null,null);
 			
 	    		for(int i=0;i<contractPeriods.size();i++){
 	    			if(contractPeriods.get(i).getSubscriptionType().equalsIgnoreCase("None")){
@@ -140,7 +140,7 @@ public class PricingApiResource {
 	    	List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
 	    	List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
 	    	List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getThePriceregionsDetails();
-	    	List<SubscriptionData> contractPeriods = this.planReadPlatformService.retrieveSubscriptionData();
+	    	List<SubscriptionData> contractPeriods = this.planReadPlatformService.retrieveSubscriptionData(null,null);
 			
     		for(int i=0;i<contractPeriods.size();i++){
     			if(contractPeriods.get(i).getSubscriptionType().equalsIgnoreCase("None")){

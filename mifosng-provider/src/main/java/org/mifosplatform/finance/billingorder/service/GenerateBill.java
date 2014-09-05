@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-import org.joda.time.Months;
 import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
@@ -449,10 +448,6 @@ public class GenerateBill {
 					
 			}else if(chargeDuration==2){
 				pricePerDay=amount.divide(new BigDecimal(divisibleDays), 2,RoundingMode.HALF_UP);
-					
-			}else if(chargeDuration==2){
-				pricePerDay=amount.divide(new BigDecimal(60), 2,RoundingMode.HALF_UP);
-					
 			}else{	
 			   pricePerDay = amount.divide(new BigDecimal(maxDaysOfMonth), 2,RoundingMode.HALF_UP);
 			}

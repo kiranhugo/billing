@@ -209,18 +209,21 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	  jsonObject.put("dateFormat","dd MMMM yyyy");
                               jsonObject.put("locale","en");
 				        	  jsonObject.put("systemDate",dateFormat.format(new Date()));
-				        	  	if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
+				        	  	
+				        	  if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
+				        		  
 				        	  		eventAction=new EventAction(new Date(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
 				        	  		EventActionConstants.ACTION_INVOICE.toString(),"/billingorder/"+clientId,Long.parseLong(resourceId),
 				        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
 						        	this.eventActionRepository.save(eventAction);
 				        	  	
 				        	  	}else{
-				            	  Order order=this.orderRepository.findOne(new Long(resourceId));
-				            	  jsonObject.put("dateFormat","dd MMMM yyyy");
-	                              jsonObject.put("locale","en");
-					        	  jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
-					        	  this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),jsonObject.toString());
+				            	 
+				        	  		Order order=this.orderRepository.findOne(new Long(resourceId));
+				        	  		jsonObject.put("dateFormat","dd MMMM yyyy");
+				        	  		jsonObject.put("locale","en");
+				        	  		jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
+				        	  		this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),jsonObject.toString());
 				        	  	}
 				      }else if(detailsData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_PROVISION_IT)){
 			  	    	
@@ -252,7 +255,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				      }
 			  	    }if(detailsData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_SEND_PROVISION)){
 		        	   
-		        	   eventAction=new EventAction(new Date(), "CREATE", "Client",EventActionConstants.ACTION_SEND_PROVISION.toString(),"/processrequest/"+clientId, 
+		        	   eventAction=new EventAction(new Date(), "CLOSE", "Client",EventActionConstants.ACTION_SEND_PROVISION.toString(),"/processrequest/"+clientId, 
 		        	   Long.parseLong(resourceId),jsonObject.toString(),clientId,clientId);
 		        	   this.eventActionRepository.save(eventAction);
 			  	}

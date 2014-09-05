@@ -148,6 +148,7 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	
+	
 
 	public Date getNextBillableDay() {
 		return nextBillableDay;
@@ -241,9 +242,9 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 		
 	}
 
-	public void setPrice(JsonCommand command) {
+	public void setPrice(BigDecimal price) {
 		
-		BigDecimal price=command.bigDecimalValueOfParameterNamed("price");
+		//BigDecimal price=command.bigDecimalValueOfParameterNamed("price");
 		this.price=price;
 		
 	}
@@ -263,9 +264,20 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 	public void setBillStartDate(LocalDate startDate) {
-	    
 		 this.billStartDate=startDate.toDate();
 		
+	}
+
+	public void setChargeCode(String chargeCode) {
+    	this.chargeCode=chargeCode;
+	}
+
+	public void setChargeType(String chargeType) {
+		this.chargeType=chargeType;
+	}
+	
+	public void setChargeDurationType(String durationType) {
+		this.durationType=durationType;
 	}
 
 
