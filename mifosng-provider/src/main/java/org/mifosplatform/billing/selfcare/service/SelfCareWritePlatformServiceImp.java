@@ -81,15 +81,21 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			
 			if(clientId == null){
 				try{
+				
 					clientId = selfCareReadPlatformService.getClientId(selfCare.getUniqueReference());					
-					}catch(EmptyResultDataAccessException erdae){
+					
+				}catch(EmptyResultDataAccessException erdae){
 						throw new PlatformDataIntegrityException("this user is not registered","this user is not registered","");
-					}catch(Exception e){
-						if(e.getMessage() != null){
+					
+				}catch(Exception e){
+						
+					if(e.getMessage() != null){
 							throw new PlatformDataIntegrityException("this user not found","this user not found",e.getMessage());
-						}else if(e.getCause().getLocalizedMessage() != null){
+						
+					}else if(e.getCause().getLocalizedMessage() != null){
 							throw new PlatformDataIntegrityException("this user not found","this user not found",e.getCause().getLocalizedMessage());
-						}else{
+					
+					}else{
 							throw new PlatformDataIntegrityException("this user not found","this user not found","");
 						}
 							
