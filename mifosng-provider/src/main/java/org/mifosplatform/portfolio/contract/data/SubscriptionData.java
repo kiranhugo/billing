@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.contract.data;
 
 import java.util.List;
 
+import org.mifosplatform.billing.chargecode.data.DurationTypeData;
 import org.mifosplatform.portfolio.contract.data.PeriodData;
 
 public class SubscriptionData {
@@ -12,7 +13,7 @@ public class SubscriptionData {
 	private final Long subscriptiontypeId;
     private final String Contractdata;
 	private final String subscriptionType;
-	private List<PeriodData> allowedperiods;
+	private List<DurationTypeData> allowedperiods;
 
 	private final Long units;
 	
@@ -42,7 +43,7 @@ public class SubscriptionData {
 	}
 	
 
-	public SubscriptionData(List<PeriodData> datas, SubscriptionData products) {
+	public SubscriptionData(List<DurationTypeData> datas, SubscriptionData products) {
 		this.id = products.getId();
 		this.allowedperiods = datas;
 		this.subscriptionPeriod = products.getSubscriptionPeriod();
@@ -52,8 +53,8 @@ public class SubscriptionData {
         this.Contractdata=null;
 	}
 
-	public SubscriptionData(List<PeriodData> allowedtypes) {
-		this.allowedperiods = allowedtypes;
+	public SubscriptionData(List<DurationTypeData> durationTypeData) {
+		this.allowedperiods = durationTypeData;
 		this.id=null;
 		this.subscriptionPeriod=null;
 		this.subscriptionType=null;
@@ -62,11 +63,11 @@ public class SubscriptionData {
 		this.Contractdata=null;
 	}
 
-	public List<PeriodData> getAllowedperiods() {
+	public List<DurationTypeData> getAllowedperiods() {
 		return allowedperiods;
 	}
 
-	public void setAllowedperiods(List<PeriodData> allowedperiods) {
+	public void setAllowedperiods(List<DurationTypeData> allowedperiods) {
 		this.allowedperiods = allowedperiods;
 	}
 

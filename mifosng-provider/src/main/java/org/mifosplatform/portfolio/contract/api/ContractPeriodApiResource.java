@@ -18,6 +18,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.billing.chargecode.data.DurationTypeData;
+import org.mifosplatform.billing.chargecode.service.ChargeCodeReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -44,17 +46,20 @@ public class ContractPeriodApiResource {
 	    private final DefaultToApiJsonSerializer<SubscriptionData> toApiJsonSerializer;
 	    private final ApiRequestParameterHelper apiRequestParameterHelper;
 	    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-	    private ContractPeriodReadPlatformService contractPeriodReadPlatformService;
+	    private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
+	    private final ChargeCodeReadPlatformService chargeCodeReadPlatformService;
+	    
 	    
 	    @Autowired
-	    public ContractPeriodApiResource(final PlatformSecurityContext context, 
-	    final DefaultToApiJsonSerializer<SubscriptionData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
+	    public ContractPeriodApiResource(final PlatformSecurityContext context, final DefaultToApiJsonSerializer<SubscriptionData> toApiJsonSerializer,
+	    		final ApiRequestParameterHelper apiRequestParameterHelper,final ChargeCodeReadPlatformService chargeCodeReadPlatformService, 
 	    final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final ContractPeriodReadPlatformService contractPeriodReadPlatformService) {
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
 		        this.apiRequestParameterHelper = apiRequestParameterHelper;
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 		        this.contractPeriodReadPlatformService=contractPeriodReadPlatformService;
+		        this.chargeCodeReadPlatformService=chargeCodeReadPlatformService;
 		    }		
 		
 	
@@ -76,8 +81,9 @@ public class ContractPeriodApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		SubscriptionData productData = this.contractPeriodReadPlatformService.retrieveSubscriptionData(SubscriptionId);
 		 final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		 List<PeriodData> allowedtypes = this.contractPeriodReadPlatformService.retrieveAllPlatformPeriod();
-			productData = new SubscriptionData(allowedtypes, productData);
+		 //List<PeriodData> allowedtypes = this.contractPeriodReadPlatformService.retrieveAllPlatformPeriod();
+		 List<DurationTypeData> durationTypeData = this.chargeCodeReadPlatformService.getDurationType();
+			productData = new SubscriptionData(durationTypeData, productData);
 	        return this.toApiJsonSerializer.serialize(settings, productData, RESPONSE_DATA_PARAMETERS);
 	}
 	@GET
@@ -122,9 +128,10 @@ public class ContractPeriodApiResource {
 
 		 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 			
-			List<PeriodData> allowedtypes = this.contractPeriodReadPlatformService.retrieveAllPlatformPeriod();
+			//List<PeriodData> allowedtypes = this.contractPeriodReadPlatformService.retrieveAllPlatformPeriod();
+			List<DurationTypeData> durationTypeData = this.chargeCodeReadPlatformService.getDurationType();
 			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters()); 
-			SubscriptionData product = new SubscriptionData(allowedtypes);
+			SubscriptionData product = new SubscriptionData(durationTypeData);
 	         return this.toApiJsonSerializer.serialize(settings, product, RESPONSE_DATA_PARAMETERS);
 		}
 	 

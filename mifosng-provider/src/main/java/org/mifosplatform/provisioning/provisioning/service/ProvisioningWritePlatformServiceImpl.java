@@ -363,7 +363,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			    		requestType,'N','N');
 			    List<OrderLine> orderLines=order.getServices();
 			    HardwareAssociation hardwareAssociation=this.associationRepository.findOneByOrderId(order.getId());
-			    	
+			   
 			    if(hardwareAssociation == null){
 			    		throw new PairingNotExistException(order.getId());
 			    }

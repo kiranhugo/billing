@@ -20,6 +20,7 @@ public class ConfigurationConstants {
 	public final static String CONFIG_PROPERTY="Implicit Association";
 	public final static String CONFIG_DISCONNECT="Disconnection Credit";
 	public final static String CONFIG_CHANGE_PLAN_ALIGN_DATES="CHANGE_PLAN_ALIGN_DATES";
+	public final static String CONFIG_IS_SELFCAREUSER="is_selfcareuser";  
 
 	public static final String ENABLED = "enabled";
 	public static final String VALUE = "value";

@@ -18,5 +18,6 @@ Drop procedure IF EXISTS clientuser1;
 delete from b_message_template where template_description = "SELFCARE REGISTRATION";
 
 INSERT IGNORE INTO b_message_template(template_description,subject,header,body,footer,message_type) values ('SELFCARE REGISTRATION','Streaming Media Selfcare','Dear <PARAM1>','Your Selfcare User Account has been successfully created,Following are the User login Details. \n userName : <PARAM2> , \n password : <PARAM3> .','Thankyou','E'); 
+insert ignore into c_configuration VALUES (null,'is_selfcareuser',1,null);
 
 

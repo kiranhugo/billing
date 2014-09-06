@@ -204,6 +204,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					findOneByName(ConfigurationConstants.CONFIR_PROPERTY_REGISTRATION_DEVICE);
 
 			String fullname = command.stringValueOfParameterNamed("fullname");
+			String firstName = command.stringValueOfParameterNamed("firstname");
 			String city = command.stringValueOfParameterNamed("city");
 			Long phone = command.longValueOfParameterNamed("phone");	
 			String email = command.stringValueOfParameterNamed("email");
@@ -231,10 +232,10 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				JSONObject clientcreation = new JSONObject();
 				clientcreation.put("officeId", new Long(1));
 				clientcreation.put("clientCategory", codeValue.getId());
-				clientcreation.put("firstname", fullname);
-				clientcreation.put("lastname", "Mr.");
+				clientcreation.put("firstname",firstName);
+				clientcreation.put("lastname", fullname);
 				clientcreation.put("phone", phone);
-				clientcreation.put("groupId", new Long(1));
+				clientcreation.put("entryType","IND");// new Long(1));
 				clientcreation.put("addressNo", "Address");
 				clientcreation.put("city", addressData.getCity());
 				clientcreation.put("state", addressData.getState());

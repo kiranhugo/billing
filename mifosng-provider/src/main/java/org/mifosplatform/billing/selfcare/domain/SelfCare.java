@@ -44,6 +44,7 @@ public class SelfCare extends AbstractPersistable<Long>{
 		this.isDeleted = isDeleted;
 		this.status="INACTIVE";
 	}
+	
 	public static SelfCare fromJson(JsonCommand command) {
 		String userName = command.stringValueOfParameterNamed("userName");
 		String uniqueReference = command.stringValueOfParameterNamed("uniqueReference");
