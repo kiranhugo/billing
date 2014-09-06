@@ -41,6 +41,7 @@ public class TenantDatabaseUpgradeService {
                 flyway.repair();
                 flyway.setOutOfOrder(true);
                 flyway.migrate();
+               
             }
         }
     }

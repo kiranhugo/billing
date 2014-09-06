@@ -1839,6 +1839,7 @@ public CommandWrapperBuilder activateProcess() {
 	this.entityName = "ACTIVATIONPROCESS";
 	this.href = "/clients/template";
 	return this;
+	
 }
 
 public CommandWrapperBuilder provisiongSystem() {

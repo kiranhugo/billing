@@ -116,7 +116,7 @@ public class GenerateDisconnectionBill {
 				
 			} else if (billingOrderData.getBillingAlign().equalsIgnoreCase("Y")) {
                 if(numberOfMonths>0){
-				 LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths);//.dayOfMonth().withMaximumValue();
+				 LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths).dayOfMonth().withMaximumValue();
 				 numberOfDays = Days.daysBetween(disconnectionDate, tempBillEndDate).getDays();
 				 System.out.println(numberOfDays);
                 }
@@ -306,34 +306,6 @@ public class GenerateDisconnectionBill {
 
 	}
 
-/*	// Disconnection credit price
-	private BigDecimal getDisconnectionCredit(LocalDate startDate,
-			LocalDate endDate, BigDecimal amount, String durationType) {
-
-		int currentDay = startDate.getDayOfMonth();
-
-		int totalDays = 0;
-		if (startDate.isEqual(endDate)) {
-			totalDays = 0;
-		} else {
-			totalDays = Days.daysBetween(startDate, endDate).getDays() + 1;
-		}
-		pricePerMonth = amount;
-		BigDecimal pricePerDay = BigDecimal.ZERO;
-
-		if (durationType.equalsIgnoreCase("month(s)")) {
-			pricePerDay = pricePerMonth.divide(new BigDecimal(30), 2,
-					RoundingMode.HALF_UP);
-
-		} else if (durationType.equalsIgnoreCase("week(s)")) {
-			pricePerDay = pricePerMonth.divide(new BigDecimal(7), 2,
-					RoundingMode.HALF_UP);
-		}
-
-		return pricePerDay.multiply(new BigDecimal(totalDays));
-
-	}
-*/
 /*	// order cancelled bill
 	public BillingOrderCommand getCancelledOrderBill(
 			BillingOrderData billingOrderData,

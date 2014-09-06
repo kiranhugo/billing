@@ -80,11 +80,11 @@ public class BillMasterWritePlatformServiceImplementation implements
 		 this.apiJsonDeserializer.validateForCreate(command.json());
 			//final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default"); 
 	        //ThreadLocalContextUtil.setTenant(tenant);
-		 Long groupId=null;
+		 Long parentId=null;
 		 Client client=this.clientRepository.findOne(clientId);
-		 if(client.getGroupName() != null){
-		 GroupsDetails groupsDetails=this.groupsDetailsRepository.findOne(client.getGroupName());//findOneByGroupName(client.getGroupName());
-		 groupId=groupsDetails.getId();
+		 if(client.getParentId() != null){
+		// GroupsDetails groupsDetails=this.groupsDetailsRepository.findOne(client.getGroupName());//findOneByGroupName(client.getGroupName());
+		 parentId=client.getParentId();
 		 }
 		 List<FinancialTransactionsData> financialTransactionsDatas = billMasterReadPlatformService.retrieveFinancialData(clientId);
 		 if (financialTransactionsDatas.size() == 0) {
@@ -97,7 +97,6 @@ public class BillMasterWritePlatformServiceImplementation implements
 	//	for (BillMaster data : billMasters) {
 	//		if (data.getClientId().compareTo(clientId)==0) {
 		BigDecimal	previousBal = this.billMasterReadPlatformService.retrieveClientBalance(clientId);
-			
 		
 		LocalDate billDate = new LocalDate();
 		BigDecimal previousBalance = BigDecimal.ZERO;
@@ -109,7 +108,7 @@ public class BillMasterWritePlatformServiceImplementation implements
 		final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
 		final String message = command.stringValueOfParameterNamed("message");
 		BillMaster  billMaster = new BillMaster(clientId, clientId,billDate.toDate(), null, null, dueDate.toDate(),
-		previousBalance, chargeAmount, adjustmentAmount, taxAmount,paidAmount, dueAmount, null,message,groupId);
+		previousBalance, chargeAmount, adjustmentAmount, taxAmount,paidAmount, dueAmount, null,message,parentId);
 		
 		List<BillDetail> listOfBillingDetail = new ArrayList<BillDetail>();
 		
@@ -118,7 +117,7 @@ public class BillMasterWritePlatformServiceImplementation implements
 			BillDetail billDetail = new BillDetail(null,financialTransactionsData.getTransactionId(),
 					financialTransactionsData.getTransDate().toDate(),	financialTransactionsData.getTransactionType(),
 					financialTransactionsData.getDebitAmount(),financialTransactionsData.getPlanCode(),financialTransactionsData.getDescription());
-			//this.billDetailRepository.save(billDetail);
+		
 			listOfBillingDetail.add(billDetail);
 		    billMaster.addBillDetails(billDetail);
 		
@@ -176,6 +175,6 @@ public class BillMasterWritePlatformServiceImplementation implements
 
 		}
 		
-		return billingMessage.getId();
+		return billMaster.getId();
 	}
 }

@@ -1,7 +1,6 @@
 package org.mifosplatform.billing.selfcare.service;
 
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
-import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

@@ -19,14 +19,12 @@ public interface PriceReadPlatformService {
 
      List<SubscriptionData> retrievePaytermData();
      
-   //  List<ServiceData> retrievePriceDetails(String planCode);
-	
      List<ServiceData> retrievePrcingDetails(Long planId);
 	
      List<ServiceData> retrieveServiceCodeDetails(Long planCode);
 	
      PricingData retrieveSinglePriceDetails(String priceId);
-	
+     
      List<PricingData> retrievePlanAndPriceDetails(String region);
 
 	List<ServiceData> retrievePriceDetails(String planId, String region);

@@ -8,10 +8,15 @@ import java.util.List;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.chargecode.domain.ChargeCode;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.discountmaster.exceptions.DiscountMasterNoRecordsFoundException;
 import org.mifosplatform.billing.pricing.data.PriceData;
+import org.mifosplatform.billing.pricing.domain.Price;
+import org.mifosplatform.billing.pricing.domain.PriceRepository;
+import org.mifosplatform.billing.pricing.service.PriceReadPlatformService;
 import org.mifosplatform.billing.promotioncodes.domain.Promotion;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionRepository;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
@@ -111,16 +116,19 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final ReverseInvoice reverseInvoice;
 	private final PlatformSecurityContext context;
 	private final OrderRepository orderRepository;
+	private final PriceRepository  priceRepository;
 	private final ClientRepository clientRepository;
 	private final PromotionRepository promotionRepository;
 	private final PaymentsApiResource paymentsApiResource;
 	private final CodeValueRepository codeValueRepository;
+	private final ChargeCodeRepository chargeCodeRepository;
 	private final OrderPriceRepository OrderPriceRepository;
 	private final EventActionRepository eventActionRepository;
 	private final OrderHistoryRepository orderHistoryRepository;
 	private final SubscriptionRepository subscriptionRepository;
 	private final OrderDiscountRepository orderDiscountRepository;
 	private final ServiceMasterRepository serviceMasterRepository;
+	private final PriceReadPlatformService priceReadPlatformService;
 	private final ProcessRequestRepository processRequestRepository;
 	private final DiscountMasterRepository discountMasterRepository;
 	private final OrderReadPlatformService orderReadPlatformService;
@@ -164,16 +172,19 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		    final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices,
 		    final EventActionRepository eventActionRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
 		   final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
-		   final PaymentFollowupRepository paymentFollowupRepository) {
+		   final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,
+		   final PriceReadPlatformService priceReadPlatformService,final ChargeCodeRepository chargeCodeRepository) {
 		
 		this.context = context;
 		this.reverseInvoice=reverseInvoice;
-		this.codeValueRepository=codeRepository;
+		this.priceRepository=priceRepository;
 		this.planRepository = planRepository;
 		this.orderRepository = orderRepository;
 		this.clientRepository=clientRepository;
+		this.codeValueRepository=codeRepository;
 		this.promotionRepository=promotionRepository;
 		this.paymentsApiResource=paymentsApiResource;
+		this.chargeCodeRepository=chargeCodeRepository;
 		this.OrderPriceRepository = OrderPriceRepository;
 		this.eventActionRepository=eventActionRepository;
 		this.associationRepository=associationRepository;
@@ -185,6 +196,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.orderDiscountRepository=orderDiscountRepository;
 		this.discountMasterRepository=discountMasterRepository;
 		this.processRequestRepository=processRequestRepository;
+		this.priceReadPlatformService=priceReadPlatformService;
 		this.prepareRequsetRepository=prepareRequsetRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.paymentFollowupRepository=paymentFollowupRepository;
@@ -319,6 +331,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 									}
 							}
 							if(plan.getProvisionSystem().equalsIgnoreCase("None")){
+								
 								Client client=this.clientRepository.findOne(clientId);
 								client.setStatus(ClientStatus.ACTIVE.getValue());
 								this.clientRepository.save(client);
@@ -365,8 +378,9 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				final Long userId=context.authenticatedUser().getId();
 				final Order order = retrieveOrderBy(orderId);
 				Long orderPriceId=command.longValueOfParameterNamed("priceId");
+				BigDecimal price=command.bigDecimalValueOfParameterNamed("price");
 				OrderPrice orderPrice=this.OrderPriceRepository.findOne(orderPriceId);
-				orderPrice.setPrice(command);
+				orderPrice.setPrice(price);
 				this.OrderPriceRepository.save(orderPrice);
 				
 				//For Order History
@@ -526,11 +540,30 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				final String description=command.stringValueOfParameterNamed("description");
 				Contract contractDetails=this.subscriptionRepository.findOne(contractPeriod);
 				Plan plan=this.planRepository.findOne(orderDetails.getPlanId());
+				
 					if(orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
 						newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
 						LocalDate renewalEndDate=calculateEndDate(newStartdate,contractDetails.getSubscriptionType(),contractDetails.getUnits());
+						
 						orderDetails.setEndDate(renewalEndDate);
 							for(OrderPrice orderprice:orderPrices){
+								
+								if(plan.isPrepaid() == 'Y'){
+									
+									ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
+								    Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),contractDetails.getSubscriptionPeriod());
+								    
+								    if(price != null){
+								    	ChargeCode chargeCode=this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
+								    	orderprice.setChargeCode(chargeCode.getChargeCode());
+								    	orderprice.setChargeDuration(chargeCode.getChargeDuration().toString());
+								    	orderprice.setChargeType(chargeCode.getChargeType());
+								    	orderprice.setChargeDurationType(chargeCode.getDurationType());
+								    	orderprice.setPrice(price.getPrice());
+								    }
+								
+									
+								}
 								orderprice.setBillEndDate(renewalEndDate);
 								// this.OrderPriceRepository.save(orderprice);
 							}
@@ -546,7 +579,22 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 						newStartdate=new LocalDate(); 
 						LocalDate renewalEndDate=calculateEndDate(newStartdate,contractDetails.getSubscriptionType(),contractDetails.getUnits());
 						orderDetails.setEndDate(renewalEndDate);
-							for(OrderPrice orderprice:orderPrices){
+							
+						for(OrderPrice orderprice:orderPrices){
+                                 if(plan.isPrepaid() == 'Y'){
+									
+									ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
+								    Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),contractDetails.getSubscriptionPeriod());
+								    
+								    if(price != null){
+								    	ChargeCode chargeCode=this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
+								    	orderprice.setChargeCode(chargeCode.getChargeCode());
+								    	orderprice.setChargeDuration(chargeCode.getChargeDuration().toString());
+								    	orderprice.setChargeType(chargeCode.getChargeType());
+								    	orderprice.setChargeDurationType(chargeCode.getDurationType());
+								    	orderprice.setPrice(price.getPrice());
+								    }
+								}
 								orderprice.setBillStartDate(newStartdate);
 								orderprice.setBillEndDate(renewalEndDate);
 								orderprice.setNextBillableDay(null);
