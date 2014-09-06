@@ -66,31 +66,28 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 	public void SmtpDataProcessing() {
 		try {
 			
-			GlobalConfigurationProperty configuration1 = repository.findOneByName("SMTP");
-			String value = configuration1.getValue();
+			 configuration = repository.findOneByName("SMTP");
+			String value = configuration.getValue();
 			JSONObject object = new JSONObject(value);
 			
-			if (configuration1 != null && configuration != null) {
+			/*if (configuration1 != null && configuration != null) {
 				if (authuser.equalsIgnoreCase(object.getString("mailId")) && encodedPassword.equals(object.getString("password"))) {
 					if (hostName.equals(object.getString("hostName")) && port.equalsIgnoreCase(object.getString("port"))) {
 						return;
 					}
 				}
+			}*/
+			authuser = (String) object.get("mailId");
+			encodedPassword = (String) object.get("password");
+			authpwd = new String(Base64.decodeBase64(encodedPassword));
+			hostName = (String) object.get("hostName");
+			port = object.getString("port");
+			if (port.isEmpty()) {
+				portNumber = Integer.parseInt("25");
+			} else {
+				portNumber = Integer.parseInt(port);
 			}
 			
-			if (configuration1 != null) {
-				configuration = configuration1;
-				authuser = (String) object.get("mailId");
-				encodedPassword = (String) object.get("password");
-				authpwd = new String(Base64.decodeBase64(encodedPassword));
-				hostName = (String) object.get("hostName");
-			    port = object.getString("port");
-				if (port.isEmpty()) {
-					portNumber = Integer.parseInt("25");
-				} else {
-					portNumber = Integer.parseInt(port);
-				}
-			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
