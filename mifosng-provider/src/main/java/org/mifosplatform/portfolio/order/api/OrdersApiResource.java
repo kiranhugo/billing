@@ -117,7 +117,7 @@ public class OrdersApiResource {
 	private OrderData handleTemplateRelatedData(Long planId) {
 		List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData(planId);
 		List<PaytermData> data=new ArrayList<PaytermData>();
-		List<SubscriptionData> contractPeriod=this.planReadPlatformService.retrieveSubscriptionData();
+		List<SubscriptionData> contractPeriod=this.planReadPlatformService.retrieveSubscriptionData(null,null);
 		return new OrderData(planDatas,data,contractPeriod,null);
 	}
 	
@@ -205,10 +205,11 @@ public class OrdersApiResource {
     @Path("renewalorder")
     @Consumes({MediaType.APPLICATION_JSON})
     @Produces({MediaType.APPLICATION_JSON})
-    public String retrieveRenewalOrderDetails(@Context final UriInfo uriInfo) {
+    public String retrieveRenewalOrderDetails(@QueryParam("orderId")final Long orderId,@QueryParam("planType")final String planType, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-    	List<SubscriptionData> contractPeriods=this.planReadPlatformService.retrieveSubscriptionData();
+    	List<SubscriptionData> contractPeriods=this.planReadPlatformService.retrieveSubscriptionData(orderId,planType);
     	GlobalConfigurationProperty configurationProperty=this.configurationRepository.findOneByName(CONFIG_PROPERTY);
+    	
     	for(int i=0;i<contractPeriods.size();i++){
     		if(contractPeriods.get(i).getContractdata().equalsIgnoreCase("Perpetual")){
     			contractPeriods.remove(contractPeriods.get(i));
@@ -226,7 +227,7 @@ public class OrdersApiResource {
     }
 	
 	
-	@POST
+	    @POST
 		@Path("renewal/{orderId}")
 		@Consumes({ MediaType.APPLICATION_JSON })
 		@Produces({ MediaType.APPLICATION_JSON })

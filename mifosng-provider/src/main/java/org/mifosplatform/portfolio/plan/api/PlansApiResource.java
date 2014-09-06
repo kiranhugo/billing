@@ -119,7 +119,7 @@ public class PlansApiResource {
 		PlanData singlePlandata = this.planReadPlatformService.retrievePlanData(planId);
 		List<ServiceData> data = this.planReadPlatformService.retrieveAllServices();
 		List<BillRuleData> billData = this.planReadPlatformService.retrievebillRules();
-		List<SubscriptionData> contractPeriods= this.planReadPlatformService.retrieveSubscriptionData();
+		List<SubscriptionData> contractPeriods= this.planReadPlatformService.retrieveSubscriptionData(null,null);
 
 		 for(int i=0;i<contractPeriods.size();i++){
 	 		if(contractPeriods.get(i).getSubscriptionType().equalsIgnoreCase("None")){

@@ -116,7 +116,7 @@ public class GenerateDisconnectionBill {
 				
 			} else if (billingOrderData.getBillingAlign().equalsIgnoreCase("Y")) {
                 if(numberOfMonths>0){
-				 LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths);//.dayOfMonth().withMaximumValue();
+				 LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths).dayOfMonth().withMaximumValue();
 				 numberOfDays = Days.daysBetween(disconnectionDate, tempBillEndDate).getDays();
 				 System.out.println(numberOfDays);
                 }

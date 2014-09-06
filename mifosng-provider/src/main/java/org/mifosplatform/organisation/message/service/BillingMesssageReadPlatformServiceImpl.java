@@ -361,9 +361,9 @@ public class BillingMesssageReadPlatformServiceImpl implements
 
 		public String schema() {
 
-			return "md.id as id,md.message_to as messageto,md.message_from as messagefrom,md.subject as subject,md.header as header,"
-					+ "md.body as body,md.footer as footer,md.message_type as messageType,md.attachment as attachment from" +
-					" b_message_data md where md.status='N' ";
+			return " md.id as id,md.message_to as messageto,md.message_from as messagefrom,md.subject as subject,md.header as header,"+
+				   " md.body as body,md.footer as footer,md.message_type as messageType,md.attachment as attachment from" +
+				   " b_message_data md where md.status='N' ";
 		}
 
 		@Override

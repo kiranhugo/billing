@@ -174,11 +174,18 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	}
 
 	@Override
-	public List<SubscriptionData> retrieveSubscriptionData() {
+	public List<SubscriptionData> retrieveSubscriptionData(Long orderId,String planType) {
 
 		context.authenticatedUser();
 		SubscriptionDataMapper mapper = new SubscriptionDataMapper();
-		String sql = "select " + mapper.schema()+" order by contract_period";
+		String sql =null;
+		if(planType != null && orderId != null && "prepaid".equalsIgnoreCase(planType)){
+			
+			 sql = "select " + mapper.schemaForPrepaidPlans()+" and o.id="+orderId+" order by sb.contract_period";
+		}else{
+		    sql = "select " + mapper.schema()+" order by contract_period";
+		}
+		
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
 
@@ -188,6 +195,13 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 		public String schema() {
 			return " sb.id as id,sb.contract_period as contractPeriod,sb.contract_duration as units,sb.contract_type as contractType "
 					+ " from b_contract_period sb where is_deleted='N'";
+
+		}
+		
+		public String schemaForPrepaidPlans() {
+			return "  sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType" +
+					" FROM b_contract_period sb, b_orders o, b_plan_pricing p WHERE sb.is_deleted = 'N' and sb.contract_period=p.duration " +
+					" and o.plan_id = p.plan_id  ";
 
 		}
 

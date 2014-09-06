@@ -8,7 +8,6 @@ package org.mifosplatform.portfolio.client.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,9 +16,19 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.mifosplatform.billing.selfcare.domain.SelfCare;
+import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
+import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationProperty;
+import org.mifosplatform.infrastructure.configuration.domain.GlobalConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -42,7 +51,6 @@ import org.mifosplatform.portfolio.client.data.ClientDataValidator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -76,24 +84,27 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     private final static Logger logger = LoggerFactory.getLogger(ClientWritePlatformServiceJpaRepositoryImpl.class);
 
-    private final PlatformSecurityContext context;
-    private final ClientRepositoryWrapper clientRepository;
-    private final OfficeRepository officeRepository;
-    private final GroupsDetailsRepository groupsDetailsRepository;
     private final PlanRepository planRepository;
     private final OrderRepository orderRepository;
-    private final ServiceParametersRepository serviceParametersRepository;
-    private final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
-    private final ClientDataValidator fromApiJsonDeserializer;
-    private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
-    private final ActiondetailsWritePlatformService actiondetailsWritePlatformService;
-    private final ActionDetailsReadPlatformService actionDetailsReadPlatformService;
+    private final PlatformSecurityContext context;
+    private final OfficeRepository officeRepository;
     private final AddressRepository addressRepository;
+    private final SelfCareRepository selfCareRepository;
     private final CodeValueRepository codeValueRepository;
+    private final ClientRepositoryWrapper clientRepository;
+    private final ClientDataValidator fromApiJsonDeserializer;
+    private final GroupsDetailsRepository groupsDetailsRepository;
     private final OrderReadPlatformService orderReadPlatformService;
-    private final PrepareRequestWriteplatformService prepareRequestWriteplatformService;
-    private final ProvisioningWritePlatformService ProvisioningWritePlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
+    private final GlobalConfigurationRepository configurationRepository;
+    private final ServiceParametersRepository serviceParametersRepository;
+    private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
+    private final ProvisioningWritePlatformService ProvisioningWritePlatformService;
+    private final ActionDetailsReadPlatformService actionDetailsReadPlatformService;
+    private final ActiondetailsWritePlatformService actiondetailsWritePlatformService;
+    private final PrepareRequestWriteplatformService prepareRequestWriteplatformService;
+    private final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
+	private final PortfolioCommandSourceWritePlatformService  portfolioCommandSourceWritePlatformService;
   
     
    
@@ -106,26 +117,31 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ActionDetailsReadPlatformService actionDetailsReadPlatformService,final CodeValueRepository codeValueRepository,
             final OrderReadPlatformService orderReadPlatformService,final ProvisioningWritePlatformService  ProvisioningWritePlatformService,
             final GroupsDetailsRepository groupsDetailsRepository,final OrderRepository orderRepository,final PlanRepository planRepository,
-            final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService) {
+            final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService,
+            final SelfCareRepository selfCareRepository,final GlobalConfigurationRepository configurationRepository,
+            final PortfolioCommandSourceWritePlatformService  portfolioCommandSourceWritePlatformService) {
     	
         this.context = context;
-        this.clientRepository = clientRepository;
-        this.officeRepository = officeRepository;
+        this.planRepository=planRepository;
         this.orderRepository=orderRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.clientRepository = clientRepository;
+        this.addressRepository=addressRepository;
+        this.officeRepository = officeRepository;
+        this.selfCareRepository=selfCareRepository;
         this.codeValueRepository=codeValueRepository;
-        this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
+        this.configurationRepository=configurationRepository;
+        this.groupsDetailsRepository=groupsDetailsRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.orderReadPlatformService=orderReadPlatformService;
+        this.clientReadPlatformService = clientReadPlatformService;
         this.serviceParametersRepository = serviceParametersRepository;
+        this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
+        this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
+        this.actiondetailsWritePlatformService=actiondetailsWritePlatformService;
+        this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
         this.prepareRequestWriteplatformService=prepareRequestWriteplatformService;
         this.transactionHistoryWritePlatformService = transactionHistoryWritePlatformService;
-        this.actiondetailsWritePlatformService=actiondetailsWritePlatformService;
-        this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
-        this.addressRepository=addressRepository;
-        this.orderReadPlatformService=orderReadPlatformService;
-        this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
-        this.groupsDetailsRepository=groupsDetailsRepository;
-        this.planRepository=planRepository;
-        this.clientReadPlatformService = clientReadPlatformService;
+        this.portfolioCommandSourceWritePlatformService=portfolioCommandSourceWritePlatformService;
        
     }
 
@@ -168,7 +184,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             if (ClientStatus.fromInt(client.getStatus()).isClosed()) {
-                final String errorMessage = "Client is alread closed.";
+                final String errorMessage = "Client is already closed.";
                 throw new InvalidClientStateTransitionException("close", "is.already.closed", errorMessage);
             } 
 
@@ -180,6 +196,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             client.close(currentUser,closureReason, closureDate.toDate());
             this.clientRepository.saveAndFlush(client);
+            
+            if(client.getEmail() != null){
+            	SelfCare selfCare=this.selfCareRepository.findOneByEmailId(client.getEmail());
+            	 if(selfCare != null){
+            		 selfCare.setIsDeleted(true);
+            	 }
+            	 this.selfCareRepository.save(selfCare);
+            }
+            
             
             List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CLOSE_CLIENT);
 			if(actionDetaislDatas.size() != 0){
@@ -239,14 +264,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
-
             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
-
             final Office clientOffice = this.officeRepository.findOne(officeId);
+
             if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
 
             final Long groupId = command.longValueOfParameterNamed(ClientApiConstants.groupIdParamName);
-
             Group clientParentGroup = null;
            /* if (groupId != null) {
                 clientParentGroup = this.groupRepository.findOne(groupId);
@@ -264,6 +287,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 newClient.updateAccountNo(accountNoGenerator.generate());
                 this.clientRepository.save(newClient);
             }
+            
+            GlobalConfigurationProperty configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
+            
+            if(configuration !=null && configuration.isEnabled()){
+            	
+            		JSONObject selfcarecreation = new JSONObject();
+            		selfcarecreation.put("userName", newClient.getFirstname());
+    				selfcarecreation.put("uniqueReference", newClient.getEmail());
+    				selfcarecreation.put("clientId", newClient.getId());
+    				
+    				final CommandWrapper selfcareCommandRequest = new CommandWrapperBuilder().createSelfCare().withJson(selfcarecreation.toString()).build();
+    				final CommandProcessingResult selfcareCommandresult = this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
+            	}
+            
             
             List<ActionDetaislData> actionDetailsDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_CLIENT);
             if(!actionDetailsDatas.isEmpty()){
@@ -284,7 +321,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
-        }
+        } catch (JSONException e) {
+        	   return CommandProcessingResult.empty();
+		}
     }
 
     @Transactional
