@@ -7,3 +7,4 @@ INSERT IGNORE INTO  m_permission VALUES(null,'billing', 'UPDATE_SELFCARE', 'SELF
 
 
 
+

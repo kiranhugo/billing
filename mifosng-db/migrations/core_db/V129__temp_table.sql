@@ -1,4 +1,5 @@
 Drop procedure IF EXISTS temp; 
+
 DELIMITER //
 create procedure temp() 
 Begin
@@ -10,7 +11,6 @@ Begin
 alter  table temp add column payment_status varchar(20) DEFAULT 'INACTIVE';
 
 END IF;
-
 IF NOT EXISTS (
      SELECT * FROM information_schema.COLUMNS
      WHERE COLUMN_NAME = 'payment_data'

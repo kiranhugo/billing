@@ -77,13 +77,13 @@ private String companyLogo;
 
 	}
 
-	public BillDetailsData(Long id,Long clientId,LocalDate dueDate, String billPeriod,
+	public BillDetailsData(Long id,Long clientId,LocalDate dueDate, 
 			String transactionType, Double dueAmount, BigDecimal amount,
 			LocalDate transDate) {
           
 		     this.id=id;
 		     this.dueDate=dueDate;
-		     this.billPeriod=billPeriod;
+		     //this.billPeriod=billPeriod;
 		     this.transaction=transactionType;
 		     this.dueAmount=dueAmount;
 		     this.amount=amount;
