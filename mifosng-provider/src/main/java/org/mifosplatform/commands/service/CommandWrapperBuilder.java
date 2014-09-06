@@ -2471,6 +2471,14 @@ public CommandWrapperBuilder createMediaAssetLocationAttributes(Long assetId) {
 	return this;
 }
 
+public CommandWrapperBuilder updateSupplier(Long supplierId) {
+	 this.actionName = "UPDATE";
+	 this.entityName = "SUPPLIER";
+	 this.entityId = supplierId;
+	 this.href = "/supplier";
+	 return this;
+}
+
 }
 
 

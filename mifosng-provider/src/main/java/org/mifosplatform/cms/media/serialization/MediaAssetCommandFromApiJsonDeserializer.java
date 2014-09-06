@@ -35,7 +35,7 @@ public final class MediaAssetCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("mediaTitle","mediatype",
     		  "catageoryId","genre","releaseDate","overview","subject","mediaImage","duration","contentProvider",
     		  "rated","mediaRating","ratingCount","status","mediaassetAttributes","mediaAssetLocations","locale",
-    		  "dateFormat","attributeName","formatType","languageId","cpShareValue","mediaTypeCheck","mediaDetailType"));
+    		  "dateFormat","attributeName","formatType","languageId","cpShareValue","mediaTypeCheck","mediaDetailType","location"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -55,44 +55,63 @@ public final class MediaAssetCommandFromApiJsonDeserializer {
         final JsonElement element = fromApiJsonHelper.parse(json);
 
         final String mediaTitle = fromApiJsonHelper.extractStringNamed("mediaTitle", element);
-        baseDataValidator.reset().parameter("mediaTitle").value(mediaTitle).notBlank();
-        final String mediaType = fromApiJsonHelper.extractStringNamed("mediatype", element);
-        baseDataValidator.reset().parameter("mediatype").value(mediaType).notBlank();
+        baseDataValidator.reset().parameter("mediaTitle").value(mediaTitle).notBlank().notExceedingLengthOf(250);
+        
+        /*final String mediaType = fromApiJsonHelper.extractStringNamed("mediatype", element);
+        baseDataValidator.reset().parameter("mediatype").value(mediaType).notBlank().notExceedingLengthOf(50);*/
+        
+        
         final Integer mediaCategoryId = fromApiJsonHelper.extractIntegerSansLocaleNamed("catageoryId", element);
         baseDataValidator.reset().parameter("catageoryId").value(mediaCategoryId).notNull().integerGreaterThanZero();
-        //final String overview = fromApiJsonHelper.extractStringNamed("overview", element);
-      //  baseDataValidator.reset().parameter("overview").value(overview).notBlank();
-        final String image = fromApiJsonHelper.extractStringNamed("mediaImage", element);
+      
+        
+       /* final String image = fromApiJsonHelper.extractStringNamed("mediaImage", element);
         baseDataValidator.reset().parameter("mediaImage").value(image).notBlank();
         final String duration = fromApiJsonHelper.extractStringNamed("duration", element);
         baseDataValidator.reset().parameter("duration").value(duration).notBlank();
         final String genre = fromApiJsonHelper.extractStringNamed("genre", element);
         baseDataValidator.reset().parameter("genre").value(genre).notBlank();
-        
-        final Long contentProvider = fromApiJsonHelper.extractLongNamed("contentProvider", element);
-        baseDataValidator.reset().parameter("contentProvider").value(contentProvider).notBlank();
-       /* final String[] mediaassetAttributes = fromApiJsonHelper.extractArrayNamed("mediaassetAttributes", element);
-        baseDataValidator.reset().parameter("mediaassetAttributes").value(mediaassetAttributes).arrayNotEmpty();*/
         final String rated = fromApiJsonHelper.extractStringNamed("rated", element);
         baseDataValidator.reset().parameter("rated").value(rated).notBlank();
         final BigDecimal rating=fromApiJsonHelper.extractBigDecimalWithLocaleNamed("mediaRating", element);
         baseDataValidator.reset().parameter("mediaRating").value(rating).notNull();
-        final String status=fromApiJsonHelper.extractStringNamed("status", element);
-        baseDataValidator.reset().parameter("status").value(status).notBlank();
         final LocalDate releaseDate = fromApiJsonHelper.extractLocalDateNamed("releaseDate", element);
         baseDataValidator.reset().parameter("releaseDate").value(releaseDate).notBlank();
         final String subject = fromApiJsonHelper.extractStringNamed("subject", element);
         baseDataValidator.reset().parameter("subject").value(subject).notBlank();
+        
+        */
+        
+        final Long contentProvider = fromApiJsonHelper.extractLongNamed("contentProvider", element);
+        baseDataValidator.reset().parameter("contentProvider").value(contentProvider).notBlank().notExceedingLengthOf(70);
+        
+        final LocalDate releaseDate = fromApiJsonHelper.extractLocalDateNamed("releaseDate", element);
+        baseDataValidator.reset().parameter("releaseDate").value(releaseDate).notBlank();
+        
+       /* final String[] mediaassetAttributes = fromApiJsonHelper.extractArrayNamed("mediaassetAttributes", element);
+        baseDataValidator.reset().parameter("mediaassetAttributes").value(mediaassetAttributes).arrayNotEmpty();*/
+        
+        final String status=fromApiJsonHelper.extractStringNamed("status", element);
+        baseDataValidator.reset().parameter("status").value(status).notBlank().notExceedingLengthOf(20);
+        
         final BigDecimal cpShareValue=fromApiJsonHelper.extractBigDecimalWithLocaleNamed("cpShareValue", element);
         baseDataValidator.reset().parameter("cpShareValue").value(cpShareValue).notNull().inMinAndMaxAmountRange(BigDecimal.ZERO,BigDecimal.valueOf(100));
        // final Long ratingCount=fromApiJsonHelper.extractLongNamed("ratingCount", element);
        // baseDataValidator.reset().parameter("ratingCount").value(ratingCount).notNull();
         
-        /**
+        
+   /**
+      * This is for Media attributes and locations
+      * Presently commented this code
+      * when you required use it
+   */
+        
+       /* 
+        *//**
          * Enter here media creation only
          * Not enter here when media creation is Advance
          * 
-         * */
+         * *//*
         final String mediaTypeCheck = fromApiJsonHelper.extractStringNamed("mediaTypeCheck", element);
         if(!mediaTypeCheck.equalsIgnoreCase("ADVANCEMEDIA")){
         final JsonArray mediaassetAttributesArray=fromApiJsonHelper.extractJsonArrayNamed("mediaassetAttributes",element);
@@ -124,8 +143,8 @@ public final class MediaAssetCommandFromApiJsonDeserializer {
 			     baseDataValidator.reset().parameter("attributeImage").value(attributeImage).notBlank();
      
 		  }
-     /*  final String[] mediaAssetLocations = fromApiJsonHelper.extractArrayNamed("mediaAssetLocations", element);
-        baseDataValidator.reset().parameter("mediaAssetLocations").value(mediaAssetLocations).arrayNotEmpty();*/
+       final String[] mediaAssetLocations = fromApiJsonHelper.extractArrayNamed("mediaAssetLocations", element);
+        baseDataValidator.reset().parameter("mediaAssetLocations").value(mediaAssetLocations).arrayNotEmpty();
         
         final JsonArray mediaAssetLocationsArray=fromApiJsonHelper.extractJsonArrayNamed("mediaAssetLocations",element);
     //  baseDataValidator.reset().parameter("mediaAssetLocations").value(mediaAssetLocationsArray).arrayNotEmpty();
@@ -155,6 +174,8 @@ public final class MediaAssetCommandFromApiJsonDeserializer {
 		  }
      
         }
+        
+          */       
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         
     }
@@ -166,7 +187,11 @@ public final class MediaAssetCommandFromApiJsonDeserializer {
                 "Validation errors exist.", dataValidationErrors); }
     }
 
-	public void validateForCreateLocationAttributes(String json) {
+    /**
+	 * This is used for Validating media attributes and location
+	 * whenever you requires use it
+	 * */
+	/*public void validateForCreateLocationAttributes(String json) {
 		
 		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -179,9 +204,9 @@ public final class MediaAssetCommandFromApiJsonDeserializer {
         final JsonElement element = fromApiJsonHelper.parse(json);
         final String mediaDetailType=fromApiJsonHelper.extractStringNamed("mediaDetailType", element);
         
-        /**
+        *//**
          * Validation checking starts from here
-         * */
+         * *//*
         if(mediaDetailType.equalsIgnoreCase("ATTRIBUTES")){
         	
         	final JsonArray mediaassetAttributesArray=fromApiJsonHelper.extractJsonArrayNamed("mediaassetAttributes",element);
@@ -231,5 +256,5 @@ public final class MediaAssetCommandFromApiJsonDeserializer {
         	}
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
-	}
+	}*/
 }

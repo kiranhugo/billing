@@ -34,7 +34,7 @@ import com.google.gson.JsonElement;
 @SuppressWarnings("serial")
 public class EventMasterFromApiJsonDeserializer {
 
-	private final Set<String> supportedParameters = new HashSet<String> (Arrays.asList("eventName","chargeCode","eventStartDate","eventDescription","status","eventEndDate","allowCancellation","eventValidity","mediaData","locale","dateFormat"));
+	private final Set<String> supportedParameters = new HashSet<String> (Arrays.asList("eventName","chargeCode","eventStartDate","eventDescription","status","eventEndDate","allowCancellation","eventValidity","mediaData","locale","dateFormat","eventCategory"));
 	private final FromJsonHelper fromApiJsonHelper;
 	
 	@Autowired
@@ -58,17 +58,22 @@ public class EventMasterFromApiJsonDeserializer {
 	     
 	     final String eventName = fromApiJsonHelper.extractStringNamed("eventName", element);
 	     baseDataValidator.reset().parameter("eventName").value(eventName).notBlank().notExceedingLengthOf(100);
-	     final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
-	     baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank().notExceedingLengthOf(100);
+	     /*final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
+	     baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank().notExceedingLengthOf(100);*/
 	     final LocalDate eventStartDate = fromApiJsonHelper.extractLocalDateNamed("eventStartDate", element);
         baseDataValidator.reset().parameter("eventStartDate").value(eventStartDate).notBlank();
+        
         final LocalDate eventValidity = fromApiJsonHelper.extractLocalDateNamed("eventValidity", element);
         baseDataValidator.reset().parameter("eventValidity").value(eventValidity).notBlank();
+        
         final String[] services = fromApiJsonHelper.extractArrayNamed("mediaData", element);
-	        baseDataValidator.reset().parameter("services").value(services).arrayNotEmpty();
-	        final Long status = fromApiJsonHelper.extractLongNamed("status", element);
-	        baseDataValidator.reset().parameter("status").value(status).notNull();
-	       
+	    baseDataValidator.reset().parameter("services").value(services).arrayNotEmpty();
+	    
+	    final Long status = fromApiJsonHelper.extractLongNamed("status", element);
+	    baseDataValidator.reset().parameter("status").value(status).notNull();
+	    
+	    final String eventCategory = fromApiJsonHelper.extractStringNamed("eventCategory", element);
+		baseDataValidator.reset().parameter("eventCategory").value(eventCategory).notBlank().notExceedingLengthOf(50);  
 	     
 	     throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	     

@@ -14,6 +14,8 @@ import javax.persistence.Table;
 import org.joda.time.LocalDate;
 import org.mifosplatform.crm.ticketmaster.command.TicketMasterCommand;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "b_ticket_master")
@@ -67,6 +69,12 @@ public class TicketMaster {
 	
 	@Column(name="due_date")
 	private Date dueDate;
+	
+	@Column(name="lastmodifiedby_id")
+	private Long lastModifyId;
+	
+	@Column(name="lastmodified_date")
+	private Date lastModifydate;
 
 	
 	public TicketMaster() {
@@ -216,11 +224,13 @@ public static TicketMaster fromJson(final JsonCommand command) throws ParseExcep
 	}
 
 
-	public void closeTicket(JsonCommand command) {
+	public void closeTicket(JsonCommand command,Long userId) {
 		this.status = "CLOSED";
 	    this.statusCode = Integer.parseInt(command.stringValueOfParameterNamed("status"));
 		this.resolutionDescription=command.stringValueOfParameterNamed("resolutionDescription");
 		this.closedDate=new Date();
+		this.lastModifyId=userId;
+		this.lastModifydate=new Date();
 		
 	}
 	

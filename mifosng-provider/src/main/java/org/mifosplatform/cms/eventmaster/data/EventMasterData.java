@@ -3,6 +3,7 @@
  */
 package org.mifosplatform.cms.eventmaster.data;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -10,6 +11,7 @@ import org.mifosplatform.cms.eventmaster.domain.EventMaster;
 import org.mifosplatform.cms.media.data.MediaAssetData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.logistics.item.data.ChargesData;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 
 /**
  * POJO for {@link EventMaster}
@@ -41,33 +43,36 @@ public class EventMasterData {
 	private EventMasterData eventMasterData;
 	private List<EventDetailsData> eventDetails;
 	private Long statusId;
-	
+	private Collection<MCodeData> eventCategeorydata;
+	private String eventCategory;
 	
 	public EventMasterData() {
 		
 	}
 	
 	public EventMasterData (List<MediaAssetData> mediaAsset, List<EnumOptionData> statusData,
-							List<EnumOptionData> optType, List<ChargesData> chargeDatas) {
+							List<EnumOptionData> optType, List<ChargesData> chargeDatas,Collection<MCodeData> eventCategeorydata) {
 		this.mediaAsset = mediaAsset;
 		this.statusData = statusData;
 		this.optType = optType;
 		this.chargeData=chargeDatas;
+		this.eventCategeorydata=eventCategeorydata;
 	}
 	
 	public EventMasterData(Long id, String eventName, String eventDescription,
-						   String status, String mediaTitle, LocalDate createdDate ) {
+						   String status, String mediaTitle, LocalDate createdDate,String eventCategory ) {
 		this.id = id;
 		this.eventName = eventName;
 		this.eventDescription = eventDescription;
 		this.status = status;
 		this.mediaTitle = mediaTitle;
 		this.createdDate = createdDate;
+		this.eventCategory=eventCategory;
 	}
 	
 	public EventMasterData(Long id,String eventName,String eventDescription,
 						   Long status, String mediaTitle, LocalDate eventStartDate,
-						   LocalDate eventEndDate,LocalDate eventValidity,Integer allowCancellation, String chargeData) {
+						   LocalDate eventEndDate,LocalDate eventValidity, String chargeData,String eventCategory) {
 		this.id= id;
 		this.eventName= eventName;
 		this.eventDescription = eventDescription;
@@ -76,12 +81,13 @@ public class EventMasterData {
 		this.eventStartDate = eventStartDate;
 		this.eventEndDate = eventEndDate;
 		this.eventValidity = eventValidity;
-		if(allowCancellation == 1) {
+		/*if(allowCancellation == 1) {
 			this.allowCancellation = "true";
 		} else {
 			this.allowCancellation = "false";
-		}
+		}*/
 		this.chargeCode = chargeData;
+		this.eventCategory=eventCategory;
 	}
 	
 	public EventMasterData(Long id, String eventName, String eventDescription) {
@@ -352,4 +358,13 @@ public class EventMasterData {
 	public String getAllowCancellation() {
 		return allowCancellation;
 	}
+
+	public Collection<MCodeData> getEventCategeorydata() {
+		return eventCategeorydata;
+	}
+
+	public void setEventCategeorydata(Collection<MCodeData> eventCategeorydata) {
+		this.eventCategeorydata = eventCategeorydata;
+	}
+	
 }

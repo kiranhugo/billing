@@ -27,6 +27,7 @@ public class CreateMediaAssetLocationAttributeCommandHandler implements NewComma
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createMediaAssetLocationAttributes(command);
+        //return this.writePlatformService.createMediaAssetLocationAttributes(command);
+    	return null;
     }
 }

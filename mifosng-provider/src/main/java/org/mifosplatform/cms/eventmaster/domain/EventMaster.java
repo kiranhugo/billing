@@ -1,8 +1,11 @@
 package org.mifosplatform.cms.eventmaster.domain;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
@@ -24,7 +28,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
  * @author pavani
  *
  */
-@ComparableFields(on={"eventName","eventDescription","status","eventStartDate","eventEndDate","eventValidity","allowCancellation"})
+@ComparableFields(on={"eventName","eventDescription","status","eventStartDate","eventEndDate","eventValidity","eventCategory"})
 @Entity
 @Table(name = "b_event_master")
 public class EventMaster extends AbstractPersistable<Long> {
@@ -49,8 +53,8 @@ public class EventMaster extends AbstractPersistable<Long> {
 	@Column(name = "event_end_date")
 	private Date eventEndDate;
 	
-	@Column(name = "allow_cancellation")
-	private boolean allowCancellation;
+	/*@Column(name = "allow_cancellation")
+	private boolean allowCancellation;*/
 	
 	@Column(name = "event_validity")
 	private Date eventValidity;
@@ -63,6 +67,9 @@ public class EventMaster extends AbstractPersistable<Long> {
 	
 	@Column(name = "charge_code")
 	private String chargeCode;
+	
+	@Column(name = "event_category")
+	private String eventCategory;
 	
 	
 	
@@ -83,15 +90,15 @@ public class EventMaster extends AbstractPersistable<Long> {
 		Integer status = command.integerValueOfParameterNamed("status");
 		LocalDate eventStartDate = command.localDateValueOfParameterNamed("eventStartDate"); 
 		LocalDate eventEndDate = command.localDateValueOfParameterNamed("eventEndDate");
-		String chargeCode = command.stringValueOfParameterNamed("chargeCode");
-		boolean allowCancellation = command.booleanPrimitiveValueOfParameterNamed("allowCancellation");
+		/*String chargeCode = command.stringValueOfParameterNamed("chargeCode");
+		boolean allowCancellation = command.booleanPrimitiveValueOfParameterNamed("allowCancellation");*/
 		LocalDate eventValidity = command.localDateValueOfParameterNamed("eventValidity");
-		
+		String eventCategory = command.stringValueOfParameterNamed("eventCategory");
 
-		return new EventMaster(eventName,eventDescription,status,eventStartDate,eventEndDate,allowCancellation,eventValidity,chargeCode);
+		return new EventMaster(eventName,eventDescription,status,eventStartDate,eventEndDate,eventValidity,eventCategory);
 	}
 	
-	public EventMaster (String eventName, String eventDescription, Integer status, LocalDate eventStartDate,LocalDate eventEndDate, boolean allowCancellation, LocalDate eventValidity,String chargeCode ) {
+	public EventMaster (String eventName, String eventDescription, Integer status, LocalDate eventStartDate,LocalDate eventEndDate,LocalDate eventValidity,String eventCategory) {
 
 		
 		this.eventName = eventName;
@@ -99,11 +106,9 @@ public class EventMaster extends AbstractPersistable<Long> {
 		this.status = status;
 		this.eventStartDate = eventStartDate.toDate();
 		this.eventEndDate =eventEndDate!=null?eventEndDate.toDate():null;
-		this.allowCancellation = allowCancellation;
 		this.eventValidity = eventValidity.toDate();
 		this.createdDate = new Date();
-		this.chargeCode=chargeCode;
-		
+		this.eventCategory=eventCategory;
 	}
 	
 	public EventMaster() {
@@ -202,20 +207,20 @@ public class EventMaster extends AbstractPersistable<Long> {
 	public void setEventEndDate(Date eventEndDate) {
 		this.eventEndDate = eventEndDate;
 	}
-
-	/**
+/*
+	*//**
 	 * @return the allowCancellation
-	 */
+	 *//*
 	public boolean getAllowCancellation() {
 		return allowCancellation;
 	}
 
-	/**
+	*//**
 	 * @param allowCancellation the allowCancellation to set
-	 */
+	 *//*
 	public void setAllowCancellation(boolean allowCancellation) {
 		this.allowCancellation = allowCancellation;
-	}
+	}*/
 
 	/**
 	 * @return the eventValidity
@@ -280,5 +285,59 @@ public class EventMaster extends AbstractPersistable<Long> {
 	public String getChargeCode() {
 		return chargeCode;
 	}
+
+	public java.util.Map<String, Object> updateEventDetails(JsonCommand command) {
+
+		final LinkedHashMap<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
+		
+		
+		final String eventNameNamedParamName = "eventName";
+		final String eventDescriptionNamedParamName = "eventDescription"; 
+		final String statusNamedParamName = "status";  
+		final String eventStartDateNamedParamName = "eventStartDate";
+		final String eventEndDateNamedParamName = "eventEndDate";
+		final String eventValidityNamedParamName = "eventValidity";
+		final String eventCategoryNamedParamName = "eventCategory";
+		
+		if(command.isChangeInStringParameterNamed(eventNameNamedParamName, this.eventName)){
+			final String newValue = command.stringValueOfParameterNamed(eventNameNamedParamName);
+			actualChanges.put(eventNameNamedParamName, newValue);
+			this.eventName = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		if(command.isChangeInStringParameterNamed(eventDescriptionNamedParamName, this.eventDescription)){
+			final String newValue = command.stringValueOfParameterNamed(eventDescriptionNamedParamName);
+			actualChanges.put(eventDescriptionNamedParamName, newValue);
+			this.eventDescription = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		if(command.isChangeInIntegerParameterNamed(statusNamedParamName, this.status)){
+			
+			final Integer newValue= command.integerValueOfParameterNamed(statusNamedParamName);
+			actualChanges.put(statusNamedParamName, newValue);
+			this.status=newValue;
+		}
+		if(command.isChangeInDateParameterNamed(eventStartDateNamedParamName, this.eventStartDate)){
+			final Date newValue=command.DateValueOfParameterNamed(eventStartDateNamedParamName);
+			actualChanges.put(eventStartDateNamedParamName, newValue);
+			this.eventStartDate=newValue;
+		}
+		if(command.isChangeInDateParameterNamed(eventEndDateNamedParamName, this.eventEndDate)){
+			final Date newValue=command.DateValueOfParameterNamed(eventEndDateNamedParamName);
+			actualChanges.put(eventEndDateNamedParamName, newValue);
+			this.eventEndDate=newValue;
+		}
+		if(command.isChangeInDateParameterNamed(eventValidityNamedParamName, this.eventValidity)){
+			final Date newValue=command.DateValueOfParameterNamed(eventValidityNamedParamName);
+			actualChanges.put(eventValidityNamedParamName, newValue);
+			this.eventValidity=newValue;
+		}
+		if(command.isChangeInStringParameterNamed(eventCategoryNamedParamName, this.eventCategory)){
+			final String newValue = command.stringValueOfParameterNamed(eventCategoryNamedParamName);
+			actualChanges.put(eventCategoryNamedParamName, newValue);
+			this.eventCategory = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		return actualChanges;
+	}
+
 	
 }

@@ -883,6 +883,8 @@ public class SynchronousCommandProcessingService implements
 			             } else if (wrapper.isSupplier()) {
 			              if(wrapper.isCreateSupplier()){
 			               handler = applicationContext.getBean("createSupplierCommandHandler",NewCommandSourceHandler.class);
+			              }else if(wrapper.isUpdateOperation()){
+			            	  handler = applicationContext.getBean("updateSupplierCommandHandler",NewCommandSourceHandler.class);
 			              }
 			}else if(wrapper.isRandomGeneratorResource()){
 

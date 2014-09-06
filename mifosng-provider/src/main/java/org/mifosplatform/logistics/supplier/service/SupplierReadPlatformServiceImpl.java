@@ -3,8 +3,6 @@ package org.mifosplatform.logistics.supplier.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
@@ -88,7 +86,14 @@ public class SupplierReadPlatformServiceImpl implements
 		
 		return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(),
 		        new Object[] {}, supplierMapper);
-	}	
+	}
 	
+	@Override
+	public List<SupplierData> retrieveSupplier(Long supplierId) {
+		SupplierMapper supplierMapper = new SupplierMapper();
+		String sql = "select id as id, supplier_code as supplierCode, supplier_description as supplierDescription, supplier_address as supplierAddress "
+						 + " from b_supplier where id=?";
+		return jdbcTemplate.query(sql, supplierMapper,new Object[]{supplierId});
+	}
 	
 }
