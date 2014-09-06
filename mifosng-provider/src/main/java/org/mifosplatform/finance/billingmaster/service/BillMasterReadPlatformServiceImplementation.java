@@ -63,7 +63,7 @@ public class BillMasterReadPlatformServiceImplementation implements
 			LocalDate transDate=JdbcSupport.getLocalDate(rs,"transDate");
 			String transactionCategory=rs.getString("transType");
 			String description = rs.getString("description");
-			String planCode = rs.getString("planCode");
+			String planCode = rs.getString("plan_code");
 			//boolean flag=rs.getBoolean("flag");
 
 			return new FinancialTransactionsData(null,transactionId,transDate,transactionType,null,null,amount,null,transactionCategory,false,planCode,description);
@@ -409,18 +409,17 @@ public class BillMasterReadPlatformServiceImplementation implements
 				Long id = rs.getLong("id");
 				Long clietId = rs.getLong("clietId");
 				LocalDate dueDate = JdbcSupport.getLocalDate(rs,"dueDate");
-				String billPeriod = rs.getString("billPeriod");
 				String transactionType = rs.getString("transactionType");
 				double dueAmount = rs.getDouble("dueAmount");
 				BigDecimal amount = rs.getBigDecimal("amoount");
 				//LocalDate transDate=JdbcSupport.getLocalDate(rs,"transDate");
 
-				return new BillDetailsData(id,clietId,dueDate,billPeriod,transactionType,dueAmount,amount,null);
+				return new BillDetailsData(id,clietId,dueDate,transactionType,dueAmount,amount,null);
 			}
 
 			public String financialTransactionsSchema() {
 
-				return  "b.id AS id,b.Client_id as clietId,b.Due_date AS dueDate,b.Due_amount AS dueAmount,b.Bill_Period AS billPeriod,bd.Transaction_type as transactionType,"
+				return  "b.id AS id,b.Client_id as clietId,b.Due_date AS dueDate,b.Due_amount AS dueAmount,bd.Transaction_type as transactionType,"
 						+" bd.Amount as amoount FROM b_bill_master b, b_bill_details bd where  b.id = bd.Bill_id and b.id =?";
 
 			}

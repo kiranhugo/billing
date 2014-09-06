@@ -135,20 +135,21 @@ public class GenerateBill {
 		
 		List<InvoiceTaxCommand> listOfTaxes=null;
 		
+
+		// If promotion is applied --Tax is calculated on Net charges ..
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
 		}else{
-			 listOfTaxes = this.calculateTax(billingOrderData,price);	
+			//Tax is calculated on charges ..
+			listOfTaxes = this.calculateTax(billingOrderData,price);
 		}
-
 		
-
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);  
-
 	}
-
+   
+	//NextMonth Bill after prorata
 	public BillingOrderCommand getNextMonthBill(BillingOrderData billingOrderData, DiscountMasterData discountMasterData) {
 		
 		BigDecimal discountAmount = BigDecimal.ZERO;
@@ -172,22 +173,15 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = invoiceTillDate.plusDays(1);
 		
-       List<InvoiceTaxCommand> listOfTaxes=null;
-		
-		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
+
+		List<InvoiceTaxCommand> listOfTaxes = null;
+       if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
 		}else{
-			 listOfTaxes = this.calculateTax(billingOrderData,price);	
+			listOfTaxes = this.calculateTax(billingOrderData,price);
 		}
-		
-		/*if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
-			
-			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			
-		}
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);*/
 
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
@@ -201,6 +195,7 @@ public class GenerateBill {
 		BigDecimal price = null;
 		LocalDate invoiceTillDate = null;
 		LocalDate nextbillDate = null;
+		List<InvoiceTaxCommand> listOfTaxes=null;
 		
 		if (billingOrderData.getInvoiceTillDate() == null) {
 			startDate = new LocalDate(billingOrderData.getBillStartDate());
@@ -223,25 +218,18 @@ public class GenerateBill {
 
 		invoiceTillDate = endDate;
 		nextbillDate = invoiceTillDate.plusDays(1);
-		
-        List<InvoiceTaxCommand> listOfTaxes=null;
-		
+
+		// If promotion is applied --Tax is calculated on Net charges ..
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
 		}else{
-			 listOfTaxes = this.calculateTax(billingOrderData,price);	
+			//Tax is calculated on charges ..
+			listOfTaxes = this.calculateTax(billingOrderData,price);
 		}
 		
-		/*if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
-			
-			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			
-		}
-
-		// List<InvoiceTax> listOfTaxes = this.calculateTax(billingOrderData,price);
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);*/
+		//List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);
 		
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
@@ -256,6 +244,7 @@ public class GenerateBill {
 		BigDecimal price = null;
 		LocalDate invoiceTillDate = null;
 		LocalDate nextbillDate = null;
+		List<InvoiceTaxCommand> listOfTaxes=null;
 		
 		startDate = new LocalDate(billingOrderData.getBillStartDate());
 		endDate = startDate.dayOfWeek().withMaximumValue();
@@ -285,7 +274,7 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = endDate.plusDays(1);
 		
-          List<InvoiceTaxCommand> listOfTaxes=null;
+         // List<InvoiceTaxCommand> listOfTaxes=null;
 		
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
@@ -298,8 +287,12 @@ public class GenerateBill {
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
+			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
+		}else{
 			
+		 listOfTaxes = this.calculateTax(billingOrderData,price);
 		}
+<<<<<<< HEAD
 
 		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);*/
 
@@ -315,6 +308,8 @@ public class GenerateBill {
 		BigDecimal price = null;
 		LocalDate invoiceTillDate = null;
 		LocalDate nextbillDate = null;
+		List<InvoiceTaxCommand> listOfTaxes=null;
+		
 		startDate = new LocalDate(billingOrderData.getNextBillableDate());
 		endDate = startDate.plusWeeks(billingOrderData.getChargeDuration()).minusDays(1);
 	
@@ -330,24 +325,17 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = endDate.plusDays(1);
 		
-          List<InvoiceTaxCommand> listOfTaxes=null;
+        
 		
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
+
+			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount()); 
 		}else{
-			 listOfTaxes = this.calculateTax(billingOrderData,price);	
-		}
-		
-		/*if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
-			
-			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			
-		}
 
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price); listOfTaxes = this.calculateTax(billingOrderData,price);*/
-
+	         listOfTaxes = this.calculateTax(billingOrderData,price); 
+		}
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
 	}
@@ -360,6 +348,8 @@ public class GenerateBill {
 		BigDecimal price = null;
 		LocalDate invoiceTillDate = null;
 		LocalDate nextbillDate = null;
+		List<InvoiceTaxCommand> listOfTaxes=null;
+		
 		if (billingOrderData.getInvoiceTillDate() == null) {
 			startDate = new LocalDate(billingOrderData.getBillStartDate());
 			endDate = startDate.plusWeeks(billingOrderData.getChargeDuration()).minusDays(1);
@@ -381,24 +371,16 @@ public class GenerateBill {
 		invoiceTillDate = endDate;
 		nextbillDate = invoiceTillDate.plusDays(1);
 		
-        List<InvoiceTaxCommand> listOfTaxes=null;
 		
 		if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
 			
 			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			 listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());//price);
-		}else{
-			 listOfTaxes = this.calculateTax(billingOrderData,price);	
-		}
-		
-		/*if(this.isDiscountApplicable(startDate,discountMasterData,endDate)){
-			
-			discountMasterData = this.calculateDiscount(discountMasterData, discountAmount, price);
-			
-		}
-		
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData,price);*/
 
+			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
+		}else{
+		
+	        listOfTaxes = this.calculateTax(billingOrderData,price);
+		}
 		return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 	}
 	
@@ -448,6 +430,7 @@ public class GenerateBill {
 					
 			}else if(chargeDuration==2){
 				pricePerDay=amount.divide(new BigDecimal(divisibleDays), 2,RoundingMode.HALF_UP);
+
 			}else{	
 			   pricePerDay = amount.divide(new BigDecimal(maxDaysOfMonth), 2,RoundingMode.HALF_UP);
 			}
