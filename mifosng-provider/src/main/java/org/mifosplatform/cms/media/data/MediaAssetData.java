@@ -1,6 +1,7 @@
 package org.mifosplatform.cms.media.data;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -8,6 +9,7 @@ import org.mifosplatform.billing.paymode.data.McodeData;
 import org.mifosplatform.cms.mediadetails.data.MediaLocationData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.data.MediaEnumoptionData;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 
 public class MediaAssetData {
 
@@ -47,6 +49,10 @@ public class MediaAssetData {
 	private String quality;
 	private String optType;
 	private BigDecimal price;
+	private Collection<MCodeData> eventCategeorydata;
+	private String EventCategory;
+	private String mediaCategory;
+	private String contentProviderValue;
 	
 public MediaAssetData(final Long mediaId,final String mediaTitle,final String image,final BigDecimal rating, Long eventId, 
 		               String assetTag, String quality, String optType, BigDecimal price){
@@ -71,7 +77,7 @@ public MediaAssetData(List<MediaAssetData> data, Long noOfPages, Long pageNo) {
 	this.pageNo=pageNo;
 }
 public MediaAssetData(MediaAssetData mediaAssetData, List<MediaassetAttributeData> mediaassetAttributes, List<MediaLocationData> mediaLocationData, List<EnumOptionData> status,List<MediaassetAttribute> data, List<MediaassetAttribute> mediaFormat,
-		List<MediaEnumoptionData> mediaTypeData, List<McodeData> mediaCategeorydata,List<McodeData> mediaLangauagedata,List<McodeData> contentProviderData) {
+		Collection<MCodeData> eventCategeorydata, List<McodeData> mediaCategeorydata,List<McodeData> mediaLangauagedata,List<McodeData> contentProviderData) {
 
 	this.mediaAssetData=mediaAssetData;
 	this.mediaStatus=status;
@@ -82,7 +88,7 @@ public MediaAssetData(MediaAssetData mediaAssetData, List<MediaassetAttributeDat
 	this.mediaImage=null;
 	this.mediaRating=null;
 	this.eventId=null;
-	this.mediaTypeData=mediaTypeData;
+	this.eventCategeorydata=eventCategeorydata;
 	this.mediaCategeorydata=mediaCategeorydata;
 	this.mediaLanguageData=mediaLangauagedata;
 	this.mediaLocationData=mediaLocationData;
@@ -92,14 +98,18 @@ public MediaAssetData(MediaAssetData mediaAssetData, List<MediaassetAttributeDat
 	
 }
 public MediaAssetData(Long mediaId, String mediaTitle, String status,
-		LocalDate releaseDate, BigDecimal rating) {
+		LocalDate releaseDate, BigDecimal share,String EventCategory,String mediaCategory,String contentProviderValue) {
           this.mediaId=mediaId;
           this.mediaTitle=mediaTitle;
           this.status=status;
           this.releaseDate=releaseDate;
-          this.mediaRating=rating;
-      	this.mediaImage=null;
-      	this.eventId=null;
+          this.cpShareValue=share;
+          this.EventCategory=EventCategory;
+          this.mediaCategory=mediaCategory;
+          this.contentProviderValue=contentProviderValue;
+      	  this.mediaImage=null;
+      	  this.eventId=null;
+      	  this.mediaRating=null;
 }
 
 public MediaAssetData(Long mediaId, String mediatitle, String type,

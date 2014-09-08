@@ -363,7 +363,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 					final String timeElapsed = rs.getString("timeElapsed");
 					final String clientName = rs.getString("clientName");
 					
-					return new ClientTicketData(0L, priority, status, userId, ticketDate, lastComment, problemDescription, assignedTo, clientId,timeElapsed,clientName);
+					return new ClientTicketData(0L, priority, status, userId, ticketDate, lastComment, problemDescription, assignedTo, clientId,timeElapsed,clientName,null,null);
 				}
 				
 			}
@@ -371,12 +371,24 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 private static final class UserTicketsMapperForNewClient implements RowMapper<ClientTicketData> {
 				
 				public String userTicketSchema() {
-					return " SQL_CALC_FOUND_ROWS tckt.id as id, tckt.client_id as clientId,(select display_name from m_client where id = tckt.client_id) as clientName, tckt.priority as priority, tckt.status as status, tckt.ticket_date as ticketDate, tckt.assigned_to as userId,"+
+					/*return " SQL_CALC_FOUND_ROWS tckt.id as id, tckt.client_id as clientId,(select display_name from m_client where id = tckt.client_id) as clientName, tckt.priority as priority, tckt.status as status, tckt.ticket_date as ticketDate, tckt.assigned_to as userId,"+
 							""+"(Select comments from b_ticket_details x where tckt.id=x.ticket_id and x.id=(select max(id) from b_ticket_details y where tckt.id=y.ticket_id)) as LastComment,"+
 							""+"(select mcv.code_value from m_code_value mcv where mcv.id = tckt.problem_code) as problemDescription,"+
 							""+"(select user.username from m_appuser user where tckt.assigned_to = user.id) as assignedTo,"+
 							""+"CONCAT(TIMESTAMPDIFF(day,tckt.ticket_date,Now()) , ' d ',MOD(TIMESTAMPDIFF(hour,tckt.ticket_date,Now()), 24), ' hr ',MOD( TIMESTAMPDIFF(minute,tckt.ticket_date,Now()), 60), ' min ')as timeElapsed,"+
-							""+"tckt.client_id as clientId from b_ticket_master tckt ";
+							""+"tckt.client_id as clientId from b_ticket_master tckt ";*/
+					return " SQL_CALC_FOUND_ROWS tckt.id AS id,tckt.client_id AS clientId,mct.display_name as clientName,tckt.priority AS priority,"+
+							"tckt.status AS status,tckt.ticket_date AS ticketDate,"+
+							"(SELECT user.username FROM m_appuser user WHERE tckt.createdby_id = user.id) AS created_user,"+
+							"tckt.assigned_to AS userId,"+
+							"(SELECT comments FROM b_ticket_details x WHERE tckt.id = x.ticket_id AND x.id = (SELECT max(id) FROM b_ticket_details y WHERE tckt.id = y.ticket_id)) AS LastComment,"+
+							"(SELECT mcv.code_value FROM m_code_value mcv WHERE mcv.id = tckt.problem_code) AS problemDescription,"+
+							"(SELECT user.username FROM m_appuser user WHERE tckt.assigned_to = user.id) AS assignedTo,"+
+							"CONCAT(TIMESTAMPDIFF(day, tckt.ticket_date, Now()), ' d ', MOD(TIMESTAMPDIFF(hour, tckt.ticket_date, Now()), 24), ' hr ',"+
+							"MOD(TIMESTAMPDIFF(minute, tckt.ticket_date, Now()), 60), ' min ') AS timeElapsed,"+
+							"IFNull((SELECT user.username FROM m_appuser user WHERE tckt.lastmodifiedby_id = user.id),'Null') AS closedby_user "+
+							"FROM b_ticket_master tckt left join m_client mct on mct.id = tckt.client_id";
+      
 					}
 
 				@Override
@@ -393,8 +405,10 @@ private static final class UserTicketsMapperForNewClient implements RowMapper<Cl
 					final Long clientId = rs.getLong("clientId");
 					final String timeElapsed = rs.getString("timeElapsed");
 					final String clientName = rs.getString("clientName");
+					final String createUser=rs.getString("created_user");
+					final String closedByuser=rs.getString("closedby_user");
 					
-					return new ClientTicketData(id, priority, status, userId, ticketDate, lastComment, problemDescription, assignedTo, clientId,timeElapsed,clientName);
+					return new ClientTicketData(id, priority, status, userId, ticketDate, lastComment, problemDescription, assignedTo, clientId,timeElapsed,clientName,createUser,closedByuser);
 				}
 				
 			}

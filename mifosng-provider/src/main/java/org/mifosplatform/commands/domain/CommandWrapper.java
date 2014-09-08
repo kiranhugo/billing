@@ -1175,4 +1175,11 @@ public class CommandWrapper {
 		public boolean isChangePassword() {
 			return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("SELFCARE");
 		}
+		
+		public boolean isMediaAssetLocationResource() {
+			 return this.entityName.equalsIgnoreCase("MEDIAASSETLOCATIONATTRIBUTES");
+		}
+		public boolean isLocationAttributeMediaAsset() {
+			return this.actionName.equalsIgnoreCase("CREATE") && this.entityName.equalsIgnoreCase("MEDIAASSETLOCATIONATTRIBUTES");
+		}
 }

@@ -1,12 +1,18 @@
 package org.mifosplatform.logistics.supplier.domain;
 
+import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 
@@ -85,5 +91,32 @@ public class Supplier extends AbstractAuditableCustom<AppUser, Long>{
 		final String supplierDescription = command.stringValueOfParameterNamed("supplierDescription");
 		final String supplierAddress =command.stringValueOfParameterNamed("supplierAddress");
 		return new Supplier(supplierCode, supplierDescription, supplierAddress);
+	}
+
+	public Map<String, Object> update(JsonCommand command){
+		
+		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
+		
+		final String supplierCodeNamedParamName = "supplierCode";
+		final String supplierDescriptionNamedParamName = "supplierDescription";
+		final String supplierAddressNamedParamName = "supplierAddress";
+		
+		if(command.isChangeInStringParameterNamed(supplierCodeNamedParamName, this.supplierCode)){
+			final String newValue = command.stringValueOfParameterNamed(supplierCodeNamedParamName);
+			actualChanges.put(supplierCodeNamedParamName, newValue);
+			this.supplierCode = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		if(command.isChangeInStringParameterNamed(supplierDescriptionNamedParamName, this.supplierDescription)){
+			final String newValue = command.stringValueOfParameterNamed(supplierDescriptionNamedParamName);
+			actualChanges.put(supplierDescriptionNamedParamName, newValue);
+			this.supplierDescription = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		if(command.isChangeInStringParameterNamed(supplierAddressNamedParamName,this.supplierAddress)){
+			final String newValue = command.stringValueOfParameterNamed(supplierAddressNamedParamName);
+			actualChanges.put(supplierAddressNamedParamName, newValue);
+			this.supplierAddress =StringUtils.defaultIfEmpty(newValue,null);
+		}		
+		return actualChanges;
+	
 	}
 }

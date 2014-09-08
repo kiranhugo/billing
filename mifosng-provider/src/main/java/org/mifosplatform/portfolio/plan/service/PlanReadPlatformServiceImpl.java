@@ -140,8 +140,8 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	private static final class PlanDataMapper implements RowMapper<PlanData> {
 
 		public String schema() {
-			return "  pm.id,pm.plan_code,pm.plan_description,pm.start_date,pm.end_date,pm.plan_status,pm.is_prepaid AS isprepaid" +
-					"  FROM    b_plan_master pm WHERE pm.is_deleted = 'n' ";
+			return "  pm.id,pm.plan_code,pm.plan_description,pm.start_date,pm.end_date,pm.plan_status,pm.is_prepaid AS isprepaid," +
+					" pm.provision_sys as provisionSystem  FROM    b_plan_master pm WHERE pm.is_deleted = 'n' ";
 
 		}
 
@@ -166,8 +166,8 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			if(rs.getString("isprepaid").equalsIgnoreCase("Y")){
 			services=priceReadPlatformService.retrievePrcingDetails(id);
 			}
-			
-			return new PlanData(id, planCode, startDate, endDate,null,null, plan, planDescription, plan, null, enumstatus,
+			String provisionSystem=rs.getString("provisionSystem");
+			return new PlanData(id, planCode, startDate, endDate,null,null, plan, planDescription, plan, provisionSystem, enumstatus,
 					null,null, null,null,null,services,null,null);
 		}
 		

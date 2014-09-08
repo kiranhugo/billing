@@ -12,4 +12,6 @@ public interface SupplierReadPlatformService {
 
 	public Page<SupplierData> retrieveSupplier(SearchSqlQuery searchSupplier);
 
+	public List<SupplierData> retrieveSupplier(Long supplierId);
+
 }

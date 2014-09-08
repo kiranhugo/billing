@@ -1,11 +1,16 @@
 package org.mifosplatform.logistics.supplier.service;
 
+import java.util.Map;
+
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.item.domain.ItemMaster;
+import org.mifosplatform.logistics.item.domain.ItemMasterAudit;
+import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.mifosplatform.logistics.supplier.domain.Supplier;
 import org.mifosplatform.logistics.supplier.domain.SupplierJpaRepository;
 import org.mifosplatform.logistics.supplier.serialization.SupplierCommandFromApiJsonDeserializer;
@@ -62,5 +67,34 @@ public class SupplierWritePlatformServiceImp implements
 	    }
 	   logger.error(dve.getMessage(), dve);   	
 	}
+	
+	@Override
+	public CommandProcessingResult updateSupplier(JsonCommand command, Long supplierId) {
+   try{
+	   
+	   this.context.authenticatedUser();
+	   apiJsonDeserializer.validateForCreate(command.json());
+	   
+	   Supplier supplier = retrieveCodeBy(supplierId);
+	   final Map<String, Object> changes = supplier.update(command);
+	   if(changes.isEmpty()){
+			supplierJpaRepository.save(supplier);
+	   }
+	   return new CommandProcessingResultBuilder() //
+       .withCommandId(command.commandId()) //
+       .withEntityId(supplierId) //
+       .with(changes) //
+       .build();
+	}catch (DataIntegrityViolationException dve) {
+		handleDataIntegrityIssues(command, dve);
+	      return new CommandProcessingResult(Long.valueOf(-1));
+	  }
+	}
+	
+	private Supplier retrieveCodeBy(final Long supplierId) {
+        final Supplier supplier = this.supplierJpaRepository.findOne(supplierId);
+        if (supplier == null) { throw new ItemNotFoundException(supplierId.toString()); }
+        return supplier;
+    }
 
 }

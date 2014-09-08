@@ -271,14 +271,23 @@ public class MediaAssetReadPlatformServiceImpl implements MediaAssetReadPlatform
 		Long mediaId = rs.getLong("id");
 		String mediaTitle = rs.getString("mediaTitle");
 		String status=rs.getString("status");
+		String EventCategory=rs.getString("EventCategory");
+		String mediaCategory=rs.getString("mediaCategory");
+		String contentProviderValue=rs.getString("contentProviderValue");
+		BigDecimal share=rs.getBigDecimal("share");
 		LocalDate releaseDate=JdbcSupport.getLocalDate(rs,"releaseDate");
-		BigDecimal rating=rs.getBigDecimal("rating");
+		//BigDecimal rating=rs.getBigDecimal("rating");
 		
-		return new MediaAssetData(mediaId,mediaTitle,status,releaseDate,rating);
+		return new MediaAssetData(mediaId,mediaTitle,status,releaseDate,share,EventCategory,mediaCategory,contentProviderValue);
 	}
 	public String mediaAssestDataSchema() {
-		return " m.id AS id,  m.title AS mediaTitle,m.status AS status,m.release_date as releaseDate,m.rating as rating"
-				+" FROM b_media_asset m where m.is_deleted='N'";
+		/*return " m.id AS id,  m.title AS mediaTitle,m.status AS status,m.release_date as releaseDate,m.rating as rating"
+				+" FROM b_media_asset m where m.is_deleted='N'";*/
+		 return " m.id AS id,m.title AS mediaTitle,m.status AS status,"+
+				"(select code_value from m_code_value v where v.id=m.type) as EventCategory,"+
+				"(select code_value from m_code_value v where v.id=m.category_id) as mediaCategory,"+
+				"(select code_value from m_code_value v where v.id=m.content_provider) as contentProviderValue,"+
+				"m.cp_share as share,m.release_date as releaseDate FROM b_media_asset m where m.is_deleted='N'";
 	}
 	
 

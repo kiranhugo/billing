@@ -7,4 +7,6 @@ public interface SupplierWritePlatformService {
 
 	CommandProcessingResult createSupplier(JsonCommand command);
 
+	CommandProcessingResult updateSupplier(JsonCommand command, Long entityId);
+
 }

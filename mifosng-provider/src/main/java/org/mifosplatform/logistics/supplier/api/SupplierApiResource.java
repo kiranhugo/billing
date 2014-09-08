@@ -2,12 +2,15 @@ package org.mifosplatform.logistics.supplier.api;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -92,5 +95,25 @@ public class SupplierApiResource {
 		return apiJsonSerializer.serialize(result);
 	}
 	
+	@PUT
+	@Path("{supplierId}")
+	@Produces({MediaType.APPLICATION_JSON})
+	@Consumes({MediaType.APPLICATION_JSON})
+	public String updateSupplier(@PathParam("supplierId") final Long supplierId,final String jsonRequestBody){
+		final CommandWrapper command = new CommandWrapperBuilder().updateSupplier(supplierId).withJson(jsonRequestBody).build();
+		final CommandProcessingResult result = portfolioCommandSourceWritePlatformService.logCommandSource(command);
+		return apiJsonSerializer.serialize(result);
+	}
+	
+	@GET
+	@Path("{supplierId}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retriveSupplierDetails(@Context final UriInfo uriInfo ,@PathParam("supplierId") final Long supplierId){
+		context.authenticatedUser().validateHasReadPermission(resourceType);
+		final List<SupplierData> mrnDetailsDatas = supplierReadPlatformService.retrieveSupplier(supplierId);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return apiJsonSerializer.serialize(mrnDetailsDatas);
+	}
 	
 }

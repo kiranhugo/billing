@@ -138,7 +138,7 @@ catch (DataIntegrityViolationException dve) {
 			TicketMaster ticketMaster=this.repository.findOne(command.entityId());
 			
 			if (!ticketMaster.getStatus().equalsIgnoreCase("CLOSED")) {
-				ticketMaster.closeTicket(command);
+				ticketMaster.closeTicket(command,this.context.authenticatedUser().getId());
 				this.repository.save(ticketMaster);
 				transactionHistoryWritePlatformService.saveTransactionHistory(ticketMaster.getClientId(), "TicketClose", ticketMaster.getClosedDate(),
 						"Status:"+ticketMaster.getStatus(),"ResolutionDescription:"+ticketMaster.getResolutionDescription(),"TicketMasterID:"+ticketMaster.getId());
