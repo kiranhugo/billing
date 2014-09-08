@@ -2464,6 +2464,22 @@ public CommandWrapperBuilder updateSelfcarePassword() {
 	return this;
 }
 
+public CommandWrapperBuilder createMediaAssetLocationAttributes(Long assetId) {
+	this.actionName="CREATE";
+	this.entityName="MEDIAASSETLOCATIONATTRIBUTES";
+	this.entityId=assetId;
+	this.href="mediaasset/template";
+	return this;
+}
+
+public CommandWrapperBuilder updateSupplier(Long supplierId) {
+	 this.actionName = "UPDATE";
+	 this.entityName = "SUPPLIER";
+	 this.entityId = supplierId;
+	 this.href = "/supplier";
+	 return this;
+}
+
 }
 
 

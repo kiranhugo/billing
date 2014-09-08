@@ -4,6 +4,7 @@
 package org.mifosplatform.cms.eventmaster.api;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -38,6 +39,8 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.data.ChargesData;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -64,6 +67,7 @@ public class EventMasterApiResource {
 	private EventMasterReadPlatformService eventMasterReadPlatformService;
 	private MediaAssetReadPlatformService assetReadPlatformService;
 	private final ItemReadPlatformService itemReadPlatformService;
+	private final MCodeReadPlatformService mCodeReadPlatformService;
 	/**
 	 * @param commandSourceWritePlatformService
 	 * @param toApiJsonSerializer
@@ -79,7 +83,8 @@ public class EventMasterApiResource {
 								  final ApiRequestParameterHelper apiRequestParameterHelper,
 								  final MediaAssetReadPlatformService assetReadPlatformService,
 								  final EventMasterReadPlatformService eventMasterReadPlatformService,
-								  final ItemReadPlatformService itemReadPlatformService) {
+								  final ItemReadPlatformService itemReadPlatformService,
+								  final MCodeReadPlatformService mCodeReadPlatformService) {
 		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper =  apiRequestParameterHelper;
@@ -87,6 +92,7 @@ public class EventMasterApiResource {
 		this.assetReadPlatformService = assetReadPlatformService;
 		this.eventMasterReadPlatformService = eventMasterReadPlatformService;
 		this.itemReadPlatformService=itemReadPlatformService;
+		this.mCodeReadPlatformService=mCodeReadPlatformService;
 	}
 	
 	/**
@@ -117,7 +123,8 @@ public class EventMasterApiResource {
 		List<EnumOptionData> statusData = this.eventMasterReadPlatformService.retrieveNewStatus();
 		List<EnumOptionData> optType = this.eventMasterReadPlatformService.retrieveOptTypeData();
 		List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
-		EventMasterData singleEvent  = new EventMasterData(mediaData,statusData,optType,chargeDatas);
+		Collection<MCodeData> eventCategeorydata=this.mCodeReadPlatformService.getCodeValue("Event Category");
+		EventMasterData singleEvent  = new EventMasterData(mediaData,statusData,optType,chargeDatas,eventCategeorydata);
 		
 		return singleEvent;	
 	}
@@ -144,6 +151,7 @@ public class EventMasterApiResource {
 		List<EnumOptionData> optType = this.eventMasterReadPlatformService.retrieveOptTypeData();
 		List<EventDetailsData> details = this.eventMasterReadPlatformService.retrieveEventDetailsData(eventId);
 		List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
+		Collection<MCodeData> eventCategeorydata=this.mCodeReadPlatformService.getCodeValue("Event Category");
 		EventMasterData event = this.eventMasterReadPlatformService.retrieveEventMasterDetails(eventId);
 	
 		int size = mediaData.size();
@@ -164,6 +172,7 @@ public class EventMasterApiResource {
 		event.setStatusData(statusData);
 		event.setSelectedMedia(details);
 		event.setChargeData(chargeDatas);
+		event.setEventCategeorydata(eventCategeorydata);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	
 		return this.toApiJsonSerializer.serialize(settings, event, RESPONSE_PARAMETERS);

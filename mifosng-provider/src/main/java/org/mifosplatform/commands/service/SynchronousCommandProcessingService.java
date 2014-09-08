@@ -746,14 +746,14 @@ public class SynchronousCommandProcessingService implements
 					       }
 			}else if (wrapper.isInventoryItemAllocatable()) {
 			       			handler = applicationContext.getBean("addInventoryItemAllocationCommandHandler",NewCommandSourceHandler.class);
-			           	   }else if(wrapper.isMediaAssetResource()){
-					         if(wrapper.isCreateMediaAsset()) {
+			}else if(wrapper.isMediaAssetResource()){
+					     if(wrapper.isCreateMediaAsset()) {
 							 handler = applicationContext.getBean("createMediaAssetCommandHandler",NewCommandSourceHandler.class);
-						   } else if(wrapper.isUpdateMediaAsset()) {
+						 }else if(wrapper.isUpdateMediaAsset()) {
 							 handler = applicationContext.getBean("updateAssetCommandHandler",NewCommandSourceHandler.class);
-						   } else if(wrapper.isCloseMediaAsset()) {
+						 }else if(wrapper.isCloseMediaAsset()) {
 							 handler = applicationContext.getBean("deleteAssetCommandHandler",NewCommandSourceHandler.class);
-						   }
+						 }
 			} else if(wrapper.isBatch()){
 						if(wrapper.isCreate()){
 							handler = applicationContext.getBean("createBatchJobCommandHandler",NewCommandSourceHandler.class);
@@ -883,6 +883,8 @@ public class SynchronousCommandProcessingService implements
 			             } else if (wrapper.isSupplier()) {
 			              if(wrapper.isCreateSupplier()){
 			               handler = applicationContext.getBean("createSupplierCommandHandler",NewCommandSourceHandler.class);
+			              }else if(wrapper.isUpdateOperation()){
+			            	  handler = applicationContext.getBean("updateSupplierCommandHandler",NewCommandSourceHandler.class);
 			              }
 			}else if(wrapper.isRandomGeneratorResource()){
 
@@ -1110,7 +1112,12 @@ public class SynchronousCommandProcessingService implements
 				     }else {
 	               throw new UnsupportedCommandException(wrapper.commandName());
                 }
-		  }
+		        }else if(wrapper.isMediaAssetLocationResource()){
+                	
+		        	if(wrapper.isLocationAttributeMediaAsset()) {
+						 handler = applicationContext.getBean("createMediaAssetLocationAttributeCommandHandler",NewCommandSourceHandler.class);
+					 }
+                }
 			   	
 	       return handler;
 	      

@@ -1,6 +1,7 @@
 package org.mifosplatform.cms.media.api;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +37,8 @@ import org.mifosplatform.infrastructure.core.data.MediaEnumoptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -59,14 +62,14 @@ public class MediaAssestApiResource {
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	private final MediaAssetReadPlatformService mediaAssetReadPlatformService;
 	private final MediaDeviceReadPlatformService deviceReadPlatformService;
-	
+	private final MCodeReadPlatformService mCodeReadPlatformService;
 	
 	private final PlanReadPlatformService planReadPlatformService;
 	 @Autowired
 	    public MediaAssestApiResource(final PlatformSecurityContext context, final DefaultToApiJsonSerializer<MediaAssetData> toApiJsonSerializer,
 	    final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 	    final MediaAssetReadPlatformService mediaAssetReadPlatformService,final MediaDeviceReadPlatformService deviceReadPlatformService,
-	    final PlanReadPlatformService planReadPlatformService) {
+	    final PlanReadPlatformService planReadPlatformService,final MCodeReadPlatformService mCodeReadPlatformService) {
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
 		        this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -74,6 +77,7 @@ public class MediaAssestApiResource {
 		        this.mediaAssetReadPlatformService=mediaAssetReadPlatformService;
 		        this.deviceReadPlatformService=deviceReadPlatformService;
 		        this.planReadPlatformService=planReadPlatformService;
+		        this.mCodeReadPlatformService=mCodeReadPlatformService;
 		    }	
 	 
 	 
@@ -221,11 +225,12 @@ public class MediaAssestApiResource {
     	 List<EnumOptionData> status = this.planReadPlatformService.retrieveNewStatus();
          List<MediaassetAttribute> data   = this.mediaAssetReadPlatformService.retrieveMediaAttributes();
          List<MediaassetAttribute> mediaFormat=this.mediaAssetReadPlatformService.retrieveMediaFormatType();
-         List<MediaEnumoptionData> mediaTypeData =this.mediaAssetReadPlatformService.retrieveMediaTypeData();
+         /*List<MediaEnumoptionData> mediaTypeData =this.mediaAssetReadPlatformService.retrieveMediaTypeData();*/
+         Collection<MCodeData> eventCategeorydata=this.mCodeReadPlatformService.getCodeValue("Event Category");
          List<McodeData> mediaCategeorydata=this.mediaAssetReadPlatformService.retrieveMedaiCategory();
          List<McodeData> languageCategeory=this.mediaAssetReadPlatformService.retrieveLanguageCategeories();
          List<McodeData> contentProviderData=this.mediaAssetReadPlatformService.retrieveContentProviders();
-         return new MediaAssetData(null,null,null,status,data,mediaFormat,mediaTypeData,mediaCategeorydata,languageCategeory,contentProviderData);
+         return new MediaAssetData(null,null,null,status,data,mediaFormat,eventCategeorydata,mediaCategeorydata,languageCategeory,contentProviderData);
 	}
 
 
@@ -261,11 +266,12 @@ public class MediaAssestApiResource {
          List<EnumOptionData> status = this.planReadPlatformService.retrieveNewStatus();
          List<MediaassetAttribute> data   = this.mediaAssetReadPlatformService.retrieveMediaAttributes();
          List<MediaassetAttribute> mediaFormat=this.mediaAssetReadPlatformService.retrieveMediaFormatType();
-         List<MediaEnumoptionData> mediaTypeData =this.mediaAssetReadPlatformService.retrieveMediaTypeData();
+         /*List<MediaEnumoptionData> mediaTypeData =this.mediaAssetReadPlatformService.retrieveMediaTypeData();*/
+         Collection<MCodeData> eventCategeorydata=this.mCodeReadPlatformService.getCodeValue("Event Category");
          List<McodeData> mediaCategeorydata=this.mediaAssetReadPlatformService.retrieveMedaiCategory();
          List<McodeData> mediaLanguageData=this.mediaAssetReadPlatformService.retrieveLanguageCategeories();
          List<McodeData> contentProviderData=this.mediaAssetReadPlatformService.retrieveContentProviders();
-         MediaAssetData assetData=new MediaAssetData(mediaAssetData,mediaassetAttributes,mediaLocationData,status,data,mediaFormat,mediaTypeData,mediaCategeorydata,mediaLanguageData,contentProviderData);
+         MediaAssetData assetData=new MediaAssetData(mediaAssetData,mediaassetAttributes,mediaLocationData,status,data,mediaFormat,eventCategeorydata,mediaCategeorydata,mediaLanguageData,contentProviderData);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, assetData, RESPONSE_DATA_PARAMETERS);
       }
@@ -294,4 +300,20 @@ public class MediaAssestApiResource {
 		   return this.toApiJsonSerializer.serialize(result);
 	}
 	
+	/**
+	 * This method used for creating media attributes and locations
+	 * Now we are not using
+	 * whenever you requires use it
+	 * */
+	/*@POST
+	@Path("locationAttributes/{assetId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String InsertMediaLocationsAndAttributes(@PathParam("assetId") final Long assetId,final String apiRequestBodyAsJson) {
+
+	   final CommandWrapper commandRequest=new CommandWrapperBuilder().createMediaAssetLocationAttributes(assetId).withJson(apiRequestBodyAsJson).build();
+	   final CommandProcessingResult result=this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	   return this.toApiJsonSerializer.serialize(result);
+	}
+	 */	
     }

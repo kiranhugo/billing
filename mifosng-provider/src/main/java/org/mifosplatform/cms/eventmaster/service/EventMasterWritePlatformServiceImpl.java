@@ -4,6 +4,7 @@
 package org.mifosplatform.cms.eventmaster.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.mifosplatform.cms.eventmaster.domain.EventDetails;
 import org.mifosplatform.cms.eventmaster.domain.EventMaster;
@@ -91,8 +92,10 @@ public class EventMasterWritePlatformServiceImpl implements
 		try {
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command.json());
-			EventMaster newEvent = EventMaster.fromJsom(command);
+			
 			EventMaster oldEvent = this.eventMasterRepository.findOne(command.entityId());
+			
+			final Map<String, Object> changes = oldEvent.updateEventDetails(command);
 			List<MediaAssetData> mediaData = this.assetReadPlatformService.retrieveAllmediaAssetdata();
 			
 			for(MediaAssetData data : mediaData) {
@@ -113,8 +116,9 @@ public class EventMasterWritePlatformServiceImpl implements
 				}
 			}
 	
-			oldEvent = (EventMaster) UpdateCompareUtil.compare(oldEvent,newEvent);
-			this.eventMasterRepository.save(oldEvent);
+			if(!changes.isEmpty()){
+				this.eventMasterRepository.save(oldEvent);
+			}
 			return new CommandProcessingResultBuilder().withEntityId(command.entityId()).withCommandId(command.commandId()).build();
 		} catch (DataIntegrityViolationException dve) {
 			return new CommandProcessingResult(Long.valueOf(-1));

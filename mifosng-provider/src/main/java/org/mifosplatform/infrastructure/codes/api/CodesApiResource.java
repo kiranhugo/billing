@@ -77,7 +77,7 @@ public class CodesApiResource {
 
         final SearchSqlQuery searchCodes =SearchSqlQuery.forSearch(sqlSearch, offset,limit );
         final Page<CodeData> codes = this.readPlatformService.retrieveAllCodes(searchCodes);
-
+        
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(codes);
     }

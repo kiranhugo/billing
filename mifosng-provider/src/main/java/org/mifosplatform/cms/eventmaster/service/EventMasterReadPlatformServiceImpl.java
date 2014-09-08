@@ -87,8 +87,8 @@ public class EventMasterReadPlatformServiceImpl implements
 	
 	private static final class EventMasterMapper implements RowMapper<EventMasterData> {
 		public String eventMasterSchema() {
-			return " evnt.id as id, evnt.event_name as eventName, evnt.event_description as eventDescription, evnt.status as status,evnt.created_date as createdDate "
-						+ " from b_event_master evnt ";
+			return " evnt.id as id, evnt.event_name as eventName, evnt.event_description as eventDescription, evnt.status as status,evnt.created_date as createdDate, "
+						+ "evnt.event_category as eventCategory from b_event_master evnt ";
 		}
 		@Override
 		public EventMasterData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
@@ -99,14 +99,15 @@ public class EventMasterReadPlatformServiceImpl implements
 			final Integer statusId = rs.getInt("status");
 			String status=OrderStatusEnumaration.OrderStatusType(statusId).getValue();
 			LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
-			return new EventMasterData(id, eventName, eventDescription,status,null,createdDate);
+			final String eventCategory=rs.getString("eventCategory");
+			return new EventMasterData(id, eventName, eventDescription,status,null,createdDate,eventCategory);
 		}
 	}
 
 	@Override
 	public EventMasterData retrieveEventMasterDetails(Integer eventId){
 		String sql = " select evnt.id as id, evnt.event_name as eventName, evnt.event_description as eventDescription, evnt.status as status,evnt.event_start_date as eventStartDate, " +
-						" evnt.event_end_date as eventEndDate, evnt.event_validity as eventValidity, evnt.allow_cancellation as allowCancellation, charge_code as chargeCode "
+						" evnt.event_end_date as eventEndDate, evnt.event_validity as eventValidity, charge_code as chargeCode,evnt.event_category as eventCategory "
 						+ " from b_event_master evnt "
 						+ "where evnt.id='"+eventId+"'";
 		RowMapper<EventMasterData> rm = new EventMapper();
@@ -123,9 +124,10 @@ public class EventMasterReadPlatformServiceImpl implements
 			LocalDate eventEndDate = JdbcSupport.getLocalDate(rs, "eventEndDate");
 			LocalDate eventValidity = JdbcSupport.getLocalDate(rs, "eventValidity");
 			Long status = rs.getLong("status");
-			int allowCancellation = JdbcSupport.getInteger(rs, "allowCancellation");
+			/*int allowCancellation = JdbcSupport.getInteger(rs, "allowCancellation");*/
 			String chargeData = rs.getString("chargeCode"); 
-			return new EventMasterData(id, eventName, eventDescription, status, null, eventStartDate, eventEndDate, eventValidity,allowCancellation,chargeData);
+			final String eventCategory=rs.getString("eventCategory");
+			return new EventMasterData(id, eventName, eventDescription, status, null, eventStartDate, eventEndDate, eventValidity,chargeData,eventCategory);
 		}
 	}
 	
