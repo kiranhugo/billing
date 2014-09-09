@@ -293,7 +293,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if(configuration !=null && configuration.isEnabled()){
             	
             		JSONObject selfcarecreation = new JSONObject();
-            		selfcarecreation.put("userName", newClient.getFirstname());
+            		selfcarecreation.put("userName", newClient.getLastname());
     				selfcarecreation.put("uniqueReference", newClient.getEmail());
     				selfcarecreation.put("clientId", newClient.getId());
     				
@@ -542,6 +542,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 					this.fromApiJsonDeserializer.ValidateParent(command);
 					final String parentAcntId=command.stringValueOfParameterNamed("accountNo");
 					childClient = this.clientRepository.findOneWithNotFoundDetection(entityId);
+					//count no of childs for a given client 
 					Boolean count =this.clientReadPlatformService.countChildClients(entityId);
 					parentClient=this.clientRepository.findOneWithAccountId(parentAcntId);
 					
