@@ -24,7 +24,8 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class SelfCareCommandFromApiJsonDeserializer {
 
-private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("clientId","userName","password","uniqueReference","isDeleted","returnUrl","verificationKey"));
+private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("clientId","userName","password","uniqueReference","isDeleted","returnUrl",
+												"verificationKey","nationalId"));
 
     
     private final FromJsonHelper fromApiJsonHelper;
@@ -54,6 +55,11 @@ private final Set<String> supportedParameters = new HashSet<String>(Arrays.asLis
         if(fromApiJsonHelper.parameterExists("uniqueReference", element)){
         	final String uniqueReference = fromApiJsonHelper.extractStringNamed("uniqueReference", element);
         	baseDataValidator.reset().parameter("uniqueReference").value(uniqueReference).notBlank();
+        }
+        
+        if(fromApiJsonHelper.parameterExists("nationalId", element)){
+        	final String nationalId = fromApiJsonHelper.extractStringNamed("nationalId", element); 
+        	baseDataValidator.reset().parameter("nationalId").value(nationalId).notNull().notExceedingLengthOf(100);
         }
         
 		

@@ -20,4 +20,5 @@ public interface BillMasterReadPlatformService {
 	List<BillDetailsData> retrievegetStatementDetails(Long billId);
 	Page<FinancialTransactionsData> retrieveSampleData(
 			SearchSqlQuery searchFinancialTransaction, Long clientId,String type);
+	List<FinancialTransactionsData> retriveDataForDownload(Long clientId,String fromDate,String toDate);
 }
