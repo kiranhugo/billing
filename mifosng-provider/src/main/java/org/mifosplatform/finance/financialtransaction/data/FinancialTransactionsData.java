@@ -263,6 +263,42 @@ public class FinancialTransactionsData {
 	public void setPlanCode(String planCode) {
 		this.planCode = planCode;
 	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public boolean isFlag() {
+		return flag;
+	}
+
+	public void setFlag(boolean flag) {
+		this.flag = flag;
+	}
+
+	public void setTransDate(LocalDate transDate) {
+		this.transDate = transDate;
+	}
+
+	public void setCreditAmount(BigDecimal creditAmount) {
+		this.creditAmount = creditAmount;
+	}
+
+	public void setDebitAmount(BigDecimal debitAmount) {
+		this.debitAmount = debitAmount;
+	}
+
+	public String getTransactionCategory() {
+		return transactionCategory;
+	}
+
+	public void setTransactionCategory(String transactionCategory) {
+		this.transactionCategory = transactionCategory;
+	}
      
 	
 
