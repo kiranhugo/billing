@@ -17,6 +17,6 @@ public interface MediaAssetWritePlatformService {
 	 * Now we are not using
 	 * whenever you required use it
 	 * */
-	/*CommandProcessingResult createMediaAssetLocationAttributes(JsonCommand command);*/
+	CommandProcessingResult createMediaAssetLocationAttributes(JsonCommand command);
 
 }
