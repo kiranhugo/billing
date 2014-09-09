@@ -135,8 +135,7 @@ public class UploadStatusWritePlatformServiceImp implements UploadStatusWritePla
 		this.adjustmentApiResource=adjustmentApiResource;
 	}
 	
-	//@Transactional
-	@Transactional
+	
 	@Override
 	public CommandProcessingResult updateUploadStatus(Long orderId,int countno, ApiRequestJsonSerializationSettings settings) {
 		//processRecords=(long)0;
