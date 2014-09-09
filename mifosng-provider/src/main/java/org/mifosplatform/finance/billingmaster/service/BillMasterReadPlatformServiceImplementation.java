@@ -3,7 +3,6 @@ package org.mifosplatform.finance.billingmaster.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 import java.util.List;
 
 import org.joda.time.LocalDate;
@@ -475,6 +474,21 @@ public class BillMasterReadPlatformServiceImplementation implements
 
 				
 			}
+		}
+		
+		@Override
+		public List<FinancialTransactionsData> retriveDataForDownload(Long clientId,String startDate,String endDate){
+			
+			StringBuilder builder = new StringBuilder(200);
+			builder.append("select ft.username as username,ft.transId as TransId,ft.transType as TransType,ft.Dr_amt as DebitAmount,ft.Cr_amt as CreditAmount,"
+						+"ft.tran_type as tran_type,ft.flag as flag,ft.transDate as TransDate from fin_trans_vw as ft where client_id="+clientId);
+			
+			builder.append(" and date_format(transDate,'%Y-%m-%d') between '"+startDate+"' and '"+endDate+"' order by transDate asc");
+			
+			
+			FinancialTypeMapper mapper = new FinancialTypeMapper();
+				
+			return jdbcTemplate.query(builder.toString(),mapper,new Object[]{});
 		}
 
 }

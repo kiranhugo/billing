@@ -293,7 +293,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if(configuration !=null && configuration.isEnabled()){
             	
             		JSONObject selfcarecreation = new JSONObject();
-            		selfcarecreation.put("userName", newClient.getFirstname());
+            		selfcarecreation.put("userName", newClient.getLastname());
     				selfcarecreation.put("uniqueReference", newClient.getEmail());
     				selfcarecreation.put("clientId", newClient.getId());
     				

@@ -74,6 +74,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 	private final SelfCareTemporaryRepository selfCareTemporaryRepository;
 	private final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService;
 	private final CodeValueRepository codeValueRepository;
+	private SelfCareRepository selfCareRepository;
 	
     @Autowired
     public ActivationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,final FromJsonHelper fromJsonHelper,
@@ -82,7 +83,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
     		final OwnedHardwareWritePlatformService ownedHardwareWritePlatformService, final AddressReadPlatformService addressReadPlatformService,
     		final ActivationProcessCommandFromApiJsonDeserializer commandFromApiJsonDeserializer, final ItemDetailsRepository itemDetailsRepository,
     		final SelfCareTemporaryRepository selfCareTemporaryRepository,final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService,
-    		final CodeValueRepository codeValueRepository) {
+    		final CodeValueRepository codeValueRepository, final SelfCareRepository selfCareRepository) {
         
     	this.context = context;
         this.fromJsonHelper = fromJsonHelper;
@@ -97,6 +98,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         this.selfCareTemporaryRepository = selfCareTemporaryRepository;
         this.portfolioCommandSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
         this.codeValueRepository = codeValueRepository;
+        this.selfCareRepository = selfCareRepository;
  
     }
 
@@ -206,8 +208,11 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			String fullname = command.stringValueOfParameterNamed("fullname");
 			String firstName = command.stringValueOfParameterNamed("firstname");
 			String city = command.stringValueOfParameterNamed("city");
+			String address = command.stringValueOfParameterNamed("address");
 			Long phone = command.longValueOfParameterNamed("phone");	
+			Long homePhoneNumber = command.longValueOfParameterNamed("homePhoneNumber");	
 			String email = command.stringValueOfParameterNamed("email");
+			String nationalId = command.stringValueOfParameterNamed("nationalId");
 			
 			SelfCareTemporary temporary = selfCareTemporaryRepository.findOneByEmailId(email);
 			
@@ -235,8 +240,9 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				clientcreation.put("firstname",firstName);
 				clientcreation.put("lastname", fullname);
 				clientcreation.put("phone", phone);
+				clientcreation.put("homePhoneNumber", homePhoneNumber);
 				clientcreation.put("entryType","IND");// new Long(1));
-				clientcreation.put("addressNo", "Address");
+				clientcreation.put("addressNo", address);
 				clientcreation.put("city", addressData.getCity());
 				clientcreation.put("state", addressData.getState());
 				clientcreation.put("country", addressData.getCountry());
@@ -258,6 +264,9 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					throw new PlatformDataIntegrityException("error.msg.client.creation.failed", "Client Creation Failed","Client Creation Failed");
 				}
 	
+				
+				SelfCare selfcare =  this.selfCareRepository.findOneByClientId(resultClient.getClientId());
+				selfcare.setNationalId(nationalId);
 				temporary.setStatus("ACTIVE");
 
 				//book device
@@ -396,17 +405,18 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 						}
 				}
 				
-				// create selfcare record		userName uniqueReference
+				/*// create selfcare record		userName uniqueReference
 				JSONObject selfcarecreation = new JSONObject();
 				selfcarecreation.put("userName", fullname);
 				selfcarecreation.put("uniqueReference", email);
-				selfcarecreation.put("clientId", resultClient.getClientId());;
+				selfcarecreation.put("nationalId", nationalId);
+				selfcarecreation.put("clientId", resultClient.getClientId());
 				final CommandWrapper selfcareCommandRequest = new CommandWrapperBuilder().createSelfCare().withJson(selfcarecreation.toString()).build();
 				final CommandProcessingResult selfcareCommandresult = this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
 				
 				if(selfcareCommandresult == null && selfcareCommandresult.resourceId() <= 0){			
 					throw new PlatformDataIntegrityException("error.msg.selfcare.creation.failed", "selfcare Creation Failed","selfcare Creation Failed");
-				}
+				}*/
 				
 				return resultClient;
 				

@@ -30,7 +30,7 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 final public class ClientData implements Comparable<ClientData> {
 
     private final Long id;
-    private final String accountNo;
+    private String accountNo;
     private final String externalId;
 
     private final EnumOptionData status;
@@ -42,7 +42,7 @@ final public class ClientData implements Comparable<ClientData> {
     private final String middlename;
     private final String lastname;
     private final String fullname;
-    private final String displayName;
+    private String displayName;
 
     private final Long officeId;
     private final String officeName;
@@ -307,6 +307,23 @@ final public class ClientData implements Comparable<ClientData> {
 	public void setSelfcare(SelfCare selfcare) {
 		this.selfcare = selfcare;
 	}
+
+	public String getAccountNo() {
+		return accountNo;
+	}
+
+	public void setAccountNo(String accountNo) {
+		this.accountNo = accountNo;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+	
 	
 
 }
