@@ -300,7 +300,7 @@ public class ClientProspectMapperForNewClient implements RowMapper<ClientProspec
 					String mobileNumber = rs.getString("mobileNumber");
 					String email = rs.getString("email");
 					String sourceOfPublicity = rs.getString("sourceOfPublicity");
-					String preferredPlan = rs.getString("preferredPlan");
+					Long preferredPlan = rs.getLong("preferredPlan");
 					Date preferredCallingTime = rs.getTimestamp("preferredCallingTime");
 					String note = rs.getString("note");
 					String address = rs.getString("address");
