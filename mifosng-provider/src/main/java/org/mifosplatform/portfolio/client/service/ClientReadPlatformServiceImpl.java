@@ -763,7 +763,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			 }
 			 return result;
 			 
-		}	
-		
+		}
+
 }
+		
+
 
