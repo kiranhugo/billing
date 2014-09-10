@@ -1,5 +1,6 @@
-DELIMITER $$
-Drop procedure IF EXISTS addchargecode $$
+
+Drop procedure IF EXISTS addchargecode;
+DELIMITER //
 create procedure addchargecode() 
 Begin
   IF NOT EXISTS (
@@ -10,9 +11,10 @@ Begin
 alter table b_itemsale add column charge_code varchar(20) DEFAULT NULL;
 ALTER TABLE b_itemsale ADD CONSTRAINT `charge_code_key` FOREIGN KEY(`charge_code`) REFERENCES b_charge_codes(`charge_code`);
 END IF;
-END $$
+END //
 DELIMITER ;
 call addchargecode();
+Drop procedure IF EXISTS addchargecode;
 insert ignore into m_permission (id,grouping,code,entity_name,action_name,can_maker_checker) VALUES (null,'billing','CREATE_ITEMSALE','ITEMSALE','CREATE',0);
 insert ignore into m_permission values(null,'billing','CREATE_USERCHATMESSAGE','USERCHATMESSAGE','CREATE',0);
 
@@ -32,8 +34,9 @@ CREATE TABLE `m_invoice` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DELIMITER $$
-Drop procedure IF EXISTS addpurchaseby $$
+
+Drop procedure IF EXISTS addpurchaseby;
+DELIMITER //
 create procedure addpurchaseby() 
 Begin
   IF NOT EXISTS (
@@ -43,8 +46,24 @@ Begin
      and TABLE_SCHEMA = DATABASE())THEN
 alter table b_itemsale add column purchase_by bigint(10) NOT NULL;
 END IF;
-END $$
+END //
 DELIMITER ;
 call addpurchaseby();
+Drop procedure IF EXISTS addpurchaseby;
 
+Drop procedure IF EXISTS addpurchaseFrom;
+DELIMITER //
+create procedure addpurchaseFrom() 
+Begin
+  IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'purchase_from'
+     and TABLE_NAME = 'b_itemsale'
+     and TABLE_SCHEMA = DATABASE())THEN
 alter table b_itemsale change  agent_id purchase_from int(10)  NOT NULL;
+END IF;
+END //
+DELIMITER ;
+call addpurchaseFrom();
+Drop procedure IF EXISTS addpurchaseFrom;
+
