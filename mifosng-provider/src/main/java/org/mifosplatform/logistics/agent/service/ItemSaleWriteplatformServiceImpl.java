@@ -66,10 +66,13 @@ public class ItemSaleWriteplatformServiceImpl implements ItemSaleWriteplatformSe
           	ItemSaleInvoice invoice=ItemSaleInvoice.fromJson(command);
             BigDecimal taxAmount=BigDecimal.ZERO;
             BigDecimal taxrate=BigDecimal.ZERO;
+           // BigDecimal taxPercentage=BigDecimal.ZERO;
             if(taxMap != null){
             	taxrate=taxMap.getRate();
+            	//taxPercentage=taxMap.get
             	if(taxMap.getType().equalsIgnoreCase("percentage")){
             		taxAmount=invoice.getChargeAmount().multiply(taxrate.divide(new BigDecimal(100)));
+            		
             	}else{
             		taxAmount=invoice.getChargeAmount().add(taxrate);
             	}
@@ -83,6 +86,7 @@ public class ItemSaleWriteplatformServiceImpl implements ItemSaleWriteplatformSe
  
         	invoice.updateAmounts(taxAmount);
         	invoice.setTaxpercentage(taxrate);
+        //	invoice.setTaxpercentage(taxrate);
         	itemSale.setItemSaleInvoice(invoice);
         	
         	this.itemSaleRepository.save(itemSale);

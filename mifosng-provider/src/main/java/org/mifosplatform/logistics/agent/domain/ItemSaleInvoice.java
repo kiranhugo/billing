@@ -102,7 +102,7 @@ public class ItemSaleInvoice extends AbstractAuditableCustom<AppUser,Long>{
 
 	public void setTaxpercentage(BigDecimal taxrate) {
 		
-		this.taxAmount=taxrate;
+		this.taxPercantage=taxrate;
 	}
 	
 	

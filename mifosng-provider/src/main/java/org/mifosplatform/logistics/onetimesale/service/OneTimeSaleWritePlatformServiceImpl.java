@@ -10,6 +10,7 @@ import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.item.data.ChargesData;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
@@ -124,23 +125,33 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	public ItemData calculatePrice(Long itemId, JsonQuery query) {
 
 		try{
-				this.context.authenticatedUser();
-				this.apiJsonDeserializer.validateForPrice(query.parsedJson());
-				final Integer quantity = fromJsonHelper.extractIntegerWithLocaleNamed("quantity", query.parsedJson());
-				ItemMaster itemMaster=this.itemMasterRepository.findOne(itemId);
-					if(itemMaster == null){
-						throw new RuntimeException();
-					}
-				BigDecimal TotalPrice=itemMaster.getUnitPrice().multiply(new BigDecimal(quantity));
-				List<ItemData> itemCodeData = this.oneTimeSaleReadPlatformService.retrieveItemData();
-				List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
-				ItemData itemData = this.itemReadPlatformService.retrieveSingleItemDetails(itemId);
-				return new ItemData(itemCodeData,itemData,TotalPrice,quantity,discountdata);
-			}catch (DataIntegrityViolationException dve) {
-				handleCodeDataIntegrityIssues(null, dve);
-				return null;
+			this.context.authenticatedUser();
+			this.apiJsonDeserializer.validateForPrice(query.parsedJson());
+			final Integer quantity = fromJsonHelper.extractIntegerWithLocaleNamed("quantity", query.parsedJson());
+			final BigDecimal unitprice= fromJsonHelper.extractBigDecimalWithLocaleNamed("unitPrice", query.parsedJson());
+			BigDecimal itemprice=null;
+			ItemMaster itemMaster=this.itemMasterRepository.findOne(itemId);
+/*				if(itemMaster == null){
+					throw new RuntimeException();
+			    }
+*/			if(unitprice !=null){
+			   itemprice=unitprice;
+			}else{
+				itemprice=itemMaster.getUnitPrice();
 			}
+			BigDecimal TotalPrice=itemprice.multiply(new BigDecimal(quantity));
+			List<ItemData> itemCodeData = this.oneTimeSaleReadPlatformService.retrieveItemData();
+			List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
+			ItemData itemData = this.itemReadPlatformService.retrieveSingleItemDetails(itemId);
+			List<ChargesData> chargesDatas=this.itemReadPlatformService.retrieveChargeCode();
+			
+			return new ItemData(itemCodeData,itemData,TotalPrice,quantity,discountdata,chargesDatas);
+		}catch (DataIntegrityViolationException dve) {
+			 handleCodeDataIntegrityIssues(null, dve);
+			return null;
+	
 }
+	}
 	
 	@Override
 	public CommandProcessingResult deleteOneTimeSale(JsonCommand command, Long entityId) {

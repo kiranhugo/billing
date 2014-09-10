@@ -3,6 +3,7 @@ package org.mifosplatform.logistics.agent.data;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.mifosplatform.logistics.item.data.ChargesData;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 
@@ -19,21 +20,22 @@ public class AgentItemSaleData {
 	private final BigDecimal chargeAmount;
 	private final BigDecimal invoiceAmount;
 	private final BigDecimal tax;
+	private final List<ChargesData> chargesDatas;
 	
 	
-	public static AgentItemSaleData instance(AgentItemSaleData itemSaleData, List<OfficeData> officeDatas,List<ItemData> itemDatas) {
+	public static AgentItemSaleData instance(AgentItemSaleData itemSaleData, List<OfficeData> officeDatas,List<ItemData> itemDatas, List<ChargesData> chargesDatas) {
 
 		return new AgentItemSaleData(itemSaleData.id,itemSaleData.itemId,itemSaleData.agentId,itemSaleData.itemName,itemSaleData.agentName,
-				itemSaleData.orderQunatity,itemSaleData.chargeAmount,itemSaleData.tax,itemSaleData.invoiceAmount,officeDatas,itemDatas);
+				itemSaleData.orderQunatity,itemSaleData.chargeAmount,itemSaleData.tax,itemSaleData.invoiceAmount,officeDatas,itemDatas,chargesDatas);
 	}
 
-	public static AgentItemSaleData withTemplateData(List<OfficeData> officeDatas, List<ItemData> itemDatas) {
+	public static AgentItemSaleData withTemplateData(List<OfficeData> officeDatas, List<ItemData> itemDatas, List<ChargesData> chargesDatas) {
 
-		return new AgentItemSaleData(null,null,null,null,null,null,null,null,null,officeDatas,itemDatas);
+		return new AgentItemSaleData(null,null,null,null,null,null,null,null,null,officeDatas,itemDatas,chargesDatas);
 	}
 
 	public AgentItemSaleData(Long id, Long itemId, Long agentId,String itemName, String agentName,Long orderQunatity,
-			BigDecimal chargeAmount, BigDecimal tax, BigDecimal invoiceAmount,List<OfficeData> officeDatas, List<ItemData> itemDatas) {
+			BigDecimal chargeAmount, BigDecimal tax, BigDecimal invoiceAmount,List<OfficeData> officeDatas, List<ItemData> itemDatas, List<ChargesData> chargesDatas) {
 		
 		this.id=id;
 		this.itemId=itemId;
@@ -45,6 +47,7 @@ public class AgentItemSaleData {
 		this.invoiceAmount=invoiceAmount;
 		this.tax=tax;
 		this.officeDatas=officeDatas;
+		this.chargesDatas=chargesDatas;
 		this.itemDatas=itemDatas;
 
 	
