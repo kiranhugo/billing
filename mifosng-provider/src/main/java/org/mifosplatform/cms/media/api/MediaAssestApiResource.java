@@ -225,12 +225,12 @@ public class MediaAssestApiResource {
     	 List<EnumOptionData> status = this.planReadPlatformService.retrieveNewStatus();
          List<MediaassetAttribute> data   = this.mediaAssetReadPlatformService.retrieveMediaAttributes();
          List<MediaassetAttribute> mediaFormat=this.mediaAssetReadPlatformService.retrieveMediaFormatType();
-         /*List<MediaEnumoptionData> mediaTypeData =this.mediaAssetReadPlatformService.retrieveMediaTypeData();*/
+         List<MediaEnumoptionData> mediaTypeData =this.mediaAssetReadPlatformService.retrieveMediaTypeData();
          Collection<MCodeData> eventCategeorydata=this.mCodeReadPlatformService.getCodeValue("Event Category");
          List<McodeData> mediaCategeorydata=this.mediaAssetReadPlatformService.retrieveMedaiCategory();
          List<McodeData> languageCategeory=this.mediaAssetReadPlatformService.retrieveLanguageCategeories();
          List<McodeData> contentProviderData=this.mediaAssetReadPlatformService.retrieveContentProviders();
-         return new MediaAssetData(null,null,null,status,data,mediaFormat,eventCategeorydata,mediaCategeorydata,languageCategeory,contentProviderData);
+         return new MediaAssetData(null,null,null,status,data,mediaFormat,eventCategeorydata,mediaCategeorydata,languageCategeory,contentProviderData,mediaTypeData);
 	}
 
 
@@ -266,12 +266,12 @@ public class MediaAssestApiResource {
          List<EnumOptionData> status = this.planReadPlatformService.retrieveNewStatus();
          List<MediaassetAttribute> data   = this.mediaAssetReadPlatformService.retrieveMediaAttributes();
          List<MediaassetAttribute> mediaFormat=this.mediaAssetReadPlatformService.retrieveMediaFormatType();
-         /*List<MediaEnumoptionData> mediaTypeData =this.mediaAssetReadPlatformService.retrieveMediaTypeData();*/
+         List<MediaEnumoptionData> mediaTypeData =this.mediaAssetReadPlatformService.retrieveMediaTypeData();
          Collection<MCodeData> eventCategeorydata=this.mCodeReadPlatformService.getCodeValue("Event Category");
          List<McodeData> mediaCategeorydata=this.mediaAssetReadPlatformService.retrieveMedaiCategory();
          List<McodeData> mediaLanguageData=this.mediaAssetReadPlatformService.retrieveLanguageCategeories();
          List<McodeData> contentProviderData=this.mediaAssetReadPlatformService.retrieveContentProviders();
-         MediaAssetData assetData=new MediaAssetData(mediaAssetData,mediaassetAttributes,mediaLocationData,status,data,mediaFormat,eventCategeorydata,mediaCategeorydata,mediaLanguageData,contentProviderData);
+         MediaAssetData assetData=new MediaAssetData(mediaAssetData,mediaassetAttributes,mediaLocationData,status,data,mediaFormat,eventCategeorydata,mediaCategeorydata,mediaLanguageData,contentProviderData,mediaTypeData);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, assetData, RESPONSE_DATA_PARAMETERS);
       }
@@ -305,7 +305,7 @@ public class MediaAssestApiResource {
 	 * Now we are not using
 	 * whenever you requires use it
 	 * */
-	/*@POST
+	@POST
 	@Path("locationAttributes/{assetId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -315,5 +315,5 @@ public class MediaAssestApiResource {
 	   final CommandProcessingResult result=this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 	   return this.toApiJsonSerializer.serialize(result);
 	}
-	 */	
+	 	
     }
