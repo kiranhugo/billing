@@ -2,6 +2,8 @@ package org.mifosplatform.logistics.agent.service;
 
 import java.math.BigDecimal;
 
+import org.mifosplatform.billing.taxmapping.domain.TaxMap;
+import org.mifosplatform.billing.taxmapping.domain.TaxMapRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -28,15 +30,17 @@ public class ItemSaleWriteplatformServiceImpl implements ItemSaleWriteplatformSe
 	private final ItemSaleInvoiceRepository itemSaleInvoiceRepository;
 	private final AgentItemSaleCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final ItemRepository itemRepository;
+	private final TaxMapRepository taxMapRepository;
 	
 	@Autowired
 	public ItemSaleWriteplatformServiceImpl(final PlatformSecurityContext context,final ItemSaleRepository itemSaleRepository,
 			final ItemSaleInvoiceRepository itemSaleInvoiceRepository,final AgentItemSaleCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final ItemRepository itemRepository){
+			final ItemRepository itemRepository,final TaxMapRepository taxMapRepository){
 		
 		   this.context=context;
 		   this.itemSaleRepository=itemSaleRepository;
 		   this.itemSaleInvoiceRepository=itemSaleInvoiceRepository;
+		   this.taxMapRepository=taxMapRepository;
 		   this.apiJsonDeserializer=apiJsonDeserializer;
 		   this.itemRepository=itemRepository;
 		
@@ -53,16 +57,32 @@ public class ItemSaleWriteplatformServiceImpl implements ItemSaleWriteplatformSe
         	this.context.authenticatedUser();
         	this.apiJsonDeserializer.validateForCreate(command.json());
         	ItemSale itemSale=ItemSale.fromJson(command);
+        	if(itemSale.getPurchaseFrom().equals(itemSale.getPurchaseBy())){
+        		
+        		throw new PlatformDataIntegrityException("invalid.move.operation", "invalid.move.operation", "invalid.move.operation");
+        	}
             ItemMaster itemMaster=this.itemRepository.findOne(itemSale.getItemId());
-            
+            TaxMap taxMap=this.taxMapRepository.findOneByChargeCode(itemSale.getChargeCode());
+          	ItemSaleInvoice invoice=ItemSaleInvoice.fromJson(command);
+            BigDecimal taxAmount=BigDecimal.ZERO;
+            BigDecimal taxrate=BigDecimal.ZERO;
+            if(taxMap != null){
+            	taxrate=taxMap.getRate();
+            	if(taxMap.getType().equalsIgnoreCase("percentage")){
+            		taxAmount=invoice.getChargeAmount().multiply(taxrate.divide(new BigDecimal(100)));
+            	}else{
+            		taxAmount=invoice.getChargeAmount().add(taxrate);
+            	}
+            }
             if(itemMaster == null){
         	  throw new ItemNotFoundException(itemSale.getItemId().toString());
             }
           
-        	ItemSaleInvoice invoice=ItemSaleInvoice.fromJson(command);
-        	BigDecimal taxAmount=this.calculateTaxAmount(invoice.getChargeAmount(),invoice.getTaxPercantage());
-
+      
+        	//this.calculateTaxAmount(invoice.getChargeAmount(),invoice.getTaxPercantage());
+ 
         	invoice.updateAmounts(taxAmount);
+        	invoice.setTaxpercentage(taxrate);
         	itemSale.setItemSaleInvoice(invoice);
         	
         	this.itemSaleRepository.save(itemSale);
