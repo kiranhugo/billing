@@ -55,6 +55,11 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 		 this.fromApiJsonDeserializer.validateForCreate(command.json());
 		 MediaAsset mediaAsset=MediaAsset.fromJson(command);
 		 
+		 /**
+		   * Condition 
+		   * for create add media
+		   * */
+		 if(mediaTypeCheck.equalsIgnoreCase("ADDMEDIA")){
 		 final String language = command.stringValueOfParameterNamed("languageId");
 		 Long languageId = null;
 		 Collection<MCodeData> CodeValuedatasForLanguages=this.mCodeReadPlatformService.getCodeValue("Asset language");
@@ -69,14 +74,14 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 		 final String location = command.stringValueOfParameterNamed("location");
 		 MediaassetLocation mediaassetLocation = new MediaassetLocation(languageId,formatType,location);
          mediaAsset.addMediaLocations(mediaassetLocation);
-		 
+		 }
          
-	/*
-		*//**
-		 * Enter here for create media
-		 * Doesn't allow advance media creation
-		 * *//*	  
-		if(!mediaTypeCheck.equalsIgnoreCase("ADVANCEMEDIA")){
+        /**
+		 * Condition 
+		 * for create advance media
+		 * 
+		 * */	  
+		if(mediaTypeCheck.equalsIgnoreCase("ADVANCEMEDIA")){
 				 
 				 final JsonArray mediaassetAttributesArray=command.arrayOfParameterNamed("mediaassetAttributes").getAsJsonArray();
 				    String[] mediaassetAttributes =null;
@@ -120,7 +125,7 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 			              MediaassetLocation mediaassetLocation = new MediaassetLocation(languageId,formatType,location);
 			              mediaAsset.addMediaLocations(mediaassetLocation);
 						  }		 
-		}*/
+		}
 			 				 
         this.assetRepository.save(mediaAsset);
 		return new CommandProcessingResult(mediaAsset.getId());
@@ -247,16 +252,16 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 	  * Now we are not using
 	  * whenever you requires use it
 	  * */
-	/*@Override
+	@Override
 	public CommandProcessingResult createMediaAssetLocationAttributes(JsonCommand command) {
 		
 		 context.authenticatedUser();
 		 this.fromApiJsonDeserializer.validateForCreateLocationAttributes(command.json());
 		 final MediaAsset mediaAsset=retriveMessageBy(command.entityId());
 		 String mediaDetailType=command.stringValueOfParameterNamed("mediaDetailType");
-		 *//**
+		 /**
 		  * This is for media Attributes 
-		  * *//*
+		  * */
 		 if(mediaDetailType.equalsIgnoreCase("ATTRIBUTES")){
 		 final JsonArray mediaassetAttributesArray=command.arrayOfParameterNamed("mediaassetAttributes").getAsJsonArray();
 		 String[] mediaassetAttributes =null;
@@ -279,9 +284,9 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
             mediaAsset.add(attributes);
 		}
 		}
-		*//**
+		/**
 		  * This is for media Locations 
-		  * *//*
+		  * */
 		if(mediaDetailType.equalsIgnoreCase("LOCATIONS")){
 		final JsonArray mediaassetLocationsArray=command.arrayOfParameterNamed("mediaAssetLocations").getAsJsonArray();
 		String[] mediaassetLocations =null;
@@ -305,6 +310,6 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 		
 		return new CommandProcessingResult(mediaAsset.getId());
 	}
-  */
+  
 	 
 }

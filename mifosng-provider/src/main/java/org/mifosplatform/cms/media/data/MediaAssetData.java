@@ -77,7 +77,7 @@ public MediaAssetData(List<MediaAssetData> data, Long noOfPages, Long pageNo) {
 	this.pageNo=pageNo;
 }
 public MediaAssetData(MediaAssetData mediaAssetData, List<MediaassetAttributeData> mediaassetAttributes, List<MediaLocationData> mediaLocationData, List<EnumOptionData> status,List<MediaassetAttribute> data, List<MediaassetAttribute> mediaFormat,
-		Collection<MCodeData> eventCategeorydata, List<McodeData> mediaCategeorydata,List<McodeData> mediaLangauagedata,List<McodeData> contentProviderData) {
+		Collection<MCodeData> eventCategeorydata, List<McodeData> mediaCategeorydata,List<McodeData> mediaLangauagedata,List<McodeData> contentProviderData,List<MediaEnumoptionData> mediaTypeData) {
 
 	this.mediaAssetData=mediaAssetData;
 	this.mediaStatus=status;
@@ -94,7 +94,7 @@ public MediaAssetData(MediaAssetData mediaAssetData, List<MediaassetAttributeDat
 	this.mediaLocationData=mediaLocationData;
 	this.mediaassetAttributes=mediaassetAttributes;
 	this.contentProviderData=contentProviderData;
-	
+	this.mediaTypeData=mediaTypeData;
 	
 }
 public MediaAssetData(Long mediaId, String mediaTitle, String status,
