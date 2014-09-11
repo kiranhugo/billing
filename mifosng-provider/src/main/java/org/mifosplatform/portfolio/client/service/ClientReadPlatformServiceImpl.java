@@ -645,7 +645,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
 	            final Long id = rs.getLong("id");
 	            final String codeValue = rs.getString("codeValue");
-                    return new ClientCategoryData(id,codeValue,null,null,null);
+                    return new ClientCategoryData(id,codeValue,null,null,null,null,null);
 	            
 	        }
 	    }
@@ -709,7 +709,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	      public ClientCategoryData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 	          final Long id = rs.getLong("id");
 	          final String billMode = rs.getString("billMode");
-	         return new  ClientCategoryData(id,null, billMode,null,null);
+	         return new  ClientCategoryData(id,null, billMode,null,null,null,null);
 	          
 	      }
 	}
@@ -730,24 +730,34 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		
 		private static final class parentClientMapper implements RowMapper<ClientCategoryData> {
 			
+			public String parentChildSchema(){
+	    		
+	    		return "select id,account_no as accountNo,display_name as displayName from m_client m ";
+	    	}
+
 			  @Override
 		      public ClientCategoryData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 		          final Long id = rs.getLong("id");
 		          final String  accountNo = rs.getString("accountNo");
 		          final String displayName = rs.getString("displayName");
-		         return new  ClientCategoryData(id,null,null,accountNo, displayName);
+		         return new  ClientCategoryData(id,null,null,accountNo, displayName,null,null);
 		          
 		      }
 
 }
 		@Override
-		public ClientCategoryData retrievingClientParentData(Long parentClientId) {
+		public List<ClientCategoryData> retrievingClientParentData(Long parentClientId,Long clientId) {
 			   context.authenticatedUser();
 			   try{
-			   parentClientMapper mapper=new parentClientMapper();
-				final String sql="select id as id , account_no as accountNo,display_name as displayName from m_client where id= ? " ;
-				return this.jdbcTemplate.queryForObject(sql, mapper,new Object[]{parentClientId});
-		}catch(EmptyResultDataAccessException e){
+				   parentClientMapper mapper=new parentClientMapper();
+				   if(parentClientId !=null){
+					   final String sql=mapper.parentChildSchema()+" where m.id= ? ";
+					   return this.jdbcTemplate.query(sql, mapper,new Object[]{parentClientId});
+				   }else{
+					   final String sql=mapper.parentChildSchema()+" where m.parent_id= ?  ";
+					   return this.jdbcTemplate.query(sql, mapper,new Object[]{clientId}); 
+				   }
+			  }catch(EmptyResultDataAccessException e){
 			return null;
 		  }
 		}
@@ -764,7 +774,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			 return result;
 			 
 		}
-
+		
 }
 		
 
