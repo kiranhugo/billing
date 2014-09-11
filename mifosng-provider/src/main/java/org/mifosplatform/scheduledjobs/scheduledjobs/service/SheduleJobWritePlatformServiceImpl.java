@@ -372,78 +372,72 @@ exception.printStackTrace();
 }
 }*/
 
-@Transactional
 @Override
 @CronTarget(jobName = JobName.SIMULATOR)
 public void processSimulator() {
 
 
 try {
-  System.out.println("Processing Simulator Details.......");
-  JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.SIMULATOR.toString());
-  if(data!=null){	
-	  List<ProcessingDetailsData> processingDetails = this.processRequestReadplatformService.retrieveUnProcessingDetails();
-     if(data.getUpdateStatus().equalsIgnoreCase("Y")){ 
-       if(!processingDetails.isEmpty()){
-       MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
-       final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
-       LocalTime date=new LocalTime(zone);
-       String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-       String path=FileUtils.generateLogFileDirectory()+JobName.SIMULATOR.toString()+ File.separator +"Simulator_"+new LocalDate().toString().
-    		    replace("-","")+"_"+dateTime+".log";
-       File fileHandler = new File(path.trim());
-       fileHandler.createNewFile();
-       FileWriter fw = new FileWriter(fileHandler);
-       FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
-       fw.append("Processing Simulator Details....... \r\n");
-        for (ProcessingDetailsData detailsData : processingDetails) {
-        	
-          fw.append("simulator Process Request id="+detailsData.getId()+" ,orderId="+detailsData.getOrderId()+" ,Provisiong System="
-          +detailsData.getProvisionigSystem()+" ,RequestType="+detailsData.getRequestType()+"\r\n");
-          ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
-          processRequest.setProcessStatus('Y');
-          this.processRequestRepository.saveAndFlush(processRequest);
-          this.processRequestWriteplatformService.notifyProcessingDetails(processRequest,'Y');
-        }
-        fw.append("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" \r\n");
-        fw.flush();
-        fw.close();
-        } 
-     
-     }
-      if(data.getcreateTicket().equalsIgnoreCase("Y")){
-       for (ProcessingDetailsData detailsData : processingDetails) {
-    	   ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
-    	   Order order=this.orderRepository.findOne(processRequest.getOrderId());
-    	   List<ProblemsData> problemsData=this.ticketMasterReadPlatformService.retrieveProblemData();
-    	   List<EnumOptionData> priorityData = this.ticketMasterReadPlatformService.retrievePriorityData();
-    	  // Collection<MCodeData> sourceData =this.codeReadPlatformService.getCodeValue("Ticket Source");
-    	   Long userId=0L;
-     	   JSONObject jsonobject = new JSONObject();
- 		   DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
- 		   DateTimeFormatter formatter2	=DateTimeFormat.fullTime();
- 		   jsonobject.put("locale", "en");
- 		   jsonobject.put("dateFormat", "dd MMMM yyyy");
- 		   jsonobject.put("ticketTime"," "+new LocalTime().toString(formatter2));
- 		   jsonobject.put("description","ClientId"+processRequest.getClientId()+" Order No:"+order.getOrderNo()+" Request Type:"+processRequest.getRequestType()
- 				          +" Generated at:"+new LocalTime().toString(formatter2));
- 		   jsonobject.put("ticketDate",formatter1.print(new LocalDate()));
- 		   jsonobject.put("sourceOfTicket","Phone");
- 		   jsonobject.put("assignedTo", userId);
- 		   jsonobject.put("priority",priorityData.get(0).getValue());
- 		   jsonobject.put("problemCode", problemsData.get(0).getProblemCode());
- 		   String resourceId = this.ticketMasterApiResource.createTicketMaster(processRequest.getClientId(), jsonobject.toString());
- 		  // if(resourceId !=null){
- 			//processRequest.setNotify();
- 			//this.processRequestRepository.save(processRequest);
- 		 
-       }
-      }
-    
-  }
-  
-     System.out.println("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
-} catch (DataIntegrityViolationException exception) {
+ 
+	System.out.println("Processing Simulator Details.......");
+	JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.SIMULATOR.toString());
+		if(data!=null){	
+			List<ProcessingDetailsData> processingDetails = this.processRequestReadplatformService.retrieveUnProcessingDetails();
+				if(data.getUpdateStatus().equalsIgnoreCase("Y")){ 
+					if(!processingDetails.isEmpty()){
+						MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+						final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+						LocalTime date=new LocalTime(zone);
+						String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
+						String path=FileUtils.generateLogFileDirectory()+JobName.SIMULATOR.toString()+ File.separator +"Simulator_"+new LocalDate().toString().
+								replace("-","")+"_"+dateTime+".log";
+						File fileHandler = new File(path.trim());
+						fileHandler.createNewFile();
+						FileWriter fw = new FileWriter(fileHandler);
+						FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
+						fw.append("Processing Simulator Details....... \r\n");
+						
+							for (ProcessingDetailsData detailsData : processingDetails) {
+								fw.append("simulator Process Request id="+detailsData.getId()+" ,orderId="+detailsData.getOrderId()+" ,Provisiong System="
+										+detailsData.getProvisionigSystem()+" ,RequestType="+detailsData.getRequestType()+"\r\n");
+								ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
+								processRequest.setProcessStatus('Y');
+								this.processRequestRepository.saveAndFlush(processRequest);
+								this.processRequestWriteplatformService.notifyProcessingDetails(processRequest,'Y');
+							}
+							fw.append("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" \r\n");
+							fw.flush();
+							fw.close();
+					} 
+				}
+				if(data.getcreateTicket().equalsIgnoreCase("Y")){
+					
+					for (ProcessingDetailsData detailsData : processingDetails) {
+						ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
+						Order order=this.orderRepository.findOne(processRequest.getOrderId());
+						List<ProblemsData> problemsData=this.ticketMasterReadPlatformService.retrieveProblemData();
+						List<EnumOptionData> priorityData = this.ticketMasterReadPlatformService.retrievePriorityData();
+						Long userId=0L;
+						JSONObject jsonobject = new JSONObject();
+						DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
+						DateTimeFormatter formatter2	=DateTimeFormat.fullTime();
+						jsonobject.put("locale", "en");
+						jsonobject.put("dateFormat", "dd MMMM yyyy");
+						jsonobject.put("ticketTime"," "+new LocalTime().toString(formatter2));
+						jsonobject.put("description","ClientId"+processRequest.getClientId()+" Order No:"+order.getOrderNo()+" Request Type:"+processRequest.getRequestType()
+								+" Generated at:"+new LocalTime().toString(formatter2));
+						jsonobject.put("ticketDate",formatter1.print(new LocalDate()));
+						jsonobject.put("sourceOfTicket","Phone");
+						jsonobject.put("assignedTo", userId);
+						jsonobject.put("priority",priorityData.get(0).getValue());
+						jsonobject.put("problemCode", problemsData.get(0).getProblemCode());
+						String resourceId = this.ticketMasterApiResource.createTicketMaster(processRequest.getClientId(), jsonobject.toString());
+ 		  
+					}
+				}
+		}
+		System.out.println("Simulator Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+	} catch (DataIntegrityViolationException exception) {
 
 	} catch (Exception exception) {
 		System.out.println(exception.getMessage());

@@ -156,7 +156,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 					orderPriceData.setNextBillableDay(billingOrderCommand
 							.getNextBillableDate());
 				}
-				//this.orderPriceRepository.saveAndFlush(orderPriceData);
+				this.orderPriceRepository.saveAndFlush(orderPriceData);
 			}
 			this.orderRepository.saveAndFlush(orderData);
 		}

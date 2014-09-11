@@ -1063,7 +1063,6 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		
 		try{
 				AppUser appUser=this.context.authenticatedUser();
-				
 				Order order=this.orderRepository.findOne(orderId);
 				Long resourceId=Long.valueOf(0);
 					if(order == null){
@@ -1076,7 +1075,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 							orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.TERMINATED).getId();
 					}else{
 							orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId();
-							CommandProcessingResult processingResult= this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,StatusTypeEnum.TERMINATED.toString());
+							CommandProcessingResult processingResult= this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,UserActionStatusTypeEnum.TERMINATION.toString());
 							resourceId=processingResult.resourceId();
 					}
 						order.setStatus(orderStatus);
@@ -1091,7 +1090,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 			this.orderHistoryRepository.save(orderHistory);	
 		    transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(),"Order Termination", new Date(),"User :"+appUser.getUsername(),
 									"PlanId:"+order.getPlanId(),"contarctPeriod:"+order.getContarctPeriod(),"Services:"+order.getAllServicesAsString(),"OrderID:"+order.getId(),"BillingAlign:"+order.getbillAlign());
-		return new CommandProcessingResult(orderId);
+		    return new CommandProcessingResult(orderId);
 		
 		}catch(DataIntegrityViolationException exception){
 			handleCodeDataIntegrityIssues(command, exception);

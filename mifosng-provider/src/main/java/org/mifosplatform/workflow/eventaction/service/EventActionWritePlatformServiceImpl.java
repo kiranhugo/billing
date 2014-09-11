@@ -96,7 +96,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 	}
 	
 	
-	@Transactional
+	
 	@Override
 	public String AddNewActions(List<ActionDetaislData> actionDetaislDatas,final Long clientId,final String resourceId) {
     
@@ -174,6 +174,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	  }
 				      
 				       }else if(actionProcedureData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_ACTIVE)){
+				    	   
 					          AssociationData associationData=this.hardwareAssociationReadplatformService.retrieveSingleDetails(actionProcedureData.getOrderId());
 					          		if(associationData ==null){
 					          			throw new HardwareDetailsNotFoundException(actionProcedureData.getOrderId().toString());

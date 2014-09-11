@@ -147,6 +147,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
 								client.setStatus(ClientStatus.ACTIVE.getValue());
 								Plan plan=this.planRepository.findOne(order.getPlanId());
+								this.orderRepository.saveAndFlush(order);
 								
 									if(plan.isPrepaid() == 'Y'){
 										List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_ACTIVE_ORDER);
@@ -162,11 +163,11 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 								if(activeOrders == 0){
 									client.setStatus(ClientStatus.DEACTIVE.getValue());
 								}
+								this.orderRepository.saveAndFlush(order);
 							
 							}else if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.TERMINATION.toString())){
 								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.TERMINATED).getId());
-								Plan plan=this.planRepository.findOne(order.getPlanId());
-								
+								this.orderRepository.saveAndFlush(order);
 									/*if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
 										
 										List<ServiceParameters> parameters=this.serviceParametersRepository.findDataByOrderId(order.getId());
@@ -182,15 +183,20 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 							}else if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.SUSPENTATION.toString())){
 								EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.SUSPENDED.toString());
 								order.setStatus(enumDomainService.getEnumId());
+								this.orderRepository.saveAndFlush(order);
+								
 							}else if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.REACTIVATION.toString())){
+								
 								EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.ACTIVE.toString());
 								order.setStatus(enumDomainService.getEnumId());
+								this.orderRepository.saveAndFlush(order);
 							}else{
 								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
 								client.setStatus(ClientStatus.ACTIVE.getValue());
 								this.clientRepository.saveAndFlush(client);
+								this.orderRepository.saveAndFlush(order);
 							}	
-							this.orderRepository.save(order);
+						//	this.orderRepository.saveAndFlush(order);
 							this.clientRepository.saveAndFlush(client);
 							detailsData.setNotify();
 					}
