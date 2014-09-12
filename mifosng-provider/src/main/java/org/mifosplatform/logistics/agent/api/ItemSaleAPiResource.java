@@ -1,6 +1,7 @@
 package org.mifosplatform.logistics.agent.api;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +26,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.agent.data.AgentItemSaleData;
 import org.mifosplatform.logistics.agent.service.ItemSaleReadPlatformService;
+import org.mifosplatform.logistics.item.data.ChargesData;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -96,12 +98,13 @@ public String createOffice(final String apiRequestBodyAsJson) {
 
 private AgentItemSaleData handleAgenttemplateData(AgentItemSaleData  itemSaleData) {
 	
-	List<OfficeData> officeDatas=this.officeReadPlatformService.retrieveAgentTypeData();
+	Collection<OfficeData> officeDatas=this.officeReadPlatformService.retrieveAllOffices();
 	List<ItemData> itemDatas=this.itemReadPlatformService.retrieveAllItems();
+	List<ChargesData> chargesDatas=this.itemReadPlatformService.retrieveChargeCode();
 	if(itemSaleData == null){
-	return  AgentItemSaleData.withTemplateData(officeDatas,itemDatas);
+	return  AgentItemSaleData.withTemplateData(officeDatas,itemDatas,chargesDatas);
 	}else{
-		return AgentItemSaleData.instance(itemSaleData, officeDatas, itemDatas);
+		return AgentItemSaleData.instance(itemSaleData, officeDatas, itemDatas,chargesDatas);
 	}
 }
 

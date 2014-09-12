@@ -23,11 +23,17 @@ public class ItemSale extends AbstractAuditableCustom<AppUser, Long>{
 	@Column(name="item_id")
 	private Long itemId;
 	
-	@Column(name="agent_id")
-	private Long agentId;
+	@Column(name="purchase_from")
+	private Long purchasefrom;
+	
+	@Column(name="purchase_by")
+	private Long purchaseBy;
 	
 	@Column(name="received_quantity")
 	private Long receivedQuantity=0L;
+	
+	@Column(name="charge_code")
+	private String chargeCode;
 
 	@Column(name="status")
 	private String status="New";
@@ -55,10 +61,11 @@ public class ItemSale extends AbstractAuditableCustom<AppUser, Long>{
 	}
 
 
-	public ItemSale(Long itemId, Long agentId, Date purchaseDate,Long orderQuantity) {
+	public ItemSale(Long itemId, Long purchaseFrom,Long purchaseBy, Date purchaseDate,Long orderQuantity) {
 		
 		this.itemId=itemId;
-		this.agentId=agentId;
+		this.purchasefrom=purchaseFrom;
+		this.purchaseBy=purchaseBy;
 		this.purchaseDate=purchaseDate;
 		this.orderQuantity=orderQuantity;
 		
@@ -66,13 +73,14 @@ public class ItemSale extends AbstractAuditableCustom<AppUser, Long>{
 
 
 	public static ItemSale fromJson(JsonCommand command) {
-	
+		
 		final Long itemId=command.longValueOfParameterNamed("itemId");
-		final Long agentId=command.longValueOfParameterNamed("agentId");
+		final Long purchaseFrom=command.longValueOfParameterNamed("purchaseFrom");
+		final Long purchaseBy=command.longValueOfParameterNamed("purchaseBy");
 		final Date purchaseDate =command.localDateValueOfParameterNamed("purchaseDate").toDate();
 		final Long orderQuantity=command.longValueOfParameterNamed("orderQuantity");
-		
-		return new ItemSale(itemId,agentId,purchaseDate,orderQuantity);
+
+		return new ItemSale(itemId,purchaseFrom,purchaseBy,purchaseDate,orderQuantity);
 				
 		
 	}
@@ -90,8 +98,8 @@ public class ItemSale extends AbstractAuditableCustom<AppUser, Long>{
 	}
 
 
-	public Long getAgentId() {
-		return agentId;
+	public Long getPurchaseFrom() {
+		return purchasefrom;
 	}
 
 
@@ -102,6 +110,11 @@ public class ItemSale extends AbstractAuditableCustom<AppUser, Long>{
 
 	public void setReceivedQuantity(Long receivedQuantity) {
 		this.receivedQuantity = receivedQuantity;
+	}
+
+
+	public String getChargeCode() {
+		return chargeCode;
 	}
 
 
@@ -122,10 +135,14 @@ public class ItemSale extends AbstractAuditableCustom<AppUser, Long>{
 		return orderQuantity;
 	}
 
-	public void setAgentId(Long agentId) {
-		this.agentId = agentId;
+
+	public void setPurchaseFrom(Long purchasefrom) {
+        this.purchasefrom=purchasefrom;
 	}
 
+	public Long getPurchaseBy() {
+		return purchaseBy;
+	}
 
 
 	public ItemSaleInvoice getItemSaleInvoice() {

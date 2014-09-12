@@ -90,7 +90,7 @@ public class ClientProspectData{
 		this.statusRemark = statusRemark;
 		this.isDeleted = isDeleted;
 	}
-	public ClientProspectData(final Long id,final Short prospectType, final String firstName, final String middleName, final String lastName, final String homePhoneNumber, final String workPhoneNumber, final String mobileNumber, final String email, final String sourceOfPublicity, final Date preferredCallingTime, final String note, final String address, final String streetArea, final String cityDistrict, final String state, final String country, final String preferredPlan, final String status, final String statusRemark, final String isDeleted, final String zipCode){
+	public ClientProspectData(final Long id,final Short prospectType, final String firstName, final String middleName, final String lastName, final String homePhoneNumber, final String workPhoneNumber, final String mobileNumber, final String email, final String sourceOfPublicity, final Date preferredCallingTime, final String note, final String address, final String streetArea, final String cityDistrict, final String state, final String country, final Long preferredPlan, final String status, final String statusRemark, final String isDeleted, final String zipCode){
 		this.id = id;
 		this.prospectType = prospectType;
 		this.firstName = firstName;
@@ -101,7 +101,7 @@ public class ClientProspectData{
 		this.mobileNumber = mobileNumber;
 		this.email = email;
 		this.sourceOfPublicityInt = sourceOfPublicity;
-		this.preferredPlanInt = new Long(preferredPlan);
+		this.preferredPlanInt = preferredPlan;
 		this.preferredCallingTime = preferredCallingTime;
 		this.note = note;
 		this.address = address;

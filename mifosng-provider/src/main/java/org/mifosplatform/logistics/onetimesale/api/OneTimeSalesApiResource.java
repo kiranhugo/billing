@@ -17,7 +17,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.billing.chargecode.data.ChargesData;
 import org.mifosplatform.billing.pricing.service.PriceReadPlatformService;
 import org.mifosplatform.cms.eventorder.data.EventOrderData;
 import org.mifosplatform.cms.eventorder.service.EventOrderReadplatformServie;
@@ -32,6 +31,7 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.item.data.ChargesData;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
@@ -121,7 +121,7 @@ public class OneTimeSalesApiResource {
 	}
 
 	private OneTimeSaleData handleTemplateRelatedData(OneTimeSaleData salesData) {
-			List<ChargesData> chargeDatas = this.priceReadPlatformService.retrieveChargeCode();
+			List<ChargesData> chargeDatas = this.itemMasterReadPlatformService.retrieveChargeCode();
 			List<ItemData> itemData = this.oneTimeSaleReadPlatformService.retrieveItemData();
 			final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
 			List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
@@ -153,7 +153,8 @@ public class OneTimeSalesApiResource {
 		List<ItemData> itemCodeData = this.oneTimeSaleReadPlatformService.retrieveItemData();
 		List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
 	    ItemData  itemData = this.itemMasterReadPlatformService.retrieveSingleItemDetails(itemId);
-		itemData=new ItemData(itemCodeData,itemData,null,null,discountdata);
+		List<ChargesData> chargesDatas=this.itemMasterReadPlatformService.retrieveChargeCode();
+		itemData=new ItemData(itemCodeData,itemData,null,null,discountdata,chargesDatas);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.defaultToApiJsonSerializer.serialize(settings, itemData, RESPONSE_DATA_PARAMETERS);		
 	}

@@ -51,6 +51,8 @@ public class InvoiceClient {
 		this.transactionHistoryWritePlatformService=transactionHistoryWritePlatformService;
 		//this.invoiceClient = invoiceClient;
 	}
+	
+	
 	public BigDecimal invoicingSingleClient(Long clientId, LocalDate processDate) {
 
 		     // Get list of qualified orders
@@ -106,7 +108,7 @@ public class InvoiceClient {
 	    				+invoice.getInvoiceAmount(),"Charge Startdate:"+billingOrderCommands.get(0).getBillStartDate(),
 	    				"Charge Enddate:"+billingOrderCommands.get(0).getEndDate());
 			
-			CommandProcessingResult entityIdentifier = billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
+			//CommandProcessingResult entityIdentifier = billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
                if(invoice.getInvoiceAmount() == null){
             	   return null;
                }

@@ -15,10 +15,16 @@ public interface ClientProspectReadPlatformService {
 
 	
 	public Collection<ClientProspectData> retriveClientProspect();
+	
 	public ProspectDetailData retriveClientProspect(Long clientProspectId);
+	
 	public Collection<ProspectPlanCodeData> retrivePlans();
+	
 	List<ProspectDetailAssignedToData> retrieveUsers();
+	
 	public List<ProspectDetailData> retriveProspectDetailHistory(Long prospectdetailid);
+	
 	public ClientProspectData retriveSingleClient(Long id);
+	
 	public Page<ClientProspectData> retriveClientProspect(SearchSqlQuery searchClientProspect);
 }

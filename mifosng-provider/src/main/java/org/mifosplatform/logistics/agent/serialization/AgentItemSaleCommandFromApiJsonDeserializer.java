@@ -31,8 +31,8 @@ public final class AgentItemSaleCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("agentId","itemId","purchaseDate","orderQuantity",
-    		"chargeAmount","taxPercantage","dateFormat","locale"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("agentId","itemId","purchaseDate","orderQuantity","unitPrice",
+    		"chargeAmount","taxPercantage","dateFormat","locale","purchaseBy","chargeCode","purchaseFrom"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -50,20 +50,22 @@ public final class AgentItemSaleCommandFromApiJsonDeserializer {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("itemsale");
 
         final JsonElement element = fromApiJsonHelper.parse(json);
-
-        final String agentId = fromApiJsonHelper.extractStringNamed("agentId", element);
-        baseDataValidator.reset().parameter("agentId").value(agentId).notNull();
-        final String itemId = fromApiJsonHelper.extractStringNamed("itemId", element);
-        baseDataValidator.reset().parameter("itemId").value(itemId).notNull();
         final LocalDate purchaseDate = fromApiJsonHelper.extractLocalDateNamed("purchaseDate", element);
         baseDataValidator.reset().parameter("purchaseDate").value(purchaseDate).notBlank();
-        
+        final String purchaseFrom = fromApiJsonHelper.extractStringNamed("purchaseFrom", element);
+        baseDataValidator.reset().parameter("purchaseFrom").value(purchaseFrom).notNull();
+        final String itemId = fromApiJsonHelper.extractStringNamed("itemId", element);
+        baseDataValidator.reset().parameter("itemId").value(itemId).notNull();
+        final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
+        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notNull();
         final Long orderQuantity = fromApiJsonHelper.extractLongNamed("orderQuantity", element);
         baseDataValidator.reset().parameter("orderQuantity").value(orderQuantity).notNull().integerGreaterThanZero();
+        final BigDecimal unitPrice = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("unitPrice", element);
+        baseDataValidator.reset().parameter("unitPrice").value(unitPrice).notNull();
+        final String purchaseBy = fromApiJsonHelper.extractStringNamed("purchaseBy", element);
+        baseDataValidator.reset().parameter("purchaseBy").value(purchaseBy).notNull();
         final BigDecimal chargeAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("chargeAmount", element);
         baseDataValidator.reset().parameter("chargeAmount").value(chargeAmount).notNull();
-        final BigDecimal taxAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("taxAmount", element);
-        baseDataValidator.reset().parameter("taxAmount").value(chargeAmount).notNull();
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         

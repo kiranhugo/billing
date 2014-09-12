@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.billing.chargecode.data.ChargesData;
 import org.mifosplatform.cms.eventorder.data.EventOrderData;
 import org.mifosplatform.finance.data.DiscountMasterData;
+import org.mifosplatform.logistics.item.data.ChargesData;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;

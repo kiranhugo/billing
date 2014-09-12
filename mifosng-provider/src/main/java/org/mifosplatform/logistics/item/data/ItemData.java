@@ -51,7 +51,8 @@ public class ItemData {
 		
 	}
 
-	public ItemData(List<ItemData> itemCodeData, ItemData itemData, BigDecimal totalPrice,Integer quantity, List<DiscountMasterData> discountdata) {
+	public ItemData(List<ItemData> itemCodeData, ItemData itemData, BigDecimal totalPrice,Integer quantity, List<DiscountMasterData> discountdata,
+			           List<ChargesData> chargesDatas) {
 		this.itemDatas=itemCodeData;
 		this.id=itemData.getId();
 		this.itemCode=itemData.getItemCode();
