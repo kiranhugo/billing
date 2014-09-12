@@ -90,15 +90,16 @@ public class EventMaster extends AbstractPersistable<Long> {
 		Integer status = command.integerValueOfParameterNamed("status");
 		LocalDate eventStartDate = command.localDateValueOfParameterNamed("eventStartDate"); 
 		LocalDate eventEndDate = command.localDateValueOfParameterNamed("eventEndDate");
-		/*String chargeCode = command.stringValueOfParameterNamed("chargeCode");
-		boolean allowCancellation = command.booleanPrimitiveValueOfParameterNamed("allowCancellation");*/
+		String chargeCode = command.stringValueOfParameterNamed("chargeCode");
+		/*boolean allowCancellation = command.booleanPrimitiveValueOfParameterNamed("allowCancellation");*/
 		LocalDate eventValidity = command.localDateValueOfParameterNamed("eventValidity");
 		String eventCategory = command.stringValueOfParameterNamed("eventCategory");
 
-		return new EventMaster(eventName,eventDescription,status,eventStartDate,eventEndDate,eventValidity,eventCategory);
+		return new EventMaster(eventName,eventDescription,status,eventStartDate,eventEndDate,eventValidity,eventCategory,chargeCode);
 	}
 	
-	public EventMaster (String eventName, String eventDescription, Integer status, LocalDate eventStartDate,LocalDate eventEndDate,LocalDate eventValidity,String eventCategory) {
+	public EventMaster (String eventName, String eventDescription, Integer status, LocalDate eventStartDate,LocalDate eventEndDate,LocalDate eventValidity,
+			String eventCategory,String chargeCode) {
 
 		
 		this.eventName = eventName;
@@ -109,6 +110,7 @@ public class EventMaster extends AbstractPersistable<Long> {
 		this.eventValidity = eventValidity.toDate();
 		this.createdDate = new Date();
 		this.eventCategory=eventCategory;
+		this.chargeCode=chargeCode;
 	}
 	
 	public EventMaster() {
@@ -298,6 +300,7 @@ public class EventMaster extends AbstractPersistable<Long> {
 		final String eventEndDateNamedParamName = "eventEndDate";
 		final String eventValidityNamedParamName = "eventValidity";
 		final String eventCategoryNamedParamName = "eventCategory";
+		final String chargeCodeNamedParamName = "chargeCode";
 		
 		if(command.isChangeInStringParameterNamed(eventNameNamedParamName, this.eventName)){
 			final String newValue = command.stringValueOfParameterNamed(eventNameNamedParamName);
@@ -334,6 +337,11 @@ public class EventMaster extends AbstractPersistable<Long> {
 			final String newValue = command.stringValueOfParameterNamed(eventCategoryNamedParamName);
 			actualChanges.put(eventCategoryNamedParamName, newValue);
 			this.eventCategory = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		if(command.isChangeInStringParameterNamed(chargeCodeNamedParamName, this.chargeCode)){
+			final String newValue = command.stringValueOfParameterNamed(chargeCodeNamedParamName);
+			actualChanges.put(chargeCodeNamedParamName, newValue);
+			this.chargeCode = StringUtils.defaultIfEmpty(newValue,null);
 		}
 		
 		return actualChanges;
