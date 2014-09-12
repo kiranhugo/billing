@@ -94,11 +94,11 @@ import org.springframework.stereotype.Component;
 	      public String retriveClientParent(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo){
 		        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		        Client client=this.clientRepository.findOneWithNotFoundDetection(clientId);
-			    ClientCategoryData parentClientData = this.clientReadPlatformService.retrievingClientParentData(client.getParentId());
+		        List<ClientCategoryData> parentClientDatas = this.clientReadPlatformService.retrievingClientParentData(client.getParentId(),clientId);
+			    Boolean count =this.clientReadPlatformService.countChildClients(clientId);
+			    ClientCategoryData parentClientData =new ClientCategoryData(null, null, null, null, null, parentClientDatas, count);
 			    return this.toApiJsonSerializer.serialize(parentClientData);
 		        
         }
-          
-         
           
 	}

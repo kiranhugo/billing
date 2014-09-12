@@ -1,5 +1,7 @@
 package org.mifosplatform.portfolio.client.service;
 
+import java.util.List;
+
 public class ClientCategoryData {
 	
 	private final Long id;
@@ -8,8 +10,11 @@ public class ClientCategoryData {
 	private final String accountNo;
 	private final String displayName;
 	private final String displayLabel;
+	private Boolean count;
+	private List<ClientCategoryData> parentClientData;
 
-	public ClientCategoryData(Long id,String categoryType,String billMode,String accountNo,String displayName) {
+	public ClientCategoryData(Long id,String categoryType,String billMode,String accountNo,String displayName,
+			List<ClientCategoryData> parentClientData,Boolean count) {
            this.id=id;
            this.categoryType=categoryType;
            this.billMode = billMode;
@@ -20,6 +25,8 @@ public class ClientCategoryData {
            }else{
         	   this.displayLabel = null; 
            }
+           this.count=count;
+           this.parentClientData=parentClientData;
 	}
 
 	private String generateLabelName() {
@@ -51,7 +58,13 @@ public class ClientCategoryData {
 	public String getDisplayLabel() {
 		return displayLabel;
 	}
+
+	public Boolean getCount() {
+		return count;
+	}
     
-	
+	public Boolean setCount(Boolean count){
+		return this.count=count;
+	}
 	
 }
