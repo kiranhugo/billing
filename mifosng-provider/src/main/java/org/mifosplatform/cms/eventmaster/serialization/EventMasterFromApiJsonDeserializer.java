@@ -58,8 +58,8 @@ public class EventMasterFromApiJsonDeserializer {
 	     
 	     final String eventName = fromApiJsonHelper.extractStringNamed("eventName", element);
 	     baseDataValidator.reset().parameter("eventName").value(eventName).notBlank().notExceedingLengthOf(100);
-	     /*final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
-	     baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank().notExceedingLengthOf(100);*/
+	     final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
+	     baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank().notExceedingLengthOf(100);
 	     final LocalDate eventStartDate = fromApiJsonHelper.extractLocalDateNamed("eventStartDate", element);
         baseDataValidator.reset().parameter("eventStartDate").value(eventStartDate).notBlank();
         

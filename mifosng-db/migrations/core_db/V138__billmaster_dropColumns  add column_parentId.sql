@@ -39,7 +39,6 @@ DELIMITER ;
 call billmaster();
 Drop procedure IF EXISTS billmaster;  
 
-Alter table b_ticket_master add column lastmodifiedby_id bigint(20);
-Alter table b_ticket_master add column lastmodified_date datetime;
+
 
 
